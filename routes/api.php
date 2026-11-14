@@ -8,6 +8,8 @@ use App\Http\Controllers\API\MessageController;
 use App\Http\Controllers\API\StatsController;
 use App\Http\Controllers\API\PotensiReviewController;
 use App\Http\Controllers\API\UploadController;
+use App\Http\Controllers\API\ProfileController;
+use App\Http\Controllers\API\SettingController;
 
 // Status
 Route::get('/status', function () {
@@ -48,4 +50,15 @@ Route::post('/potensi-review/{id}', [PotensiReviewController::class, 'review']);
 
 // Upload
 Route::post('/upload', [UploadController::class, 'upload']);
+
+// Admin Profile (protected by Sanctum)
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/admin/profile', [ProfileController::class, 'show']);
+    Route::post('/admin/profile', [ProfileController::class, 'update']);
+    Route::put('/admin/password', [ProfileController::class, 'changePassword']);
+    Route::post('/settings/logo', [SettingController::class, 'uploadLogo']);
+});
+
+// Settings (public)
+Route::get('/settings/logo', [SettingController::class, 'getLogo']);
 

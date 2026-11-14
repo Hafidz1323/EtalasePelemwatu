@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login Admin — EtalasePelemwatu</title>
+  <title>Login Admin â€” EtalasePelemwatu</title>
   <meta name="description" content="Halaman login administrator portal potensi lokal Desa Pelemwatu.">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
@@ -438,7 +438,8 @@
 
           // 1. Coba hubungi backend API
           try {
-            const response = await fetch('/api/auth/login', {
+            const API_BASE = (window.location.protocol === 'file:' || window.location.port === '5500') ? 'http://localhost:8000/api' : (window.location.port === '3000' ? 'http://localhost:3000/api' : '/api');
+            const response = await fetch(API_BASE + '/auth/login', {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json'

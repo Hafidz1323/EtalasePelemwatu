@@ -1,12 +1,13 @@
 /**
- * EtalasePelemwatu — Admin Authentication Module
+ * EtalasePelemwatu â€” Admin Authentication Module
  * Handles Admin Login, Logout, Session Guard, and Navbar States
  */
 
 'use strict';
 
 (function () {
-  const API_LOGIN_URL = '/api/login';
+  const API_BASE = (window.location.protocol === 'file:' || window.location.port === '5500') ? 'http://localhost:8000/api' : (window.location.port === '3000' ? 'http://localhost:3000/api' : '/api');
+  const API_LOGIN_URL = API_BASE + '/login';
 
   // Check login status
   function isAdminLoggedIn() {
@@ -68,7 +69,7 @@
       localStorage.removeItem('ep_admin_session');
       sessionStorage.removeItem('ep_admin_session');
       try {
-        fetch('/api/auth/logout', { method: 'POST' }).catch(() => {});
+        fetch((typeof API_BASE !== 'undefined' ? API_BASE : '/api') + '/auth/logout', { method: 'POST' }).catch(() => {});
       } catch (err) {}
       
       // If currently on admin page, redirect to index

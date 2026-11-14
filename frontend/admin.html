@@ -1,0 +1,1179 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel Admin — EtalasePelemwatu</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="stylesheet" href="assets/css/admin.css">
+  <link rel="stylesheet" href="assets/css/galeri.css">
+  <script>
+    if (localStorage.getItem('adminLoggedIn') !== 'true') {
+      window.location.replace('index.html?action=login');
+    }
+  </script>
+</head>
+<body class="admin-page">
+
+<div id="sidebarOverlay" class="sidebar-overlay"></div>
+
+<!-- ============================================================  SIDEBAR  -->
+<aside class="admin-sidebar" id="adminSidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-icon"><i class="bi bi-shop-window"></i></div>
+      <div class="sidebar-logo-text">
+        <span class="site-name">EtalasePelemwatu</span>
+        <span class="site-sub">Panel Admin</span>
+      </div>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="sidebar-nav-section">MENU UTAMA</div>
+    <button class="sidebar-nav-item active" data-section="dashboard">
+      <i class="bi bi-speedometer2"></i><span>Dashboard</span>
+    </button>
+    <button class="sidebar-nav-item" data-section="kelola-potensi">
+      <i class="bi bi-grid"></i><span>Kelola Potensi</span><span class="nav-badge">8</span>
+    </button>
+    <button class="sidebar-nav-item" data-section="verifikasi">
+      <i class="bi bi-clipboard-check"></i><span>Verifikasi</span>
+      <span class="nav-badge" id="verifikasiBadge">2</span>
+    </button>
+    <div class="sidebar-nav-section">DATA DESA</div>
+    <button class="sidebar-nav-item" data-section="galeri">
+      <i class="bi bi-images"></i><span>Galeri Kegiatan</span>
+    </button>
+    <button class="sidebar-nav-item" data-section="perangkat">
+      <i class="bi bi-person-badge"></i><span>Perangkat Desa</span>
+    </button>
+    <button class="sidebar-nav-item" data-section="profil-desa-admin">
+      <i class="bi bi-info-circle"></i><span>Profil Desa</span>
+    </button>
+    <div class="sidebar-nav-section">PENGATURAN</div>
+    <button class="sidebar-nav-item" data-section="pengaturan">
+      <i class="bi bi-gear"></i><span>Pengaturan</span>
+    </button>
+    <a href="index.html" class="sidebar-nav-item" style="text-decoration:none;">
+      <i class="bi bi-house-door"></i><span>Kembali ke Website</span>
+    </a>
+    <button type="button" class="sidebar-nav-item text-danger border-0 bg-transparent w-100 text-start" id="sidebarNavLogout" style="cursor:pointer;">
+      <i class="bi bi-box-arrow-right text-danger"></i><span class="text-danger fw-semibold">Keluar (Logout)</span>
+    </button>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="sidebar-user-avatar">A</div>
+      <div class="sidebar-user-info">
+        <span class="uname">Administrator</span>
+        <span class="urole">Admin Desa</span>
+      </div>
+      <button type="button" class="btn-logout-sidebar" id="btnLogoutSidebar" title="Keluar / Logout">
+        <i class="bi bi-box-arrow-right"></i>
+      </button>
+    </div>
+  </div>
+</aside>
+
+<!-- ============================================================  MAIN  -->
+<div class="admin-main" id="adminMain">
+  <div class="admin-topbar">
+    <div class="d-flex align-items-center gap-3">
+      <button class="btn p-1" id="sidebarToggle"
+              style="color:var(--clr-blue);font-size:1.3rem;border:none;background:none;">
+        <i class="bi bi-list"></i>
+      </button>
+      <span class="admin-topbar-title" id="adminPageTitle">Dashboard</span>
+    </div>
+    <div class="admin-topbar-right">
+      <div class="position-relative" id="notifBellWrap">
+        <button id="btnNotifBell" class="btn p-1 position-relative"
+                style="color:var(--clr-blue);font-size:1.2rem;border:none;background:none;"
+                title="Notifikasi" aria-expanded="false">
+          <i class="bi bi-bell"></i>
+          <span id="notifBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill"
+                style="background:var(--clr-orange);font-size:.6rem;">2</span>
+        </button>
+
+        <!-- Panel Notifikasi -->
+        <div id="notifPanel"
+             style="display:none;position:absolute;top:calc(100% + 10px);right:0;width:320px;
+                    background:#fff;border:1px solid #e0e7ef;border-radius:12px;
+                    box-shadow:0 8px 28px rgba(9,74,116,.13);z-index:9999;">
+          <div style="display:flex;align-items:center;justify-content:space-between;
+                      padding:.75rem 1rem .6rem;border-bottom:1px solid #f0f4f8;">
+            <span style="font-weight:700;font-size:.92rem;color:var(--clr-blue);">
+              <i class="bi bi-bell-fill me-1" style="color:var(--clr-orange);"></i>Notifikasi
+            </span>
+            <button id="btnNotifTandaiSemua"
+                    style="font-size:.75rem;color:var(--clr-orange);background:none;border:none;
+                           padding:0;cursor:pointer;font-weight:600;">
+              Tandai semua dibaca
+            </button>
+          </div>
+          <ul id="notifList" style="list-style:none;margin:0;padding:.4rem 0;max-height:320px;overflow-y:auto;">
+            <li class="notif-item notif-unread"
+                style="display:flex;gap:.75rem;padding:.7rem 1rem;cursor:pointer;
+                       border-bottom:1px solid #f5f7fa;background:rgba(242,99,15,.04);"
+                data-notif-id="1">
+              <div style="flex-shrink:0;width:36px;height:36px;border-radius:50%;
+                          background:rgba(242,99,15,.12);display:flex;align-items:center;
+                          justify-content:center;color:var(--clr-orange);font-size:1rem;">
+                <i class="bi bi-person-plus-fill"></i>
+              </div>
+              <div style="flex:1;min-width:0;">
+                <div style="font-size:.82rem;font-weight:600;color:var(--clr-blue);
+                            white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                  Pendaftaran baru: Dimsum Pak Heru
+                </div>
+                <div style="font-size:.77rem;color:#6b7a8d;margin-top:.15rem;">
+                  Menunggu verifikasi · 10 menit lalu
+                </div>
+              </div>
+              <span style="width:8px;height:8px;border-radius:50%;background:var(--clr-orange);
+                           flex-shrink:0;margin-top:5px;"></span>
+            </li>
+            <li class="notif-item notif-unread"
+                style="display:flex;gap:.75rem;padding:.7rem 1rem;cursor:pointer;
+                       border-bottom:1px solid #f5f7fa;background:rgba(242,99,15,.04);"
+                data-notif-id="2">
+              <div style="flex-shrink:0;width:36px;height:36px;border-radius:50%;
+                          background:rgba(9,74,116,.10);display:flex;align-items:center;
+                          justify-content:center;color:var(--clr-blue);font-size:1rem;">
+                <i class="bi bi-shop-fill"></i>
+              </div>
+              <div style="flex:1;min-width:0;">
+                <div style="font-size:.82rem;font-weight:600;color:var(--clr-blue);
+                            white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                  Pendaftaran baru: Laundry Bu Siti
+                </div>
+                <div style="font-size:.77rem;color:#6b7a8d;margin-top:.15rem;">
+                  Menunggu verifikasi · 32 menit lalu
+                </div>
+              </div>
+              <span style="width:8px;height:8px;border-radius:50%;background:var(--clr-orange);
+                           flex-shrink:0;margin-top:5px;"></span>
+            </li>
+            <li style="padding:.65rem 1rem;text-align:center;">
+              <button id="btnNotifLihatSemua"
+                      style="font-size:.8rem;color:var(--clr-blue);background:none;border:none;
+                             cursor:pointer;font-weight:600;padding:0;">
+                Lihat semua di Verifikasi →
+              </button>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div class="d-flex align-items-center gap-2" style="font-size:.88rem;color:var(--clr-blue);">
+        <i class="bi bi-person-circle fs-5"></i>
+        <span class="d-none d-sm-inline fw-semibold">Admin</span>
+      </div>
+      <button type="button" class="btn btn-sm btn-outline-danger ms-2 d-flex align-items-center gap-1" id="btnLogoutTopbar" title="Keluar dari Panel Admin" style="font-size:.8rem;padding:.3rem .75rem;border-radius:6px;">
+        <i class="bi bi-box-arrow-right"></i>
+        <span class="d-none d-md-inline">Logout</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="admin-content">
+
+    <!-- ─── DASHBOARD ─── -->
+    <div class="admin-section active" id="section-dashboard">
+      <div class="admin-page-header">
+        <h2>Dashboard</h2>
+        <p>Selamat datang di Panel Admin EtalasePelemwatu. Pantau dan kelola data potensi lokal Desa Pelemwatu.</p>
+      </div>
+      <div class="row g-3 mb-4">
+        <div class="col-md-6 col-xl-3">
+          <div class="kpi-card">
+            <div class="kpi-icon" style="background:rgba(242,99,15,.12);">
+              <i class="bi bi-grid" style="color:var(--clr-orange);"></i>
+            </div>
+            <div class="kpi-data">
+              <div class="kpi-num">8</div>
+              <div class="kpi-label">Total Potensi</div>
+              <div class="kpi-trend up"><i class="bi bi-arrow-up-short"></i>+2 bulan ini</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6 col-xl-3">
+          <div class="kpi-card">
+            <div class="kpi-icon" style="background:rgba(255,193,7,.12);">
+              <i class="bi bi-clock-history" style="color:#d49a00;"></i>
+            </div>
+            <div class="kpi-data">
+              <div class="kpi-num" id="kpiPending">2</div>
+              <div class="kpi-label">Menunggu Verifikasi</div>
+              <div class="kpi-trend" style="color:#d49a00;">Perlu ditinjau</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6 col-xl-3">
+          <div class="kpi-card">
+            <div class="kpi-icon" style="background:rgba(40,167,69,.12);">
+              <i class="bi bi-check-circle" style="color:#28a745;"></i>
+            </div>
+            <div class="kpi-data">
+              <div class="kpi-num">6</div>
+              <div class="kpi-label">Terverifikasi</div>
+              <div class="kpi-trend up">Aktif ditampilkan</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6 col-xl-3">
+          <div class="kpi-card">
+            <div class="kpi-icon" style="background:rgba(9,74,116,.12);">
+              <i class="bi bi-eye" style="color:var(--clr-blue);"></i>
+            </div>
+            <div class="kpi-data">
+              <div class="kpi-num">142</div>
+              <div class="kpi-label">Kunjungan</div>
+            </div>
+          </div>
+        </div>
+      </div><!-- /kpi row -->
+
+      <div class="row g-4">
+        <div class="col-lg-8">
+          <div class="admin-card">
+            <div class="admin-card-header">
+              <h5><i class="bi bi-clock-history me-2" style="color:var(--clr-orange);"></i>Pendaftaran Terbaru</h5>
+              <button class="btn btn-sm btn-outline-secondary" id="btnLihatSemua">
+                Lihat Semua <i class="bi bi-arrow-right ms-1"></i>
+              </button>
+            </div>
+            <div class="table-responsive">
+              <table class="table admin-table mb-0">
+                <thead>
+                  <tr><th>No</th><th>Nama Potensi</th><th>Kategori</th><th>Tanggal</th><th>Status</th><th>Aksi</th></tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>1</td><td><strong>Omah Dimsum</strong></td>
+                    <td><span class="potensi-badge badge-usaha">Usaha &amp; Produk</span></td>
+                    <td>28 Okt 2024</td>
+                    <td><span class="status-badge status-aktif">Aktif</span></td>
+                    <td><button class="btn btn-sm btn-outline-primary btn-action btn-lihat-db">Lihat</button></td>
+                  </tr>
+                  <tr>
+                    <td>2</td><td><strong>Moni Laundry 24 Jam</strong></td>
+                    <td><span class="potensi-badge badge-jasa">Jasa</span></td>
+                    <td>25 Okt 2024</td>
+                    <td><span class="status-badge status-aktif">Aktif</span></td>
+                    <td><button class="btn btn-sm btn-outline-primary btn-action btn-lihat-db">Lihat</button></td>
+                  </tr>
+                  <tr>
+                    <td>3</td><td><strong>My Kost</strong></td>
+                    <td><span class="potensi-badge badge-hunian">Hunian</span></td>
+                    <td>20 Okt 2024</td>
+                    <td><span class="status-badge status-aktif">Aktif</span></td>
+                    <td><button class="btn btn-sm btn-outline-primary btn-action btn-lihat-db">Lihat</button></td>
+                  </tr>
+
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-4">
+          <div class="admin-card">
+            <div class="admin-card-header">
+              <h5><i class="bi bi-lightning me-2" style="color:var(--clr-orange);"></i>Aksi Cepat</h5>
+            </div>
+            <div class="admin-card-body d-flex flex-column gap-2">
+              <a href="daftar-potensi.html" class="quick-action">
+                <i class="bi bi-plus-circle"></i><span>Tambah Potensi</span>
+              </a>
+              <button class="quick-action" id="btnExport">
+                <i class="bi bi-download"></i><span>Export Data</span>
+              </button>
+              <button class="quick-action" id="btnGoSettings">
+                <i class="bi bi-gear"></i><span>Pengaturan</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div><!-- /dashboard -->
+
+    <!-- ─── KELOLA POTENSI ─── -->
+    <div class="admin-section" id="section-kelola-potensi">
+      <div class="admin-page-header">
+        <h2>Kelola Potensi</h2>
+        <p>Daftar seluruh potensi lokal yang terdaftar di EtalasePelemwatu.</p>
+      </div>
+      <div class="admin-card">
+        <div class="admin-card-header">
+          <h5><i class="bi bi-grid me-2" style="color:var(--clr-orange);"></i>Daftar Potensi</h5>
+          <div class="d-flex gap-2 flex-wrap">
+            <div class="admin-search-bar">
+              <input type="text" placeholder="Cari nama potensi..." id="searchPotensi">
+              <select class="form-select form-select-sm" style="width:auto;" id="filterKategori">
+                <option value="all">Semua Kategori</option>
+                <option value="usaha">Usaha &amp; Produk</option>
+                <option value="jasa">Jasa</option>
+                <option value="hunian">Hunian</option>
+                <option value="barang">Barang Warga</option>
+              </select>
+            </div>
+            <a href="daftar-potensi.html"
+               class="btn btn-sm btn-primary"
+               style="background:var(--clr-orange);border-color:var(--clr-orange);">
+              <i class="bi bi-plus-lg me-1"></i> Tambah
+            </a>
+          </div>
+        </div>
+        <div class="table-responsive">
+          <table class="table admin-table mb-0" id="tabelPotensi">
+            <thead>
+              <tr><th>No</th><th>Nama Potensi</th><th>Kategori</th><th>Status</th><th>Tgl Daftar</th><th>Aksi</th></tr>
+            </thead>
+            <tbody>
+              <tr data-kat="usaha"><td>1</td><td><strong>Omah Dimsum</strong></td>
+                <td><span class="potensi-badge badge-usaha">Usaha &amp; Produk</span></td>
+                <td><span class="status-badge status-aktif">Aktif</span></td>
+                <td>28 Okt 2024</td>
+                <td>
+                  <button class="btn btn-sm btn-outline-warning btn-action btn-edit-row"><i class="bi bi-pencil"></i></button>
+                  <button class="btn btn-sm btn-outline-danger btn-action btn-hapus"><i class="bi bi-trash"></i></button>
+                </td>
+              </tr>
+              <tr data-kat="usaha"><td>2</td><td><strong>Warung Prasmanan Selarasnasi</strong></td>
+                <td><span class="potensi-badge badge-usaha">Usaha &amp; Produk</span></td>
+                <td><span class="status-badge status-aktif">Aktif</span></td>
+                <td>26 Okt 2024</td>
+                <td>
+                  <button class="btn btn-sm btn-outline-warning btn-action btn-edit-row"><i class="bi bi-pencil"></i></button>
+                  <button class="btn btn-sm btn-outline-danger btn-action btn-hapus"><i class="bi bi-trash"></i></button>
+                </td>
+              </tr>
+              <tr data-kat="usaha"><td>3</td><td><strong>Ratu Frozen Food Pelemwatu</strong></td>
+                <td><span class="potensi-badge badge-usaha">Usaha &amp; Produk</span></td>
+                <td><span class="status-badge status-aktif">Aktif</span></td>
+                <td>24 Okt 2024</td>
+                <td>
+                  <button class="btn btn-sm btn-outline-warning btn-action btn-edit-row"><i class="bi bi-pencil"></i></button>
+                  <button class="btn btn-sm btn-outline-danger btn-action btn-hapus"><i class="bi bi-trash"></i></button>
+                </td>
+              </tr>
+              <tr data-kat="jasa"><td>4</td><td><strong>Moni Laundry 24 Jam</strong></td>
+                <td><span class="potensi-badge badge-jasa">Jasa</span></td>
+                <td><span class="status-badge status-aktif">Aktif</span></td>
+                <td>25 Okt 2024</td>
+                <td>
+                  <button class="btn btn-sm btn-outline-warning btn-action btn-edit-row"><i class="bi bi-pencil"></i></button>
+                  <button class="btn btn-sm btn-outline-danger btn-action btn-hapus"><i class="bi bi-trash"></i></button>
+                </td>
+              </tr>
+              <tr data-kat="jasa"><td>5</td><td><strong>One Laundry Koin</strong></td>
+                <td><span class="potensi-badge badge-jasa">Jasa</span></td>
+                <td><span class="status-badge status-aktif">Aktif</span></td>
+                <td>23 Okt 2024</td>
+                <td>
+                  <button class="btn btn-sm btn-outline-warning btn-action btn-edit-row"><i class="bi bi-pencil"></i></button>
+                  <button class="btn btn-sm btn-outline-danger btn-action btn-hapus"><i class="bi bi-trash"></i></button>
+                </td>
+              </tr>
+              <tr data-kat="hunian"><td>6</td><td><strong>My Kost</strong></td>
+                <td><span class="potensi-badge badge-hunian">Hunian</span></td>
+                <td><span class="status-badge status-aktif">Aktif</span></td>
+                <td>20 Okt 2024</td>
+                <td>
+                  <button class="btn btn-sm btn-outline-warning btn-action btn-edit-row"><i class="bi bi-pencil"></i></button>
+                  <button class="btn btn-sm btn-outline-danger btn-action btn-hapus"><i class="bi bi-trash"></i></button>
+                </td>
+              </tr>
+              <tr data-kat="hunian"><td>7</td><td><strong>RAMA Kost</strong></td>
+                <td><span class="potensi-badge badge-hunian">Hunian</span></td>
+                <td><span class="status-badge status-aktif">Aktif</span></td>
+                <td>18 Okt 2024</td>
+                <td>
+                  <button class="btn btn-sm btn-outline-warning btn-action btn-edit-row"><i class="bi bi-pencil"></i></button>
+                  <button class="btn btn-sm btn-outline-danger btn-action btn-hapus"><i class="bi bi-trash"></i></button>
+                </td>
+              </tr>
+              <tr data-kat="barang"><td>8</td><td><strong>Barang Warga</strong></td>
+                <td><span class="potensi-badge badge-barang">Barang Warga</span></td>
+                <td><span class="status-badge status-pending">Menunggu</span></td>
+                <td>01 Nov 2024</td>
+                <td>
+                  <button class="btn btn-sm btn-outline-warning btn-action btn-edit-row"><i class="bi bi-pencil"></i></button>
+                  <button class="btn btn-sm btn-outline-danger btn-action btn-hapus"><i class="bi bi-trash"></i></button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="admin-card-body pt-2 pb-3">
+          <div class="admin-pagination">
+            <button class="page-btn active">1</button>
+            <button class="page-btn">2</button>
+            <button class="page-btn">3</button>
+            <button class="page-btn"><i class="bi bi-chevron-right"></i></button>
+          </div>
+        </div>
+      </div>
+    </div><!-- /kelola-potensi -->
+
+    <!-- ─── VERIFIKASI ─── -->
+    <div class="admin-section" id="section-verifikasi">
+      <div class="admin-page-header">
+        <h2>Verifikasi Pendaftaran</h2>
+        <p>Tinjau dan verifikasi pendaftaran potensi lokal yang masuk dari masyarakat.</p>
+      </div>
+      <div class="admin-alert warning mb-4" id="warningVerifikasi">
+        <i class="bi bi-exclamation-triangle-fill fs-5 flex-shrink-0"></i>
+        <span>Terdapat <strong id="pendingCount">2</strong> pendaftaran yang menunggu verifikasi.</span>
+      </div>
+      <!-- Card 1 -->
+      <div class="admin-card mb-4" id="verifyCard1">
+        <div class="admin-card-header">
+          <div>
+            <h5 class="mb-0"><i class="bi bi-file-earmark-text me-2" style="color:var(--clr-orange);"></i>Pendaftaran #001</h5>
+            <small style="color:var(--text-light);">Pendaftaran masuk: 01 November 2024</small>
+          </div>
+          <span class="status-badge status-pending" id="badge-vc1">Menunggu Verifikasi</span>
+        </div>
+        <div class="admin-card-body">
+          <div class="row g-3 mb-3">
+            <div class="col-md-4"><div class="preview-label">Kategori</div><div class="preview-value">Usaha &amp; Produk</div></div>
+            <div class="col-md-4"><div class="preview-label">Pendaftar</div><div class="preview-value">Warga Desa Pelemwatu</div></div>
+            <div class="col-md-4"><div class="preview-label">Tanggal Daftar</div><div class="preview-value">01 November 2024</div></div>
+            <div class="col-12">
+              <div class="preview-label">Deskripsi Potensi</div>
+              <div class="preview-card mt-1">
+                <p class="mb-0" style="font-size:.9rem;color:var(--text-mid);">
+                  Formulir pendaftaran belum selesai diisi oleh pendaftar.
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="d-flex gap-2 flex-wrap">
+            <button class="btn btn-success btn-verify" data-card="vc1">
+              <i class="bi bi-check-circle me-1"></i>Verifikasi &amp; Aktifkan
+            </button>
+            <button class="btn btn-danger btn-reject" data-card="vc1">
+              <i class="bi bi-x-circle me-1"></i>Tolak
+            </button>
+          </div>
+        </div>
+      </div>
+      <!-- Card 2 -->
+      <div class="admin-card" id="verifyCard2">
+        <div class="admin-card-header">
+          <div>
+            <h5 class="mb-0"><i class="bi bi-file-earmark-text me-2" style="color:var(--clr-orange);"></i>Pendaftaran #002</h5>
+            <small style="color:var(--text-light);">Pendaftaran masuk: 02 November 2024</small>
+          </div>
+          <span class="status-badge status-pending" id="badge-vc2">Menunggu Verifikasi</span>
+        </div>
+        <div class="admin-card-body">
+          <div class="row g-3 mb-3">
+            <div class="col-md-4"><div class="preview-label">Kategori</div><div class="preview-value">Jasa</div></div>
+            <div class="col-md-4"><div class="preview-label">Pendaftar</div><div class="preview-value">Warga Desa Pelemwatu</div></div>
+            <div class="col-md-4"><div class="preview-label">Tanggal Daftar</div><div class="preview-value">02 November 2024</div></div>
+            <div class="col-12">
+              <div class="preview-label">Deskripsi Potensi</div>
+              <div class="preview-card mt-1">
+                <p class="mb-0" style="font-size:.9rem;color:var(--text-mid);">
+                  Formulir pendaftaran belum selesai diisi oleh pendaftar.
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="d-flex gap-2 flex-wrap">
+            <button class="btn btn-success btn-verify" data-card="vc2">
+              <i class="bi bi-check-circle me-1"></i>Verifikasi &amp; Aktifkan
+            </button>
+            <button class="btn btn-danger btn-reject" data-card="vc2">
+              <i class="bi bi-x-circle me-1"></i>Tolak
+            </button>
+          </div>
+        </div>
+      </div>
+    </div><!-- /verifikasi -->
+
+    <!-- ─── GALERI KEGIATAN ─── -->
+    <div class="admin-section" id="section-galeri">
+      <div class="admin-page-header">
+        <h2>Galeri Kegiatan</h2>
+        <p>Kelola foto kegiatan desa yang ditampilkan di halaman utama website.</p>
+      </div>
+      <div class="admin-card">
+        <div class="admin-card-header">
+          <h5><i class="bi bi-images me-2" style="color:var(--clr-orange);"></i>Foto Kegiatan</h5>
+          <label class="btn btn-sm btn-primary" id="btnTambahFoto"
+                 style="background:var(--clr-orange);border-color:var(--clr-orange);cursor:pointer;">
+            <i class="bi bi-plus-lg me-1"></i> Tambah Foto
+            <input type="file" id="galeriFileInput" accept="image/*" multiple style="display:none;">
+          </label>
+        </div>
+        <div class="admin-card-body">
+                    <div class="galeri-admin-grid" id="galeriAdminGrid">
+
+            <!-- Item 1 -->
+            <div class="galeri-admin-item" data-galeri-id="1" data-galeri-desc="Kegiatan rapat koordinasi rutin yang dihadiri oleh perangkat desa dan perwakilan warga untuk membahas program dan kebijakan desa.">
+              <div class="galeri-admin-thumb">
+                <img src="assets/img/kegiatan-kantor-desa.jpg" alt="Rapat Koordinasi Desa">
+                <div class="galeri-admin-actions">
+                  <button class="btn btn-sm btn-warning btn-galeri-edit" data-id="1" style="font-size:.78rem;padding:.3rem .75rem;">
+                    <i class="bi bi-pencil me-1"></i>Edit
+                  </button>
+                  <button class="btn btn-sm btn-danger btn-galeri-hapus" data-id="1" style="font-size:.78rem;padding:.3rem .75rem;">
+                    <i class="bi bi-trash me-1"></i>Hapus
+                  </button>
+                </div>
+              </div>
+              <div class="galeri-admin-info">
+                <div class="galeri-caption">Rapat Koordinasi Desa</div>
+                <p class="galeri-admin-desc">Kegiatan rapat koordinasi rutin yang dihadiri oleh perangkat desa dan perwakilan warga untuk membahas program dan kebijakan desa.</p>
+              </div>
+            </div>
+
+            <!-- Item 2 -->
+            <div class="galeri-admin-item" data-galeri-id="2" data-galeri-desc="Kegiatan gotong royong membersihkan lingkungan desa yang diikuti oleh seluruh lapisan masyarakat Desa Pelemwatu secara sukarela.">
+              <div class="galeri-admin-thumb">
+                <img src="assets/img/kegiatan-kerja-bakti.jpg" alt="Kerja Bakti Warga">
+                <div class="galeri-admin-actions">
+                  <button class="btn btn-sm btn-warning btn-galeri-edit" data-id="2" style="font-size:.78rem;padding:.3rem .75rem;">
+                    <i class="bi bi-pencil me-1"></i>Edit
+                  </button>
+                  <button class="btn btn-sm btn-danger btn-galeri-hapus" data-id="2" style="font-size:.78rem;padding:.3rem .75rem;">
+                    <i class="bi bi-trash me-1"></i>Hapus
+                  </button>
+                </div>
+              </div>
+              <div class="galeri-admin-info">
+                <div class="galeri-caption">Kerja Bakti Warga</div>
+                <p class="galeri-admin-desc">Kegiatan gotong royong membersihkan lingkungan desa yang diikuti oleh seluruh lapisan masyarakat Desa Pelemwatu secara sukarela.</p>
+              </div>
+            </div>
+
+            <!-- Item 3 -->
+            <div class="galeri-admin-item" data-galeri-id="3" data-galeri-desc="Program penanaman pohon dan tanaman di area desa sebagai upaya menjaga lingkungan hijau dan asri di Desa Pelemwatu.">
+              <div class="galeri-admin-thumb">
+                <img src="assets/img/kegiatan-penghijauan.jpg" alt="Program Penghijauan">
+                <div class="galeri-admin-actions">
+                  <button class="btn btn-sm btn-warning btn-galeri-edit" data-id="3" style="font-size:.78rem;padding:.3rem .75rem;">
+                    <i class="bi bi-pencil me-1"></i>Edit
+                  </button>
+                  <button class="btn btn-sm btn-danger btn-galeri-hapus" data-id="3" style="font-size:.78rem;padding:.3rem .75rem;">
+                    <i class="bi bi-trash me-1"></i>Hapus
+                  </button>
+                </div>
+              </div>
+              <div class="galeri-admin-info">
+                <div class="galeri-caption">Program Penghijauan</div>
+                <p class="galeri-admin-desc">Program penanaman pohon dan tanaman di area desa sebagai upaya menjaga lingkungan hijau dan asri di Desa Pelemwatu.</p>
+              </div>
+            </div>
+
+            <!-- Item 4 -->
+            <div class="galeri-admin-item" data-galeri-id="4" data-galeri-desc="Kantor Desa Pelemwatu sebagai pusat pelayanan administrasi dan pemerintahan desa yang melayani kebutuhan warga setiap hari kerja.">
+              <div class="galeri-admin-thumb">
+                <img src="assets/img/foto-kantor-desa.jpg" alt="Kantor Desa Pelemwatu">
+                <div class="galeri-admin-actions">
+                  <button class="btn btn-sm btn-warning btn-galeri-edit" data-id="4" style="font-size:.78rem;padding:.3rem .75rem;">
+                    <i class="bi bi-pencil me-1"></i>Edit
+                  </button>
+                  <button class="btn btn-sm btn-danger btn-galeri-hapus" data-id="4" style="font-size:.78rem;padding:.3rem .75rem;">
+                    <i class="bi bi-trash me-1"></i>Hapus
+                  </button>
+                </div>
+              </div>
+              <div class="galeri-admin-info">
+                <div class="galeri-caption">Kantor Desa Pelemwatu</div>
+                <p class="galeri-admin-desc">Kantor Desa Pelemwatu sebagai pusat pelayanan administrasi dan pemerintahan desa yang melayani kebutuhan warga setiap hari kerja.</p>
+              </div>
+            </div>
+
+            <!-- Item 5 -->
+            <div class="galeri-admin-item" data-galeri-id="5" data-galeri-desc="Salah satu contoh usaha kuliner milik warga Desa Pelemwatu yang berhasil berkembang dan menjadi bagian dari potensi ekonomi lokal desa.">
+              <div class="galeri-admin-thumb">
+                <img src="assets/img/foto-warung-desa.jpg" alt="Warung Usaha Warga">
+                <div class="galeri-admin-actions">
+                  <button class="btn btn-sm btn-warning btn-galeri-edit" data-id="5" style="font-size:.78rem;padding:.3rem .75rem;">
+                    <i class="bi bi-pencil me-1"></i>Edit
+                  </button>
+                  <button class="btn btn-sm btn-danger btn-galeri-hapus" data-id="5" style="font-size:.78rem;padding:.3rem .75rem;">
+                    <i class="bi bi-trash me-1"></i>Hapus
+                  </button>
+                </div>
+              </div>
+              <div class="galeri-admin-info">
+                <div class="galeri-caption">Warung Usaha Warga</div>
+                <p class="galeri-admin-desc">Salah satu contoh usaha kuliner milik warga Desa Pelemwatu yang berhasil berkembang dan menjadi bagian dari potensi ekonomi lokal desa.</p>
+              </div>
+            </div>
+
+            <!-- Tombol tambah foto -->
+            <label class="galeri-add-btn" for="galeriFileInput">
+              <i class="bi bi-plus-circle"></i>
+              <span>Tambah Foto</span>
+            </label>
+
+          </div>
+        </div>
+        <div class="admin-card-body pt-0 pb-3">
+          <small style="color:var(--text-light);">
+            <i class="bi bi-info-circle me-1"></i>
+            Hover pada foto untuk opsi edit kegiatan atau hapus. Klik "Tambah Foto" untuk mengunggah kegiatan baru.
+          </small>
+        </div>
+      </div>
+
+      <!-- Modal Edit Judul Galeri -->
+      <div class="modal fade" id="modalEditGaleri" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header" style="border-bottom:1px solid var(--border);">
+              <h5 class="modal-title" style="color:var(--clr-blue);">
+                <i class="bi bi-pencil me-2" style="color:var(--clr-orange);"></i>Edit Kegiatan Galeri
+              </h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+              <input type="hidden" id="editGaleriId">
+              <label class="form-label fw-semibold" style="color:var(--clr-blue);">Judul Kegiatan</label><input type="text" class="form-control" id="editGaleriCaption" placeholder="Masukkan judul kegiatan">
+              <label class="form-label fw-semibold mt-3" style="color:var(--clr-blue);">Deskripsi Kegiatan</label>
+              <textarea class="form-control" id="editGaleriDesc" rows="3" placeholder="Deskripsi singkat kegiatan..."></textarea>
+            </div>
+            <div class="modal-footer" style="border-top:1px solid var(--border);">
+              <button type="button" class="btn-outline-custom" data-bs-dismiss="modal">Batal</button>
+              <button type="button" class="btn-primary-custom" id="btnSimpanJudulGaleri">
+                <i class="bi bi-save me-1"></i>Simpan
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div><!-- /galeri -->
+
+    <!-- ─── PERANGKAT ─── -->
+    <div class="admin-section" id="section-perangkat">
+      <div class="admin-page-header"><h2>Perangkat Desa</h2><p>Data perangkat Desa Pelemwatu.</p></div>
+      <div class="admin-card">
+        <div class="admin-card-body text-center py-5">
+          <div style="width:80px;height:80px;background:rgba(9,74,116,.07);border-radius:50%;
+                      display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem;">
+            <i class="bi bi-person-badge" style="font-size:2rem;color:var(--clr-blue);"></i>
+          </div>
+          <h5 style="color:var(--clr-blue);">Data Belum Tersedia</h5>
+          <p style="color:var(--text-mid);max-width:420px;margin:0 auto 1.5rem;">
+            Informasi perangkat desa akan ditambahkan setelah data resmi tersedia dari pemerintah Desa Pelemwatu.
+            Data tidak akan dibuat tanpa sumber resmi yang dapat diverifikasi.
+          </p>
+          <button class="btn-primary-custom" id="btnHubungiPengelola">
+            <i class="bi bi-envelope"></i> Hubungi Pengelola
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── PROFIL DESA ─── -->
+    <div class="admin-section" id="section-profil-desa-admin">
+      <div class="admin-page-header"><h2>Profil Desa</h2><p>Kelola informasi profil Desa Pelemwatu yang ditampilkan di website.</p></div>
+      <div class="admin-card">
+        <div class="admin-card-header">
+          <h5><i class="bi bi-building me-2" style="color:var(--clr-orange);"></i>Data Profil Desa</h5>
+          <span class="status-badge status-aktif">Data Tersimpan</span>
+        </div>
+        <div class="admin-card-body">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label fw-semibold" style="color:var(--clr-blue);">Nama Desa</label>
+              <input type="text" class="form-control" value="Pelemwatu" readonly style="background:var(--clr-bg);">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold" style="color:var(--clr-blue);">Kecamatan</label>
+              <input type="text" class="form-control" value="Menganti" readonly style="background:var(--clr-bg);">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold" style="color:var(--clr-blue);">Kabupaten</label>
+              <input type="text" class="form-control" value="Gresik" readonly style="background:var(--clr-bg);">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold" style="color:var(--clr-blue);">Provinsi</label>
+              <input type="text" class="form-control" value="Jawa Timur" readonly style="background:var(--clr-bg);">
+            </div>
+            <div class="col-12">
+              <label class="form-label fw-semibold" style="color:var(--clr-blue);">Alamat Lengkap</label>
+              <input type="text" class="form-control"
+                     value="Jl. Raya Pelemwatu No. 128, Kecamatan Menganti, Kabupaten Gresik, Jawa Timur">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label fw-semibold" style="color:var(--clr-blue);">Kode Pos</label>
+              <input type="text" class="form-control" placeholder="Kode pos">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label fw-semibold" style="color:var(--clr-blue);">Telepon Kantor</label>
+              <input type="tel" class="form-control" placeholder="Nomor telepon kantor">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label fw-semibold" style="color:var(--clr-blue);">Email Resmi</label>
+              <input type="email" class="form-control" placeholder="Alamat email resmi">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold" style="color:var(--clr-blue);">Nama Kepala Desa</label>
+              <input type="text" class="form-control" placeholder="Nama kepala desa">
+            </div>
+            <div class="col-12 mt-2">
+              <button type="button" class="btn-primary-custom" id="saveProfileBtn">
+                <i class="bi bi-save"></i> Simpan Perubahan
+              </button>
+              <button type="button" class="btn-outline-custom ms-2" id="btnBatalProfil">Batal</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div><!-- /profil-desa-admin -->
+
+    <!-- ─── PENGATURAN ─── -->
+    <div class="admin-section" id="section-pengaturan">
+      <div class="admin-page-header"><h2>Pengaturan</h2><p>Konfigurasi platform EtalasePelemwatu.</p></div>
+      <div class="settings-section">
+        <div class="settings-section-header"><i class="bi bi-display me-2"></i>Tampilan Platform</div>
+        <div class="settings-section-body">
+          <div class="settings-row">
+            <div class="settings-row-info">
+              <h6>Mode Maintenance</h6>
+              <p>Tampilkan halaman maintenance saat website dalam pemeliharaan.</p>
+            </div>
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" id="toggleMaintenance">
+            </div>
+          </div>
+          <div class="settings-row">
+            <div class="settings-row-info">
+              <h6>Tampilkan Banner Statistik</h6>
+              <p>Tampilkan keterangan tambahan pada bagian ringkasan statistik platform.</p>
+            </div>
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" id="toggleDemo" checked>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="settings-section">
+        <div class="settings-section-header"><i class="bi bi-bell me-2"></i>Notifikasi</div>
+        <div class="settings-section-body">
+          <div class="settings-row">
+            <div class="settings-row-info">
+              <h6>Notifikasi Pendaftaran Baru</h6>
+              <p>Terima notifikasi saat ada pendaftaran potensi baru masuk.</p>
+            </div>
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" id="toggleNotifDaftar" checked>
+            </div>
+          </div>
+          <div class="settings-row">
+            <div class="settings-row-info">
+              <h6>Notifikasi Email</h6>
+              <p>Kirim notifikasi melalui email saat ada pendaftaran atau perubahan data.</p>
+            </div>
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" id="toggleNotifEmail">
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="settings-section">
+        <div class="settings-section-header"><i class="bi bi-info-circle me-2"></i>Tentang Platform</div>
+        <div class="settings-section-body">
+          <div class="settings-row">
+            <div class="settings-row-info"><h6>Nama Platform</h6><p>Identitas resmi platform digital desa.</p></div>
+            <div style="font-weight:600;color:var(--clr-blue);">EtalasePelemwatu</div>
+          </div>
+          <div class="settings-row">
+            <div class="settings-row-info"><h6>Versi</h6><p>Versi rilis saat ini.</p></div>
+            <div style="font-weight:600;color:var(--clr-blue);">v1.0.0</div>
+          </div>
+          <div class="settings-row">
+            <div class="settings-row-info"><h6>Status Platform</h6><p>Status operasional platform.</p></div>
+            <span class="status-badge status-aktif">Aktif &amp; Online</span>
+          </div>
+        </div>
+      </div>
+      <div class="d-flex gap-2 mt-3">
+        <button class="btn-primary-custom" id="btnSavePengaturan">
+          <i class="bi bi-save"></i> Simpan Pengaturan
+        </button>
+      </div>
+    </div><!-- /pengaturan -->
+
+  </div><!-- /admin-content -->
+</div><!-- /admin-main -->
+
+<div id="toastContainer"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+'use strict';
+
+/* ── Toast ── */
+function showAdminToast(msg, type) {
+  type = type || 'info';
+  var c = document.getElementById('toastContainer');
+  var colors = {success:'#537839',error:'#B02A37',info:'var(--clr-blue)',warning:'#E0AA08'};
+  var icons  = {success:'bi-check-circle-fill',error:'bi-x-circle-fill',info:'bi-info-circle-fill',warning:'bi-exclamation-triangle-fill'};
+  var t = document.createElement('div');
+  t.className = 'custom-toast ' + type;
+  t.innerHTML = '<i class="bi '+(icons[type]||icons.info)+'" style="color:'+(colors[type]||colors.info)+';font-size:1.2rem;flex-shrink:0"></i><span>'+msg+'</span>';
+  c.appendChild(t);
+  setTimeout(function(){t.style.opacity='0';t.style.transform='translateX(40px)';t.style.transition='all .35s ease';setTimeout(function(){t.remove();},380);},3500);
+}
+
+/* ── Section Switch ── */
+function switchSection(name) {
+  document.querySelectorAll('.sidebar-nav-item[data-section]').forEach(function(i){i.classList.remove('active');});
+  document.querySelectorAll('.admin-section').forEach(function(s){s.classList.remove('active');});
+  var item = document.querySelector('[data-section="'+name+'"]');
+  if (item) item.classList.add('active');
+  var sec = document.getElementById('section-'+name);
+  if (sec) sec.classList.add('active');
+  var lbl = item && item.querySelector('span') ? item.querySelector('span').textContent : name;
+  document.getElementById('adminPageTitle').textContent = lbl;
+  if (window.innerWidth < 992) {
+    document.getElementById('adminSidebar').classList.remove('open');
+    document.getElementById('sidebarOverlay').classList.remove('show');
+  }
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ── Nav items ── */
+document.querySelectorAll('.sidebar-nav-item[data-section]').forEach(function(item){
+  item.addEventListener('click', function(){switchSection(this.dataset.section);});
+});
+
+/* ── Mobile toggle ── */
+document.getElementById('sidebarToggle').addEventListener('click', function(){
+  document.getElementById('adminSidebar').classList.toggle('open');
+  document.getElementById('sidebarOverlay').classList.toggle('show');
+});
+document.getElementById('sidebarOverlay').addEventListener('click', function(){
+  document.getElementById('adminSidebar').classList.remove('open');
+  this.classList.remove('show');
+});
+
+/* ── Dashboard shortcuts ── */
+document.getElementById('btnLihatSemua').addEventListener('click',function(){switchSection('verifikasi');});
+document.getElementById('btnGoSettings').addEventListener('click',function(){switchSection('pengaturan');});
+document.getElementById('btnExport').addEventListener('click',function(){showAdminToast('Fitur export data belum tersedia.','info');});
+
+/* ── Notifikasi Bell ── */
+(function(){
+  var bell    = document.getElementById('btnNotifBell');
+  var panel   = document.getElementById('notifPanel');
+  var badge   = document.getElementById('notifBadge');
+  var btnAll  = document.getElementById('btnNotifTandaiSemua');
+  var btnVerif= document.getElementById('btnNotifLihatSemua');
+
+  function openPanel() {
+    panel.style.display = 'block';
+    bell.setAttribute('aria-expanded', 'true');
+    // Sembunyikan badge saat panel dibuka (tanda sudah dilihat)
+    if (badge) badge.style.display = 'none';
+  }
+
+  function closePanel() {
+    panel.style.display = 'none';
+    bell.setAttribute('aria-expanded', 'false');
+  }
+
+  bell.addEventListener('click', function(e) {
+    e.stopPropagation();
+    var isOpen = panel.style.display === 'block';
+    if (isOpen) { closePanel(); } else { openPanel(); }
+  });
+
+  // Klik di luar panel → tutup
+  document.addEventListener('click', function(e) {
+    if (!document.getElementById('notifBellWrap').contains(e.target)) {
+      closePanel();
+    }
+  });
+
+  // Tandai semua dibaca
+  btnAll.addEventListener('click', function() {
+    document.querySelectorAll('.notif-unread').forEach(function(item) {
+      item.style.background = 'transparent';
+      item.classList.remove('notif-unread');
+      var dot = item.querySelector('span[style*="border-radius:50%"]');
+      if (dot) dot.style.display = 'none';
+    });
+    if (badge) badge.style.display = 'none';
+    showAdminToast('Semua notifikasi telah ditandai dibaca.', 'success');
+  });
+
+  // Klik item notifikasi → tandai dibaca & navigasi ke verifikasi
+  document.querySelectorAll('#notifList .notif-item').forEach(function(item) {
+    item.addEventListener('click', function() {
+      this.style.background = 'transparent';
+      this.classList.remove('notif-unread');
+      var dot = this.querySelector('span[style*="border-radius:50%"]');
+      if (dot) dot.style.display = 'none';
+      // Hitung sisa unread, perbarui badge
+      var unread = document.querySelectorAll('.notif-unread').length;
+      if (badge) {
+        if (unread > 0) { badge.textContent = unread; badge.style.display = ''; }
+        else { badge.style.display = 'none'; }
+      }
+      closePanel();
+      switchSection('verifikasi');
+    });
+  });
+
+  // "Lihat semua di Verifikasi →"
+  btnVerif.addEventListener('click', function() {
+    closePanel();
+    switchSection('verifikasi');
+  });
+})();
+
+document.querySelectorAll('.btn-go-verifikasi').forEach(function(b){
+  b.addEventListener('click',function(){switchSection('verifikasi');});
+});
+document.querySelectorAll('.btn-lihat-db').forEach(function(b){
+  b.addEventListener('click',function(){showAdminToast('Detail potensi belum tersedia.','info');});
+});
+
+/* ── Verifikasi ── */
+var pendingCount = 2;
+document.querySelectorAll('.btn-verify').forEach(function(btn){
+  btn.addEventListener('click', function(){
+    var cid  = this.dataset.card;
+    var bdg  = document.getElementById('badge-'+cid);
+    if (bdg){bdg.className='status-badge status-aktif';bdg.textContent='Terverifikasi & Aktif';}
+    this.disabled = true;
+    var rb = this.closest('.admin-card-body').querySelector('.btn-reject');
+    if (rb) rb.disabled = true;
+    showAdminToast('Potensi berhasil diverifikasi dan diaktifkan.','success');
+    pendingCount = Math.max(0, pendingCount-1);
+    var vb = document.getElementById('verifikasiBadge');
+    if (vb) vb.textContent = pendingCount > 0 ? pendingCount : '';
+    var kp = document.getElementById('kpiPending');
+    if (kp) kp.textContent = pendingCount;
+    var pc = document.getElementById('pendingCount');
+    if (pc) pc.textContent = pendingCount;
+    if (pendingCount === 0){var w=document.getElementById('warningVerifikasi');if(w)w.style.display='none';}
+  });
+});
+document.querySelectorAll('.btn-reject').forEach(function(btn){
+  btn.addEventListener('click', function(){
+    var cid  = this.dataset.card;
+    var bdg  = document.getElementById('badge-'+cid);
+    if (bdg){bdg.className='status-badge status-ditolak';bdg.textContent='Ditolak';}
+    this.disabled = true;
+    var vb2 = this.closest('.admin-card-body').querySelector('.btn-verify');
+    if (vb2) vb2.disabled = true;
+    showAdminToast('Pendaftaran telah ditolak.','error');
+    pendingCount = Math.max(0, pendingCount-1);
+    var vbg = document.getElementById('verifikasiBadge');
+    if (vbg) vbg.textContent = pendingCount > 0 ? pendingCount : '';
+  });
+});
+/* ── Delete ── */
+document.querySelectorAll('.btn-hapus').forEach(function(btn){
+  btn.addEventListener('click', function(){
+    if (confirm('Hapus data ini?')){
+      var row = this.closest('tr');
+      row.style.transition='opacity .4s';
+      row.style.opacity='0.3';
+      showAdminToast('Data telah dihapus.','error');
+    }
+  });
+});
+
+/* ── Edit ── */
+document.querySelectorAll('.btn-edit-row').forEach(function(btn){
+  btn.addEventListener('click',function(){showAdminToast('Fitur edit potensi belum tersedia.','info');});
+});
+
+/* ── Save Profile ── */
+document.getElementById('saveProfileBtn').addEventListener('click',function(){
+  showAdminToast('Data profil desa berhasil disimpan.','success');
+});
+document.getElementById('btnBatalProfil').addEventListener('click',function(){
+  showAdminToast('Perubahan dibatalkan.','info');
+});
+
+/* ── Perangkat ── */
+document.getElementById('btnHubungiPengelola').addEventListener('click',function(){
+  showAdminToast('Silakan hubungi pengelola untuk menambahkan data perangkat desa.','info');
+});
+
+/* ── Settings Save ── */
+document.getElementById('btnSavePengaturan').addEventListener('click',function(){
+  showAdminToast('Pengaturan berhasil disimpan.','success');
+});
+
+/* ── Settings Toggles ── */
+document.querySelectorAll('.form-check-input[type=checkbox]').forEach(function(cb){
+  cb.addEventListener('change',function(){showAdminToast('Pengaturan diperbarui.','info');});
+});
+
+/* ── Search & Filter Table ── */
+var searchInput  = document.getElementById('searchPotensi');
+var filterSelect = document.getElementById('filterKategori');
+function filterTable(){
+  var q   = searchInput  ? searchInput.value.toLowerCase().trim() : '';
+  var sel = filterSelect ? filterSelect.value : 'all';
+  var visibleRows = 0;
+  var rows = document.querySelectorAll('#tabelPotensi tbody tr:not(.empty-row)');
+  rows.forEach(function(row){
+    var name = row.cells[1] ? row.cells[1].textContent.toLowerCase() : '';
+    var cat  = row.dataset.kat || '';
+    var matchSearch = !q || name.includes(q) || cat.includes(q);
+    var matchCat = (sel === 'all' || cat === sel);
+    if (matchSearch && matchCat) {
+      row.style.display = '';
+      visibleRows++;
+    } else {
+      row.style.display = 'none';
+    }
+  });
+
+  var emptyRow = document.querySelector('#tabelPotensi tbody tr.empty-row');
+  if (visibleRows === 0) {
+    if (!emptyRow) {
+      emptyRow = document.createElement('tr');
+      emptyRow.className = 'empty-row text-center';
+      emptyRow.innerHTML = '<td colspan="6" class="py-4 text-muted"><i class="bi bi-search me-2"></i>Tidak ada potensi yang cocok dengan pencarian</td>';
+      document.querySelector('#tabelPotensi tbody').appendChild(emptyRow);
+    }
+    emptyRow.style.display = '';
+  } else if (emptyRow) {
+    emptyRow.style.display = 'none';
+  }
+}
+if (searchInput)  searchInput.addEventListener('input',  filterTable);
+if (filterSelect) filterSelect.addEventListener('change',filterTable);
+
+/* ── Pagination ── */
+document.querySelectorAll('.page-btn').forEach(function(btn){
+  btn.addEventListener('click',function(){
+    document.querySelectorAll('.page-btn').forEach(function(b){b.classList.remove('active');});
+    this.classList.add('active');
+  });
+});
+
+/* ── Galeri Admin ── */
+var galeriIdCounter = 6;
+
+/* Tambah foto via file input */
+document.getElementById('galeriFileInput').addEventListener('change', function(){
+  Array.from(this.files).forEach(function(file){
+    if (!file.type.startsWith('image/')) return;
+    var reader = new FileReader();
+    reader.onload = function(e){
+      var id = galeriIdCounter++;
+      var caption = file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ');
+      caption = caption.charAt(0).toUpperCase() + caption.slice(1);
+      addGaleriAdminItem(id, e.target.result, caption, '');
+      showAdminToast('Foto "' + caption + '" berhasil ditambahkan. Silakan isi deskripsi kegiatan.', 'success');
+      // Langsung buka modal edit agar admin bisa mengisi deskripsi
+      setTimeout(function() {
+        var item = document.querySelector('[data-galeri-id="' + id + '"]');
+        if (item) {
+          document.getElementById('editGaleriId').value = id;
+          document.getElementById('editGaleriCaption').value = caption;
+          document.getElementById('editGaleriDesc').value = '';
+          new bootstrap.Modal(document.getElementById('modalEditGaleri')).show();
+        }
+      }, 400);
+    };
+    reader.readAsDataURL(file);
+  });
+  this.value = '';
+});
+
+function addGaleriAdminItem(id, src, caption, desc) {
+  desc = desc || '';
+  var grid = document.getElementById('galeriAdminGrid');
+  var addBtn = grid.querySelector('.galeri-add-btn');
+  var div = document.createElement('div');
+  div.className = 'galeri-admin-item';
+  div.dataset.galeriId = id;
+  div.dataset.galeriDesc = desc;
+  div.innerHTML =
+    '<div class="galeri-admin-thumb">' +
+      '<img src="' + src + '" alt="' + caption + '">' +
+      '<div class="galeri-admin-actions">' +
+        '<button class="btn btn-sm btn-warning btn-galeri-edit" data-id="' + id + '" style="font-size:.78rem;padding:.3rem .75rem;">' +
+          '<i class="bi bi-pencil me-1"></i>Edit' +
+        '</button>' +
+        '<button class="btn btn-sm btn-danger btn-galeri-hapus" data-id="' + id + '" style="font-size:.78rem;padding:.3rem .75rem;">' +
+          '<i class="bi bi-trash me-1"></i>Hapus' +
+        '</button>' +
+      '</div>' +
+    '</div>' +
+    '<div class="galeri-admin-info">' +
+      '<div class="galeri-caption">' + caption + '</div>' +
+      '<p class="galeri-admin-desc">' + (desc || 'Belum ada deskripsi kegiatan.') + '</p>' +
+    '</div>';
+  grid.insertBefore(div, addBtn);
+  bindGaleriButtons(div);
+}
+
+/* Bind edit & hapus buttons */
+function bindGaleriButtons(scope) {
+  var root = scope || document;
+  root.querySelectorAll ? null : root = document;
+
+  (scope ? [scope] : Array.from(document.querySelectorAll('.galeri-admin-item'))).forEach(function(item){
+    item.querySelectorAll('.btn-galeri-edit').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var id = this.dataset.id;
+        var cap = item.querySelector('.galeri-caption').textContent;
+        document.getElementById('editGaleriId').value = id;
+        document.getElementById('editGaleriCaption').value = cap;
+        document.getElementById('editGaleriDesc').value = item.dataset.galeriDesc || '';
+        new bootstrap.Modal(document.getElementById('modalEditGaleri')).show();
+      });
+    });
+    item.querySelectorAll('.btn-galeri-hapus').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        if (confirm('Hapus foto ini dari galeri?')) {
+          item.style.transition = 'opacity .3s, transform .3s';
+          item.style.opacity = '0';
+          item.style.transform = 'scale(.9)';
+          setTimeout(function(){ item.remove(); }, 300);
+          showAdminToast('Foto dihapus dari galeri.', 'error');
+        }
+      });
+    });
+  });
+}
+
+/* Init existing items */
+bindGaleriButtons();
+
+/* Simpan judul galeri */
+document.getElementById('btnSimpanJudulGaleri').addEventListener('click', function(){
+  var id   = document.getElementById('editGaleriId').value;
+  var cap  = document.getElementById('editGaleriCaption').value.trim();
+  var desc = document.getElementById('editGaleriDesc').value.trim();
+  if (!cap) { return; }
+  var item = document.querySelector('[data-galeri-id="' + id + '"]');
+  if (item) {
+    item.querySelector('.galeri-caption').textContent = cap;
+    item.querySelector('img').alt = cap;
+    item.dataset.galeriDesc = desc;
+    var descEl = item.querySelector('.galeri-admin-desc');
+    if (!descEl) {
+      descEl = document.createElement('p');
+      descEl.className = 'galeri-admin-desc';
+      descEl.style.cssText = 'font-size:.75rem;color:#666;margin:.3rem .6rem .5rem;line-height:1.4;';
+      item.appendChild(descEl);
+    }
+    descEl.textContent = desc;
+  }
+  bootstrap.Modal.getInstance(document.getElementById('modalEditGaleri')).hide();
+  showAdminToast('Judul dan deskripsi foto berhasil diperbarui.', 'success');
+});
+</script>
+<script src="assets/js/auth.js"></script>
+</body>
+</html>
