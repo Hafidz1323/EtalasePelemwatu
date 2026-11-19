@@ -38,8 +38,8 @@
             </button>
             <ul class="dropdown-menu dropdown-menu-end shadow-sm" style="border-radius:10px;font-size:.88rem;min-width:180px;">
               <li><a class="dropdown-item py-2" href="admin.html"><i class="bi bi-speedometer2 me-2 text-primary"></i>Dashboard</a></li>
-              <li><a class="dropdown-item py-2" href="admin.html"><i class="bi bi-shop me-2 text-warning"></i>Kelola Potensi</a></li>
-              <li><a class="dropdown-item py-2" href="admin.html"><i class="bi bi-images me-2 text-info"></i>Galeri Kegiatan</a></li>
+              <li><a class="dropdown-item py-2" href="admin.html#kelola-potensi"><i class="bi bi-shop me-2 text-warning"></i>Kelola Potensi</a></li>
+              <li><a class="dropdown-item py-2" href="admin.html#galeri"><i class="bi bi-images me-2 text-info"></i>Galeri Kegiatan</a></li>
               <li><hr class="dropdown-divider my-1"></li>
               <li><button class="dropdown-item py-2 text-danger nav-btn-logout" type="button"><i class="bi bi-box-arrow-right me-2"></i>Logout</button></li>
             </ul>

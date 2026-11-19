@@ -39,7 +39,7 @@ class SettingController extends Controller
     public function uploadLogo(Request $request)
     {
         $request->validate([
-            'logo' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'logo' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:1024'],
         ]);
 
         // Simpan file baru ke public/uploads/

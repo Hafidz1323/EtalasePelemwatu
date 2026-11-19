@@ -38,7 +38,7 @@ class ProfileController extends Controller
         $data = $request->validate([
             'name'   => ['required', 'string', 'max:255'],
             'email'  => ['required', 'email', 'max:255', 'unique:users,email,' . $user->id],
-            'avatar' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'avatar' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:1024'],
         ]);
 
         $user->name  = $data['name'];

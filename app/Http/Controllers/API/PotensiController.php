@@ -43,26 +43,66 @@ class PotensiController extends Controller
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'owner_name' => 'required|string|max:255',
-            'category_id' => 'nullable|integer',
-            'whatsapp' => 'nullable|string',
-            'address' => 'nullable|string',
-            'description' => 'nullable|string',
-            'location' => 'nullable|string',
-            'latitude' => 'nullable|numeric',
-            'longitude' => 'nullable|numeric',
+        // a. Normalisasi sebelum validasi
+        $wa = $request->input('whatsapp');
+        if (!is_null($wa)) {
+            $wa = preg_replace('/[\s\-()]/', '', $wa);
+            $wa = preg_replace('/^\+?62(?=8)/', '0', $wa);
+        }
+
+        $email = $request->input('email');
+        if (!is_null($email)) {
+            $email = strtolower(trim($email));
+            $email = $email === '' ? null : $email;
+        }
+
+        $request->merge([
+            'whatsapp' => $wa,
+            'email'    => $email,
         ]);
 
+        // b. Validasi ketat dengan pesan bahasa Indonesia
+        $validated = $request->validate([
+            'name'            => 'required|string|min:3|max:100',
+            'owner_name'      => ['required', 'string', 'min:3', 'max:100', 'regex:/^[\p{L}\s.\'\-]+$/u'],
+            'category_id'     => 'nullable|integer|exists:categories,id',
+            'whatsapp'        => ['required', 'regex:/^08[1-9][0-9]{7,10}$/'],
+            'address'         => 'required|string|min:10|max:255',
+            'description'     => ['required', 'string', 'min:20', 'max:1000', 'not_regex:/(\p{L})\1{7,}/u'],
+            'location'        => 'nullable|string|max:255',
+            'email'           => 'nullable|email:rfc|max:100',
+            'jenis'           => 'nullable|string|max:100',
+            'jam_operasional' => 'nullable|string|max:100',
+            'latitude'        => 'nullable|numeric',
+            'longitude'       => 'nullable|numeric',
+        ], [
+            'name.required'          => 'Nama potensi wajib diisi.',
+            'name.min'               => 'Nama potensi minimal 3 karakter.',
+            'name.max'               => 'Nama potensi maksimal 100 karakter.',
+            'owner_name.required'    => 'Nama lengkap wajib diisi.',
+            'owner_name.min'         => 'Nama lengkap minimal 3 huruf.',
+            'owner_name.regex'       => 'Nama lengkap hanya boleh berisi huruf.',
+            'category_id.exists'     => 'Kategori yang dipilih tidak valid.',
+            'whatsapp.required'      => 'Nomor telepon wajib diisi.',
+            'whatsapp.regex'         => 'Nomor telepon tidak valid. Contoh: 08123456789.',
+            'address.required'       => 'Alamat rumah wajib diisi.',
+            'address.min'            => 'Alamat rumah minimal 10 karakter.',
+            'description.required'   => 'Deskripsi wajib diisi.',
+            'description.min'        => 'Deskripsi minimal 20 karakter.',
+            'description.max'        => 'Deskripsi maksimal 1000 karakter.',
+            'description.not_regex'  => 'Deskripsi mengandung huruf yang diulang-ulang, mohon ditulis dengan kalimat yang jelas.',
+            'email.email'            => 'Format email tidak valid. Contoh: nama@gmail.com.',
+        ]);
+
+        // d. Paksa status (tidak diubah)
         $validated['status'] = 'aktif';
 
         $potensi = Potensi::create($validated);
 
         return response()->json([
-            'status' => 'success',
+            'status'  => 'success',
             'message' => 'Potensi berhasil didaftarkan!',
-            'data' => $potensi,
+            'data'    => $potensi,
         ], 201);
     }
 

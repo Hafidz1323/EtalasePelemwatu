@@ -506,3 +506,157 @@ body.admin-page {
   border-color: var(--clr-green);
   color: var(--clr-green-aa-dark);
 }
+
+/* ── Kotak lompat halaman (page jump input) ── */
+.page-jump-input {
+  width: 72px;
+  height: 34px;
+  border: 1.5px solid var(--clr-border);
+  border-radius: 8px;
+  padding: 0 .5rem;
+  font-size: .83rem;
+  color: var(--clr-text-mid);
+  background: var(--clr-white);
+  outline: none;
+  transition: border-color var(--transition);
+  /* hide number spin buttons */
+  -moz-appearance: textfield;
+}
+.page-jump-input::-webkit-outer-spin-button,
+.page-jump-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.page-jump-input:focus { border-color: var(--clr-orange); }
+
+/* ── Toolbar Kelola Potensi: kontrol sama tinggi + dropdown kategori custom ── */
+
+/* Fix: admin-card-header must be visible so dropdown can overflow */
+.admin-page .admin-card-header { overflow: visible; }
+
+/* ── Tinggi seragam 40px ── */
+.admin-page .potensi-toolbar { align-items: center; }
+
+.admin-page .potensi-toolbar .admin-search-bar input {
+  height: 40px;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: .9rem;
+  padding-right: .9rem;
+  border-radius: 8px;
+  font-size: .88rem;
+}
+
+.admin-page .potensi-toolbar > a.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .35rem;
+  height: 40px !important;
+  padding: 0 1rem !important;
+  border-radius: 8px !important;
+  font-size: .88rem !important;
+  font-weight: 600;
+}
+.admin-page .potensi-toolbar > a.btn:hover { filter: brightness(.94); }
+
+/* ── Dropdown custom ── */
+.kat-dropdown { position: relative; }
+
+.kat-dropdown-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .6rem;
+  height: 40px;
+  min-width: 190px;
+  padding: 0 .9rem;
+  background: var(--clr-white);
+  color: var(--clr-text);
+  border: 1.5px solid var(--clr-border);
+  border-radius: 8px;
+  font-family: var(--font-main);
+  font-size: .88rem;
+  cursor: pointer;
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+.kat-dropdown-toggle:hover,
+.kat-dropdown.open .kat-dropdown-toggle {
+  border-color: var(--clr-green);
+}
+.kat-dropdown-toggle:focus-visible {
+  outline: none;
+  border-color: var(--clr-green);
+  box-shadow: 0 0 0 3px rgba(79,127,69,.18);
+}
+.kat-dropdown-toggle.is-filtered {
+  border-color: var(--clr-green);
+  font-weight: 600;
+}
+
+.kat-dropdown-caret {
+  font-size: .8rem;
+  color: var(--clr-text-light);
+  transition: transform var(--transition);
+  flex-shrink: 0;
+}
+.kat-dropdown.open .kat-dropdown-caret { transform: rotate(180deg); }
+
+.kat-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  min-width: 100%;
+  min-width: 210px;
+  margin: 0;
+  padding: .35rem;
+  list-style: none;
+  background: var(--clr-white);
+  border: 1px solid var(--clr-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  z-index: 1000;
+  animation: katMenuIn .15s ease;
+}
+.kat-dropdown-menu[hidden] { display: none; }
+
+@keyframes katMenuIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .kat-dropdown-menu { animation: none; }
+}
+
+.kat-dropdown-menu li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .75rem;
+  padding: .55rem .75rem;
+  border-radius: 6px;
+  font-size: .88rem;
+  color: var(--clr-text);
+  cursor: pointer;
+}
+.kat-dropdown-menu li:hover,
+.kat-dropdown-menu li:focus { background: rgba(104,147,75,.10); outline: none; }
+.kat-dropdown-menu li.active {
+  background: rgba(104,147,75,.14);
+  color: var(--clr-green-aa-dark);
+  font-weight: 600;
+}
+.kat-dropdown-menu li .bi-check2 { display: none; }
+.kat-dropdown-menu li.active .bi-check2 { display: inline; }
+
+/* ── Responsif ≤575px ── */
+@media (max-width: 575px) {
+  .admin-page .potensi-toolbar { flex-wrap: wrap; }
+  .admin-page .potensi-toolbar .admin-search-bar {
+    width: 100%;
+    flex: 1 1 100%;
+  }
+  .admin-page .potensi-toolbar .admin-search-bar input {
+    flex: 1 1 100%;
+    min-width: 0;
+    width: 100%;
+  }
+  .kat-dropdown-toggle { min-width: 0; flex: 1; }
+}

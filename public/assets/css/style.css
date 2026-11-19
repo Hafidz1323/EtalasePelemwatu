@@ -1964,15 +1964,52 @@ body.form-page .form-page-header p {
   border: 1.5px solid var(--clr-border);
   padding: .65rem .9rem;
   font-size: .9rem;
-  border-radius: var(--radius);
+  border-radius: 0;          /* radius diatur oleh input-group, bukan form-control */
 }
 .modal-login-admin .form-control:focus {
   border-color: var(--clr-blue);
   box-shadow: 0 0 0 3px rgba(30, 59, 44, 0.12);
+  z-index: 3;
 }
+
+/* ── Kotak ikon (kiri) ── */
 .modal-login-admin .input-group-text {
+  width: 44px;               /* lebar tetap & seragam untuk dua field */
   border: 1.5px solid var(--clr-border);
+  border-right: none;        /* hilangkan border ganda antara ikon & input */
+  border-radius: 0;          /* radius hanya di ujung luar (lihat bawah) */
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: .95rem;
   color: var(--clr-text-mid);
+}
+
+/* ── Menyatukan grup: radius hanya di ujung luar ── */
+.modal-login-admin .input-group > .input-group-text:first-child {
+  border-radius: var(--radius) 0 0 var(--radius);
+}
+.modal-login-admin .input-group > .form-control:last-child {
+  border-radius: 0 var(--radius) var(--radius) 0;
+}
+/* Untuk field Kata Sandi: form-control bukan elemen terakhir, tombol mata di kanan */
+.modal-login-admin .input-group > .btn:last-child {
+  border: 1.5px solid var(--clr-border);
+  border-left: none;         /* tidak ada border ganda antara input & tombol mata */
+  border-radius: 0 var(--radius) var(--radius) 0;
+  background: #fff;
+  color: var(--clr-text-mid);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  padding: 0;
+  font-size: .95rem;
+}
+.modal-login-admin .input-group > .btn:last-child:focus {
+  box-shadow: 0 0 0 3px rgba(30, 59, 44, 0.12);
+  z-index: 3;
 }
 
 .btn-logout-sidebar {
@@ -2152,6 +2189,22 @@ body.form-page .form-page-header p {
 #siteHeader #mainNavbar .nav-link:not(.btn-nav-daftar).active {
   color: var(--clr-orange-aa) !important;
   background-color: transparent !important;
+}
+
+/* ── Garis bawah hover (desktop ≥992px, hanya saat hover, bukan .active) ── */
+@media (min-width: 992px) {
+  #siteHeader #mainNavbar .nav-link:not(.btn-nav-daftar):not(.btn-nav-admin) {
+    background-image: linear-gradient(var(--clr-orange-aa), var(--clr-orange-aa));
+    background-repeat: no-repeat;
+    background-size: 0% 2px;
+    background-position: left bottom;
+    background-origin: content-box;
+    background-clip: content-box;          /* garis hanya sepanjang teks */
+    transition: background-size var(--transition), color var(--transition);
+  }
+  #siteHeader #mainNavbar .nav-link:not(.btn-nav-daftar):not(.btn-nav-admin):hover {
+    background-size: 100% 2px;             /* melebar kiri→kanan saat hover */
+  }
 }
 
 /* Tombol "Daftarkan Potensimu" = pil oranye */

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Panel Admin â€” EtalasePelemwatu</title>
+  <title>Panel Admin — EtalasePelemwatu</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   <link rel="stylesheet" href="assets/css/style.css">
@@ -154,53 +154,12 @@
             </button>
           </div>
           <ul id="notifList" style="list-style:none;margin:0;padding:.4rem 0;max-height:320px;overflow-y:auto;">
-            <li class="notif-item notif-unread"
-                style="display:flex;gap:.75rem;padding:.7rem 1rem;cursor:pointer;
-                       border-bottom:1px solid #f5f7fa;background:rgba(242,99,15,.04);"
-                data-notif-id="1">
-              <div style="flex-shrink:0;width:36px;height:36px;border-radius:50%;
-                          background:rgba(242,99,15,.12);display:flex;align-items:center;
-                          justify-content:center;color:var(--clr-orange);font-size:1rem;">
-                <i class="bi bi-person-plus-fill"></i>
-              </div>
-              <div style="flex:1;min-width:0;">
-                <div style="font-size:.82rem;font-weight:600;color:var(--clr-blue);
-                            white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
-                  Pendaftaran baru: Dimsum Pak Heru
-                </div>
-                <div style="font-size:.77rem;color:#6b7a8d;margin-top:.15rem;">
-                  Menunggu verifikasi Â· 10 menit lalu
-                </div>
-              </div>
-              <span style="width:8px;height:8px;border-radius:50%;background:var(--clr-orange);
-                           flex-shrink:0;margin-top:5px;"></span>
-            </li>
-            <li class="notif-item notif-unread"
-                style="display:flex;gap:.75rem;padding:.7rem 1rem;cursor:pointer;
-                       border-bottom:1px solid #f5f7fa;background:rgba(242,99,15,.04);"
-                data-notif-id="2">
-              <div style="flex-shrink:0;width:36px;height:36px;border-radius:50%;
-                          background:rgba(9,74,116,.10);display:flex;align-items:center;
-                          justify-content:center;color:var(--clr-blue);font-size:1rem;">
-                <i class="bi bi-shop-fill"></i>
-              </div>
-              <div style="flex:1;min-width:0;">
-                <div style="font-size:.82rem;font-weight:600;color:var(--clr-blue);
-                            white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
-                  Pendaftaran baru: Laundry Bu Siti
-                </div>
-                <div style="font-size:.77rem;color:#6b7a8d;margin-top:.15rem;">
-                  Menunggu verifikasi Â· 32 menit lalu
-                </div>
-              </div>
-              <span style="width:8px;height:8px;border-radius:50%;background:var(--clr-orange);
-                           flex-shrink:0;margin-top:5px;"></span>
-            </li>
+            <li id="notifLoadingRow" style="padding:.85rem 1rem;text-align:center;font-size:.82rem;color:#6b7a8d;">Memuat notifikasi…</li>
             <li style="padding:.65rem 1rem;text-align:center;">
               <button id="btnNotifLihatSemua"
                       style="font-size:.8rem;color:var(--clr-blue);background:none;border:none;
                              cursor:pointer;font-weight:600;padding:0;">
-                Lihat semua di Verifikasi â†’
+                Lihat semua di Verifikasi →
               </button>
             </li>
           </ul>
@@ -347,16 +306,26 @@
       <div class="admin-card">
         <div class="admin-card-header">
           <h5><i class="bi bi-grid me-2" style="color:var(--clr-orange);"></i>Daftar Potensi</h5>
-          <div class="d-flex gap-2 flex-wrap">
+          <div class="d-flex gap-2 flex-wrap potensi-toolbar">
             <div class="admin-search-bar">
               <input type="text" placeholder="Cari nama potensi..." id="searchPotensi">
-              <select class="form-select form-select-sm" style="width:auto;" id="filterKategori">
+              <select class="form-select form-select-sm" style="width:auto;" id="filterKategori" hidden tabindex="-1" aria-hidden="true">
                 <option value="all">Semua Kategori</option>
                 <option value="usaha">Usaha &amp; Produk</option>
                 <option value="jasa">Jasa</option>
                 <option value="hunian">Hunian</option>
                 <option value="barang">Barang Warga</option>
               </select>
+              <div class="kat-dropdown" id="katDropdown">
+                <button type="button" class="kat-dropdown-toggle"
+                        id="katDropdownToggle" aria-haspopup="listbox"
+                        aria-expanded="false" aria-label="Filter kategori">
+                  <span class="kat-dropdown-label">Semua Kategori</span>
+                  <i class="bi bi-chevron-down kat-dropdown-caret"></i>
+                </button>
+                <ul class="kat-dropdown-menu" id="katDropdownMenu" role="listbox"
+                    hidden></ul>
+              </div>
             </div>
             <a href="daftar-potensi.html"
                class="btn btn-sm btn-primary"
@@ -371,87 +340,13 @@
               <tr><th>No</th><th>Nama Potensi</th><th>Kategori</th><th>Status</th><th>Tgl Daftar</th><th>Aksi</th></tr>
             </thead>
             <tbody>
-              <tr data-kat="usaha"><td>1</td><td><strong>Omah Dimsum</strong></td>
-                <td><span class="potensi-badge badge-usaha">Usaha &amp; Produk</span></td>
-                <td><span class="status-badge status-aktif">Aktif</span></td>
-                <td>28 Okt 2024</td>
-                <td>
-                  <button class="btn btn-sm btn-outline-warning btn-action btn-edit-row"><i class="bi bi-pencil"></i></button>
-                  <button class="btn btn-sm btn-outline-danger btn-action btn-hapus"><i class="bi bi-trash"></i></button>
-                </td>
-              </tr>
-              <tr data-kat="usaha"><td>2</td><td><strong>Warung Prasmanan Selarasnasi</strong></td>
-                <td><span class="potensi-badge badge-usaha">Usaha &amp; Produk</span></td>
-                <td><span class="status-badge status-aktif">Aktif</span></td>
-                <td>26 Okt 2024</td>
-                <td>
-                  <button class="btn btn-sm btn-outline-warning btn-action btn-edit-row"><i class="bi bi-pencil"></i></button>
-                  <button class="btn btn-sm btn-outline-danger btn-action btn-hapus"><i class="bi bi-trash"></i></button>
-                </td>
-              </tr>
-              <tr data-kat="usaha"><td>3</td><td><strong>Ratu Frozen Food Pelemwatu</strong></td>
-                <td><span class="potensi-badge badge-usaha">Usaha &amp; Produk</span></td>
-                <td><span class="status-badge status-aktif">Aktif</span></td>
-                <td>24 Okt 2024</td>
-                <td>
-                  <button class="btn btn-sm btn-outline-warning btn-action btn-edit-row"><i class="bi bi-pencil"></i></button>
-                  <button class="btn btn-sm btn-outline-danger btn-action btn-hapus"><i class="bi bi-trash"></i></button>
-                </td>
-              </tr>
-              <tr data-kat="jasa"><td>4</td><td><strong>Moni Laundry 24 Jam</strong></td>
-                <td><span class="potensi-badge badge-jasa">Jasa</span></td>
-                <td><span class="status-badge status-aktif">Aktif</span></td>
-                <td>25 Okt 2024</td>
-                <td>
-                  <button class="btn btn-sm btn-outline-warning btn-action btn-edit-row"><i class="bi bi-pencil"></i></button>
-                  <button class="btn btn-sm btn-outline-danger btn-action btn-hapus"><i class="bi bi-trash"></i></button>
-                </td>
-              </tr>
-              <tr data-kat="jasa"><td>5</td><td><strong>One Laundry Koin</strong></td>
-                <td><span class="potensi-badge badge-jasa">Jasa</span></td>
-                <td><span class="status-badge status-aktif">Aktif</span></td>
-                <td>23 Okt 2024</td>
-                <td>
-                  <button class="btn btn-sm btn-outline-warning btn-action btn-edit-row"><i class="bi bi-pencil"></i></button>
-                  <button class="btn btn-sm btn-outline-danger btn-action btn-hapus"><i class="bi bi-trash"></i></button>
-                </td>
-              </tr>
-              <tr data-kat="hunian"><td>6</td><td><strong>My Kost</strong></td>
-                <td><span class="potensi-badge badge-hunian">Hunian</span></td>
-                <td><span class="status-badge status-aktif">Aktif</span></td>
-                <td>20 Okt 2024</td>
-                <td>
-                  <button class="btn btn-sm btn-outline-warning btn-action btn-edit-row"><i class="bi bi-pencil"></i></button>
-                  <button class="btn btn-sm btn-outline-danger btn-action btn-hapus"><i class="bi bi-trash"></i></button>
-                </td>
-              </tr>
-              <tr data-kat="hunian"><td>7</td><td><strong>RAMA Kost</strong></td>
-                <td><span class="potensi-badge badge-hunian">Hunian</span></td>
-                <td><span class="status-badge status-aktif">Aktif</span></td>
-                <td>18 Okt 2024</td>
-                <td>
-                  <button class="btn btn-sm btn-outline-warning btn-action btn-edit-row"><i class="bi bi-pencil"></i></button>
-                  <button class="btn btn-sm btn-outline-danger btn-action btn-hapus"><i class="bi bi-trash"></i></button>
-                </td>
-              </tr>
-              <tr data-kat="barang"><td>8</td><td><strong>Barang Warga</strong></td>
-                <td><span class="potensi-badge badge-barang">Barang Warga</span></td>
-                <td><span class="status-badge status-pending">Menunggu</span></td>
-                <td>01 Nov 2024</td>
-                <td>
-                  <button class="btn btn-sm btn-outline-warning btn-action btn-edit-row"><i class="bi bi-pencil"></i></button>
-                  <button class="btn btn-sm btn-outline-danger btn-action btn-hapus"><i class="bi bi-trash"></i></button>
-                </td>
-              </tr>
+              <tr class="empty-row text-center"><td colspan="6" class="py-4 text-muted">Memuat data...</td></tr>
             </tbody>
           </table>
         </div>
         <div class="admin-card-body pt-2 pb-3">
           <div class="admin-pagination">
-            <button class="page-btn active">1</button>
-            <button class="page-btn">2</button>
-            <button class="page-btn">3</button>
-            <button class="page-btn"><i class="bi bi-chevron-right"></i></button>
+            <!-- pagination buttons rendered by JS -->
           </div>
         </div>
       </div>
@@ -691,6 +586,89 @@
       </div>
     </div><!-- /galeri -->
 
+    <!-- Modal Edit Potensi -->
+    <div class="modal fade" id="modalEditPotensi" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+          <div class="modal-header" style="border-bottom:1px solid var(--border);">
+            <h5 class="modal-title" style="color:var(--clr-blue);">
+              <i class="bi bi-pencil me-2" style="color:var(--clr-orange);"></i>Edit Potensi
+            </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <input type="hidden" id="editPotensiId">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label fw-semibold" style="color:var(--clr-blue);">Nama Potensi <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="editPotensiName" placeholder="Nama potensi/usaha" maxlength="100">
+                <div class="invalid-feedback" id="editPotensiNameErr"></div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold" style="color:var(--clr-blue);">Nama Pemilik <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="editPotensiOwner" placeholder="Nama lengkap pemilik" maxlength="100">
+                <div class="invalid-feedback" id="editPotensiOwnerErr"></div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold" style="color:var(--clr-blue);">Kategori</label>
+                <select class="form-control" id="editPotensiCategory">
+                  <option value="">-- Pilih Kategori --</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold" style="color:var(--clr-blue);">Nomor WhatsApp <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="editPotensiWa" placeholder="08xxxxxxxxxx" maxlength="20">
+                <div class="invalid-feedback" id="editPotensiWaErr"></div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold" style="color:var(--clr-blue);">Email</label>
+                <input type="text" class="form-control" id="editPotensiEmail" placeholder="opsional" maxlength="100">
+                <div class="invalid-feedback" id="editPotensiEmailErr"></div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold" style="color:var(--clr-blue);">Status</label>
+                <select class="form-control" id="editPotensiStatus">
+                  <option value="aktif">Aktif</option>
+                  <option value="pending">Menunggu</option>
+                  <option value="approved">Disetujui</option>
+                  <option value="rejected">Ditolak</option>
+                </select>
+              </div>
+              <div class="col-12">
+                <label class="form-label fw-semibold" style="color:var(--clr-blue);">Alamat <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="editPotensiAddress" placeholder="Alamat lengkap" maxlength="255">
+                <div class="invalid-feedback" id="editPotensiAddressErr"></div>
+              </div>
+              <div class="col-12">
+                <label class="form-label fw-semibold" style="color:var(--clr-blue);">Deskripsi <span class="text-danger">*</span></label>
+                <textarea class="form-control" id="editPotensiDesc" rows="3" placeholder="Deskripsi potensi..." maxlength="1000"></textarea>
+                <div class="invalid-feedback" id="editPotensiDescErr"></div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold" style="color:var(--clr-blue);">Lokasi</label>
+                <input type="text" class="form-control" id="editPotensiLocation" placeholder="opsional" maxlength="255">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold" style="color:var(--clr-blue);">Jenis</label>
+                <input type="text" class="form-control" id="editPotensiJenis" placeholder="opsional" maxlength="100">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold" style="color:var(--clr-blue);">Jam Operasional</label>
+                <input type="text" class="form-control" id="editPotensiJam" placeholder="opsional" maxlength="100">
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer" style="border-top:1px solid var(--border);">
+            <button type="button" class="btn-outline-custom" data-bs-dismiss="modal">Batal</button>
+            <button type="button" class="btn-primary-custom" id="btnSimpanPotensi">
+              <i class="bi bi-save me-1"></i>Simpan
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- /modal edit potensi -->
+
     <!-- â”€â”€â”€ PERANGKAT â”€â”€â”€ -->
     <div class="admin-section" id="section-perangkat">
       <div class="admin-page-header"><h2>Perangkat Desa</h2><p>Data perangkat Desa Pelemwatu.</p></div>
@@ -910,7 +888,7 @@
             <div id="logoDropContent">
               <i class="bi bi-image" style="font-size:2rem;color:var(--clr-blue);opacity:.5;display:block;margin-bottom:.6rem;"></i>
               <div style="font-size:.95rem;font-weight:700;color:var(--clr-blue);margin-bottom:.35rem;">Pilih file atau seret ke sini</div>
-              <div style="font-size:.8rem;color:var(--text-mid);margin-bottom:1rem;">JPG, PNG, WebP, hingga 2 MB</div>
+              <div style="font-size:.8rem;color:var(--text-mid);margin-bottom:1rem;">JPG, PNG, WebP, hingga 10 MB</div>
               <button type="button" id="logoBtnTelusuri"
                       style="display:inline-block;padding:.42rem 1.3rem;border-radius:999px;border:1.5px solid var(--clr-blue,#094a74);background:#fff;color:var(--clr-blue,#094a74);font-size:.85rem;font-weight:600;cursor:pointer;transition:background .15s,color .15s;">
                 Telusuri file
@@ -953,7 +931,7 @@
             Platform digital potensi lokal Desa Pelemwatu, Kecamatan Menganti, Kabupaten Gresik, Jawa Timur. Memperkenalkan dan memasarkan produk, jasa, serta potensi warga desa secara digital.
           </div>
           <div style="display:inline-flex;align-items:center;gap:.5rem;background:var(--clr-bg);border-radius:8px;padding:.5rem 1rem;font-size:.82rem;color:var(--text-mid);">
-            <i class="bi bi-patch-check-fill" style="color:var(--clr-green);"></i> Versi 1.0.0 &nbsp;Â·&nbsp; <i class="bi bi-circle-fill" style="color:var(--clr-green);font-size:.5rem;"></i>&nbsp; Aktif &amp; Online
+            <i class="bi bi-patch-check-fill" style="color:var(--clr-green);"></i> Versi 1.0.0 &nbsp;·&nbsp; <i class="bi bi-circle-fill" style="color:var(--clr-green);font-size:.5rem;"></i>&nbsp; Aktif &amp; Online
           </div>
         </div>
       </div>
@@ -1149,80 +1127,273 @@ document.getElementById('sidebarOverlay').addEventListener('click', function(){
   this.classList.remove('show');
 });
 
+
+/* ── Hash-based section routing ── */
+(function () {
+  var VALID_SECTIONS = ['dashboard','kelola-potensi','verifikasi','galeri','perangkat','profil-desa-admin','pengaturan'];
+  function routeFromHash() {
+    var hash = window.location.hash.replace('#', '');
+    if (hash && VALID_SECTIONS.indexOf(hash) !== -1) {
+      switchSection(hash);
+    }
+  }
+  routeFromHash();
+  window.addEventListener('hashchange', routeFromHash);
+})();
+
 /* â”€â”€ Dashboard shortcuts â”€â”€ */
 document.getElementById('btnLihatSemua').addEventListener('click',function(){switchSection('verifikasi');});
 document.getElementById('btnGoSettings').addEventListener('click',function(){switchSection('pengaturan');});
 document.getElementById('btnExport').addEventListener('click',function(){showAdminToast('Fitur export data belum tersedia.','info');});
 
-/* â”€â”€ Notifikasi Bell â”€â”€ */
-(function(){
-  var bell    = document.getElementById('btnNotifBell');
-  var panel   = document.getElementById('notifPanel');
-  var badge   = document.getElementById('notifBadge');
-  var btnAll  = document.getElementById('btnNotifTandaiSemua');
-  var btnVerif= document.getElementById('btnNotifLihatSemua');
+/* \u2500\u2500 Notifikasi Bell \u2500\u2500 */
+(function () {
+  'use strict';
 
+  var API_BASE = (window.location.protocol === 'file:' || window.location.port === '5500')
+    ? 'http://localhost:8000/api'
+    : (window.location.port === '3000' ? 'http://localhost:3000/api' : '/api');
+
+  var bell      = document.getElementById('btnNotifBell');
+  var panel     = document.getElementById('notifPanel');
+  var badge     = document.getElementById('notifBadge');
+  var btnAll    = document.getElementById('btnNotifTandaiSemua');
+  var btnVerif  = document.getElementById('btnNotifLihatSemua');
+  var list      = document.getElementById('notifList');
+
+  var STORAGE_KEY = 'ep_notif_read';
+  var MAX_IDS     = 200;
+  var _items      = [];           // cache data terakhir
+  var _loadTimer  = null;
+  var _autoTimer  = null;
+
+  /* ── localStorage helpers ── */
+  function getReadIds() {
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); } catch (e) { return []; }
+  }
+  function saveReadIds(ids) {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(ids.slice(-MAX_IDS))); } catch (e) {}
+  }
+  function markRead(id) {
+    var ids = getReadIds();
+    if (ids.indexOf(id) === -1) { ids.push(id); saveReadIds(ids); }
+  }
+  function isRead(id) { return getReadIds().indexOf(id) !== -1; }
+
+  /* ── Waktu relatif ── */
+  var MONTHS = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agt','Sep','Okt','Nov','Des'];
+  function relTime(str) {
+    if (!str) return '';
+    try {
+      var d   = new Date(str);
+      if (isNaN(d.getTime())) return '';
+      var now = new Date();
+      var diff = Math.floor((now - d) / 1000);
+      if (diff < 0)   diff = 0;
+      if (diff < 60)  return 'baru saja';
+      if (diff < 3600) return Math.floor(diff / 60) + ' menit lalu';
+      if (diff < 86400) return Math.floor(diff / 3600) + ' jam lalu';
+      var days = Math.floor(diff / 86400);
+      if (days < 30)  return days + ' hari lalu';
+      return d.getDate() + ' ' + MONTHS[d.getMonth()] + ' ' + d.getFullYear();
+    } catch (e) { return ''; }
+  }
+
+  /* ── Badge ── */
+  function updateBadge() {
+    var ids = getReadIds();
+    var unread = _items.filter(function (p) { return ids.indexOf(p.id) === -1; }).length;
+    if (!badge) return;
+    if (unread === 0) {
+      badge.style.display = 'none';
+      badge.textContent   = '';
+    } else {
+      badge.textContent   = unread > 9 ? '9+' : String(unread);
+      badge.style.display = '';
+    }
+  }
+
+  /* ── Render list ── */
+  function render() {
+    // Hapus semua kecuali <li> tombol (last child)
+    var btnLi = list.lastElementChild;
+    while (list.firstElementChild !== btnLi) {
+      list.removeChild(list.firstElementChild);
+    }
+
+    var ids = getReadIds();
+
+    if (_items.length === 0) {
+      var emptyLi = document.createElement('li');
+      emptyLi.style.cssText = 'padding:.85rem 1rem;text-align:center;font-size:.82rem;color:#6b7a8d;';
+      emptyLi.textContent = 'Tidak ada notifikasi baru';
+      list.insertBefore(emptyLi, btnLi);
+      updateBadge();
+      return;
+    }
+
+    _items.forEach(function (p) {
+      var read     = ids.indexOf(p.id) !== -1;
+      var timeStr  = relTime(p.created_at);
+      var subLabel = p.status === 'pending'
+        ? 'Menunggu verifikasi' + (timeStr ? ' \u00b7 ' + timeStr : '')
+        : 'Baru terdaftar'     + (timeStr ? ' \u00b7 ' + timeStr : '');
+
+      var li = document.createElement('li');
+      li.className = read ? 'notif-item' : 'notif-item notif-unread';
+      li.style.cssText = 'display:flex;gap:.75rem;padding:.7rem 1rem;cursor:pointer;border-bottom:1px solid #f5f7fa;'
+                       + (read ? '' : 'background:rgba(242,99,15,.04);');
+      li.dataset.notifId     = p.id;
+      li.dataset.notifStatus = p.status || '';
+
+      // Ikon
+      var iconWrap = document.createElement('div');
+      iconWrap.style.cssText = 'flex-shrink:0;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1rem;'
+                             + (read
+                               ? 'background:rgba(9,74,116,.10);color:#6b7a8d;'
+                               : 'background:rgba(242,99,15,.12);color:var(--clr-orange);');
+      var icon = document.createElement('i');
+      icon.className = 'bi bi-person-plus-fill';
+      iconWrap.appendChild(icon);
+      li.appendChild(iconWrap);
+
+      // Teks
+      var textWrap = document.createElement('div');
+      textWrap.style.cssText = 'flex:1;min-width:0;';
+
+      var title = document.createElement('div');
+      title.style.cssText = 'font-size:.82rem;font-weight:600;color:var(--clr-blue);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;';
+      title.textContent = 'Pendaftaran baru: ' + (p.name || '');
+      textWrap.appendChild(title);
+
+      var sub = document.createElement('div');
+      sub.style.cssText = 'font-size:.77rem;color:#6b7a8d;margin-top:.15rem;';
+      sub.textContent = subLabel;
+      textWrap.appendChild(sub);
+      li.appendChild(textWrap);
+
+      // Titik oranye (hanya jika belum dibaca)
+      if (!read) {
+        var dot = document.createElement('span');
+        dot.style.cssText = 'width:8px;height:8px;border-radius:50%;background:var(--clr-orange);flex-shrink:0;margin-top:5px;';
+        li.appendChild(dot);
+      }
+
+      list.insertBefore(li, btnLi);
+    });
+
+    updateBadge();
+  }
+
+  /* ── Load dari API ── */
+  function load(showLoading) {
+    if (document.hidden) return;
+    if (showLoading && _items.length === 0) {
+      // Tampilkan loading row
+      var btnLi = list.lastElementChild;
+      while (list.firstElementChild !== btnLi) list.removeChild(list.firstElementChild);
+      var loadLi = document.createElement('li');
+      loadLi.id = 'notifLoadingRow';
+      loadLi.style.cssText = 'padding:.85rem 1rem;text-align:center;font-size:.82rem;color:#6b7a8d;';
+      loadLi.textContent = 'Memuat notifikasi\u2026';
+      list.insertBefore(loadLi, btnLi);
+    }
+
+    clearTimeout(_loadTimer);
+    _loadTimer = setTimeout(function () {
+      fetch(API_BASE + '/potensi')
+        .then(function (r) { return r.json(); })
+        .then(function (res) {
+          if (res && Array.isArray(res.data)) {
+            var all = res.data;
+            // Hitung pending untuk verifikasiBadge
+            var pendingTotal = all.filter(function (p) { return p.status === 'pending'; }).length;
+            var vb = document.getElementById('verifikasiBadge');
+            if (vb) vb.textContent = pendingTotal > 0 ? pendingTotal : '';
+
+            // Ambil 5 teratas bukan rejected
+            _items = all.filter(function (p) { return p.status !== 'rejected'; }).slice(0, 5);
+          }
+          render();
+        })
+        .catch(function () {
+          // Gagal: jika belum ada data, tampilkan pesan error
+          if (_items.length === 0) {
+            var btnLi = list.lastElementChild;
+            while (list.firstElementChild !== btnLi) list.removeChild(list.firstElementChild);
+            var errLi = document.createElement('li');
+            errLi.style.cssText = 'padding:.85rem 1rem;text-align:center;font-size:.82rem;color:#6b7a8d;';
+            errLi.textContent = 'Gagal memuat notifikasi.';
+            list.insertBefore(errLi, btnLi);
+          }
+          // Jika sudah ada data, pertahankan render lama
+        });
+    }, 120);
+  }
+
+  /* ── Buka / tutup panel ── */
   function openPanel() {
     panel.style.display = 'block';
     bell.setAttribute('aria-expanded', 'true');
-    // Sembunyikan badge saat panel dibuka (tanda sudah dilihat)
-    if (badge) badge.style.display = 'none';
+    load(true);   // muat ulang setiap kali panel dibuka
   }
-
   function closePanel() {
     panel.style.display = 'none';
     bell.setAttribute('aria-expanded', 'false');
   }
 
-  bell.addEventListener('click', function(e) {
+  bell.addEventListener('click', function (e) {
     e.stopPropagation();
-    var isOpen = panel.style.display === 'block';
-    if (isOpen) { closePanel(); } else { openPanel(); }
+    if (panel.style.display === 'block') { closePanel(); } else { openPanel(); }
   });
 
-  // Klik di luar panel â†’ tutup
-  document.addEventListener('click', function(e) {
-    if (!document.getElementById('notifBellWrap').contains(e.target)) {
-      closePanel();
-    }
+  // Klik di luar panel \u2192 tutup
+  document.addEventListener('click', function (e) {
+    if (!document.getElementById('notifBellWrap').contains(e.target)) closePanel();
   });
 
-  // Tandai semua dibaca
-  btnAll.addEventListener('click', function() {
-    document.querySelectorAll('.notif-unread').forEach(function(item) {
-      item.style.background = 'transparent';
-      item.classList.remove('notif-unread');
-      var dot = item.querySelector('span[style*="border-radius:50%"]');
-      if (dot) dot.style.display = 'none';
-    });
-    if (badge) badge.style.display = 'none';
+  /* ── Tandai semua dibaca ── */
+  btnAll.addEventListener('click', function () {
+    var ids = getReadIds();
+    _items.forEach(function (p) { if (ids.indexOf(p.id) === -1) ids.push(p.id); });
+    saveReadIds(ids);
+    render();
     showAdminToast('Semua notifikasi telah ditandai dibaca.', 'success');
   });
 
-  // Klik item notifikasi â†’ tandai dibaca & navigasi ke verifikasi
-  document.querySelectorAll('#notifList .notif-item').forEach(function(item) {
-    item.addEventListener('click', function() {
-      this.style.background = 'transparent';
-      this.classList.remove('notif-unread');
-      var dot = this.querySelector('span[style*="border-radius:50%"]');
-      if (dot) dot.style.display = 'none';
-      // Hitung sisa unread, perbarui badge
-      var unread = document.querySelectorAll('.notif-unread').length;
-      if (badge) {
-        if (unread > 0) { badge.textContent = unread; badge.style.display = ''; }
-        else { badge.style.display = 'none'; }
-      }
-      closePanel();
-      switchSection('verifikasi');
-    });
+  /* ── Event delegation: klik item ── */
+  list.addEventListener('click', function (e) {
+    var li = e.target.closest('.notif-item');
+    if (!li) return;
+    var id     = Number(li.dataset.notifId);
+    var status = li.dataset.notifStatus || '';
+    if (id) markRead(id);
+    render();
+    closePanel();
+    if (status === 'pending') { switchSection('verifikasi'); }
+    else                      { switchSection('kelola-potensi'); }
   });
 
-  // "Lihat semua di Verifikasi â†’"
-  btnVerif.addEventListener('click', function() {
+  /* ── Lihat semua di Verifikasi ── */
+  btnVerif.addEventListener('click', function () {
     closePanel();
     switchSection('verifikasi');
   });
+
+  /* ── Muat saat halaman dibuka ── */
+  load(true);
+
+  /* ── Auto-refresh 60 detik ── */
+  _autoTimer = setInterval(function () {
+    if (!document.hidden) load(false);
+  }, 60000);
+
+  document.addEventListener('visibilitychange', function () {
+    if (!document.hidden && panel.style.display === 'block') load(false);
+  });
+
 })();
+
 
 document.querySelectorAll('.btn-go-verifikasi').forEach(function(b){
   b.addEventListener('click',function(){switchSection('verifikasi');});
@@ -1266,44 +1437,457 @@ document.querySelectorAll('.btn-reject').forEach(function(btn){
     if (vbg) vbg.textContent = pendingCount > 0 ? pendingCount : '';
   });
 });
-/* â”€â”€ Delete â”€â”€ */
-document.querySelectorAll('.btn-hapus').forEach(function(btn){
-  btn.addEventListener('click', function(){
-    if (confirm('Hapus data ini?')){
-      var row = this.closest('tr');
-      row.style.transition='opacity .4s';
-      row.style.opacity='0.3';
-      showAdminToast('Data telah dihapus.','error');
+/* -- Kelola Potensi: Load, Filter, Paginate, Edit, Delete -- */
+(function () {
+  'use strict';
+
+  var API_BASE = (window.location.protocol === 'file:' || window.location.port === '5500')
+    ? 'http://localhost:8000/api'
+    : (window.location.port === '3000' ? 'http://localhost:3000/api' : '/api');
+
+  var PAGE_SIZE = 8;
+  var _allData  = [];
+  var _filtered = [];
+  var _page     = 1;
+
+  var tbody        = document.querySelector('#tabelPotensi tbody');
+  var pagDiv       = document.querySelector('.admin-pagination');
+  var searchInput  = document.getElementById('searchPotensi');
+  var filterSelect = document.getElementById('filterKategori');
+
+  var BULAN = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+
+  function escapeHtml(s) {
+    if (s == null) return '';
+    return String(s)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  }
+  function getToken() {
+    try {
+      var s = localStorage.getItem('ep_admin_session') || sessionStorage.getItem('ep_admin_session');
+      if (s) return JSON.parse(s).token || null;
+    } catch(e){}
+    return null;
+  }
+  function hdrs(json) {
+    var h = { 'Accept': 'application/json' };
+    if (json) h['Content-Type'] = 'application/json';
+    var t = getToken(); if (t) h['Authorization'] = 'Bearer ' + t;
+    return h;
+  }
+  function katFrom(name) {
+    if (!name) return '';
+    var n = name.toLowerCase();
+    if (n.indexOf('usaha')  !== -1) return 'usaha';
+    if (n.indexOf('jasa')   !== -1) return 'jasa';
+    if (n.indexOf('hunian') !== -1) return 'hunian';
+    if (n.indexOf('barang') !== -1) return 'barang';
+    return '';
+  }
+  function fmtDate(str) {
+    if (!str) return '-';
+    var d = new Date(str);
+    if (isNaN(d.getTime())) return str;
+    return ('0'+d.getDate()).slice(-2)+' '+BULAN[d.getMonth()]+' '+d.getFullYear();
+  }
+
+  function makeRow(item, no) {
+    var catName = (item.category && item.category.name) ? item.category.name : '';
+    var kat     = katFrom(catName);
+    var katBadge = catName
+      ? '<span class="potensi-badge badge-'+(kat||'usaha')+'">'+escapeHtml(catName)+'</span>'
+      : '-';
+    var st = item.status || '';
+    var stClass, stLabel;
+    if (st==='aktif'||st==='approved')    { stClass='status-aktif';   stLabel='Aktif'; }
+    else if (st==='pending')              { stClass='status-pending'; stLabel='Menunggu'; }
+    else if (st==='rejected')             { stClass='status-ditolak'; stLabel='Ditolak'; }
+    else                                  { stClass='status-pending'; stLabel=escapeHtml(st); }
+    var tr = document.createElement('tr');
+    tr.dataset.kat = kat; tr.dataset.id = item.id;
+    tr.innerHTML =
+      '<td>'+no+'</td>'
+      +'<td><strong>'+escapeHtml(item.name)+'</strong></td>'
+      +'<td>'+katBadge+'</td>'
+      +'<td><span class="status-badge '+stClass+'">'+stLabel+'</span></td>'
+      +'<td>'+fmtDate(item.created_at)+'</td>'
+      +'<td>'
+        +'<button class="btn btn-sm btn-outline-warning btn-action btn-edit-row"><i class="bi bi-pencil"></i></button> '
+        +'<button class="btn btn-sm btn-outline-danger btn-action btn-hapus"><i class="bi bi-trash"></i></button>'
+      +'</td>';
+    return tr;
+  }
+
+  function renderTable() {
+    tbody.innerHTML = '';
+    if (_filtered.length === 0) {
+      var q   = searchInput ? searchInput.value.trim() : '';
+      var etr = document.createElement('tr'); etr.className = 'empty-row text-center';
+      var etd = document.createElement('td'); etd.colSpan=6; etd.className='py-4 text-muted';
+      etd.innerHTML = q
+        ? '<i class="bi bi-search me-2"></i>Tidak ada potensi yang cocok dengan pencarian'
+        : 'Belum ada data potensi.';
+      etr.appendChild(etd); tbody.appendChild(etr);
+      renderPagination(); return;
+    }
+    var start = (_page-1)*PAGE_SIZE, end = Math.min(start+PAGE_SIZE,_filtered.length);
+    for (var i=start;i<end;i++) tbody.appendChild(makeRow(_filtered[i],i+1));
+    renderPagination();
+  }
+
+  function renderPagination() {
+    pagDiv.innerHTML = '';
+    var total = Math.max(1, Math.ceil(_filtered.length / PAGE_SIZE));
+    if (total >= 2) {
+      var inp = document.createElement('input');
+      inp.type='number'; inp.min='1'; inp.inputMode='numeric';
+      inp.placeholder='Hal.'; inp.id='inputLompatHalaman'; inp.className='page-jump-input';
+      var btnJ = document.createElement('button');
+      btnJ.className='page-btn'; btnJ.setAttribute('aria-label','Ke halaman');
+      btnJ.innerHTML='<i class="bi bi-search"></i>';
+      function doJump() {
+        var v=inp.value.trim(), n=parseInt(v,10);
+        if (!v||isNaN(n)||n<1||n>total||n!==Math.floor(n)) {
+          showAdminToast('Halaman tidak valid. Masukkan angka 1 sampai '+total+'.','warning'); return;
+        }
+        inp.value=''; goPage(n);
+      }
+      inp.addEventListener('keydown',function(e){if(e.key==='Enter')doJump();});
+      btnJ.addEventListener('click',doJump);
+      pagDiv.appendChild(inp); pagDiv.appendChild(btnJ);
+    }
+    var pages=[];
+    if (total<=7) { for(var i=1;i<=total;i++) pages.push(i); }
+    else {
+      pages.push(1);
+      var lo=Math.max(2,_page-1), hi=Math.min(total-1,_page+1);
+      if (lo>2) pages.push('...');
+      for(var i=lo;i<=hi;i++) pages.push(i);
+      if (hi<total-1) pages.push('...');
+      pages.push(total);
+    }
+    pages.forEach(function(p) {
+      var btn=document.createElement('button');
+      btn.className='page-btn'+(p===_page?' active':'');
+      if (p==='...') { btn.textContent='...'; btn.disabled=true; btn.style.cursor='default'; }
+      else { btn.textContent=p; (function(pg){btn.addEventListener('click',function(){goPage(pg);});})(p); }
+      pagDiv.appendChild(btn);
+    });
+    if (total >= 2) {
+      var arr=document.createElement('button');
+      arr.className='page-btn'; arr.innerHTML='<i class="bi bi-chevron-right"></i>';
+      if (_page>=total) { arr.disabled=true; arr.style.opacity='0.4'; arr.style.cursor='default'; }
+      else { (function(pg){arr.addEventListener('click',function(){goPage(pg);});})((_page+1)); }
+      pagDiv.appendChild(arr);
+    }
+  }
+
+  function goPage(n) {
+    _page=n; renderTable();
+    var tbl=tbody.closest('.table-responsive');
+    if (tbl) tbl.scrollIntoView({behavior:'smooth',block:'start'});
+  }
+
+  function applyFilter() {
+    var q   = searchInput  ? searchInput.value.toLowerCase().trim() : '';
+    var sel = filterSelect ? filterSelect.value : 'all';
+    _filtered = _allData.filter(function(item) {
+      var name=(item.name||'').toLowerCase();
+      var kat=katFrom((item.category&&item.category.name)?item.category.name:'');
+      return (!q||name.indexOf(q)!==-1||kat.indexOf(q)!==-1)&&(sel==='all'||kat===sel);
+    });
+    _page=1; renderTable();
+  }
+  if (searchInput)  searchInput.addEventListener('input',  applyFilter);
+  if (filterSelect) filterSelect.addEventListener('change', applyFilter);
+
+  function loadPotensi(keepPage) {
+    if (!keepPage) _page=1;
+    fetch(API_BASE+'/potensi',{headers:hdrs(false)})
+      .then(function(r){return r.json();})
+      .then(function(json){
+        _allData=(json&&Array.isArray(json.data))?json.data:[];
+        applyFilter();
+      })
+      .catch(function(){
+        tbody.innerHTML='<tr class="empty-row text-center"><td colspan="6" class="py-4 text-muted">Gagal memuat data potensi.</td></tr>';
+        pagDiv.innerHTML='';
+        showAdminToast('Gagal memuat data potensi.','error');
+      });
+  }
+
+  tbody.addEventListener('click',function(e){
+    var btnH=e.target.closest('.btn-hapus');
+    var btnE=e.target.closest('.btn-edit-row');
+    if (btnH) {
+      var tr=btnH.closest('tr'), id=tr?tr.dataset.id:null;
+      var name=tr&&tr.cells[1]?tr.cells[1].textContent:'';
+      if (!id) return;
+      if (!confirm('Hapus potensi "'+name.trim()+'"? Data tidak bisa dikembalikan.')) return;
+      btnH.disabled=true;
+      fetch(API_BASE+'/potensi/'+id,{method:'DELETE',headers:hdrs(false)})
+        .then(function(r){
+          if (r.status===404){loadPotensi(true);showAdminToast('Data telah dihapus.','error');return;}
+          return r.json().then(function(json){
+            if (json&&(json.status==='success'||r.ok)){
+              _allData=_allData.filter(function(x){return String(x.id)!==String(id);});
+              applyFilter();
+              var tot=Math.max(1,Math.ceil(_filtered.length/PAGE_SIZE));
+              if (_page>tot) _page=tot;
+              renderTable();
+              showAdminToast('Data telah dihapus.','error');
+            } else {btnH.disabled=false;showAdminToast('Gagal menghapus data.','error');}
+          });
+        })
+        .catch(function(){btnH.disabled=false;showAdminToast('Gagal menghapus data.','error');});
+    }
+    if (btnE) {
+      var tr=btnE.closest('tr'), id=tr?tr.dataset.id:null;
+      if (!id) return;
+      var item=_allData.find(function(x){return String(x.id)===String(id);});
+      if (item) openEditModal(item);
     }
   });
-});
 
-/* â”€â”€ Edit â”€â”€ */
-document.querySelectorAll('.btn-edit-row').forEach(function(btn){
-  btn.addEventListener('click',function(){showAdminToast('Fitur edit potensi belum tersedia.','info');});
-});
+  var _categories=[];
+  function loadCategories(cb) {
+    if (_categories.length){cb();return;}
+    fetch(API_BASE+'/categories',{headers:hdrs(false)})
+      .then(function(r){return r.json();})
+      .then(function(json){_categories=(json&&Array.isArray(json.data))?json.data:[];cb();})
+      .catch(function(){cb();});
+  }
 
-/* â”€â”€ Save Profile â”€â”€ */
-document.getElementById('saveProfileBtn').addEventListener('click',function(){
-  showAdminToast('Data profil desa berhasil disimpan.','success');
-});
-document.getElementById('btnBatalProfil').addEventListener('click',function(){
-  showAdminToast('Perubahan dibatalkan.','info');
-});
+  function openEditModal(item) {
+    loadCategories(function(){
+      var sel=document.getElementById('editPotensiCategory');
+      sel.innerHTML='<option value="">-- Pilih Kategori --</option>';
+      _categories.forEach(function(c){
+        var o=document.createElement('option');o.value=c.id;o.textContent=c.name;sel.appendChild(o);
+      });
+      document.getElementById('editPotensiId').value      = item.id;
+      document.getElementById('editPotensiName').value    = item.name||'';
+      document.getElementById('editPotensiOwner').value   = item.owner_name||'';
+      document.getElementById('editPotensiWa').value      = item.whatsapp||'';
+      document.getElementById('editPotensiEmail').value   = item.email||'';
+      document.getElementById('editPotensiAddress').value = item.address||'';
+      document.getElementById('editPotensiDesc').value    = item.description||'';
+      document.getElementById('editPotensiLocation').value= item.location||'';
+      document.getElementById('editPotensiJenis').value   = item.jenis||'';
+      document.getElementById('editPotensiJam').value     = item.jam_operasional||'';
+      var catId=(item.category_id)||(item.category?item.category.id:'');
+      sel.value=catId||'';
+      document.getElementById('editPotensiStatus').value  = item.status||'aktif';
+      ['editPotensiName','editPotensiOwner','editPotensiWa','editPotensiEmail',
+       'editPotensiAddress','editPotensiDesc'].forEach(function(fid){
+        document.getElementById(fid).classList.remove('is-invalid');
+        var e=document.getElementById(fid+'Err');if(e)e.textContent='';
+      });
+      bootstrap.Modal.getOrCreateInstance(document.getElementById('modalEditPotensi')).show();
+    });
+  }
 
-/* â”€â”€ Perangkat â”€â”€ */
-document.getElementById('btnHubungiPengelola').addEventListener('click',function(){
-  showAdminToast('Silakan hubungi pengelola untuk menambahkan data perangkat desa.','info');
-});
+  function setInv(fid,msg){
+    var el=document.getElementById(fid),err=document.getElementById(fid+'Err');
+    el.classList.add('is-invalid');if(err)err.textContent=msg;return el;
+  }
+  function clrInv(fid){
+    var el=document.getElementById(fid),err=document.getElementById(fid+'Err');
+    el.classList.remove('is-invalid');if(err)err.textContent='';
+  }
+  ['editPotensiName','editPotensiOwner','editPotensiWa','editPotensiEmail',
+   'editPotensiAddress','editPotensiDesc'].forEach(function(fid){
+    var el=document.getElementById(fid);if(el)el.addEventListener('input',function(){clrInv(fid);});
+  });
 
-/* â”€â”€ Settings Save (stub, tombol disembunyikan tapi ID tetap ada) â”€â”€ */
-document.getElementById('btnSavePengaturan').addEventListener('click',function(){
-  showAdminToast('Pengaturan berhasil disimpan.','success');
-});
+  function validateEdit() {
+    var ok=true,first=null;
+    var nm=document.getElementById('editPotensiName').value.trim();
+    if(!nm||nm.length<3||nm.length>100){first=first||setInv('editPotensiName','Nama potensi minimal 3 karakter (maks 100).');ok=false;}else clrInv('editPotensiName');
+    var ow=document.getElementById('editPotensiOwner').value.trim();
+    var owRe=/^[A-Za-z\u00C0-\u024F\s.'\u2019\-]+$/;
+    if(!ow||ow.length<3||ow.length>100||!owRe.test(ow)){first=first||setInv('editPotensiOwner','Nama pemilik minimal 3 huruf dan hanya boleh berisi huruf.');ok=false;}else clrInv('editPotensiOwner');
+    var wa=document.getElementById('editPotensiWa').value.replace(/[\s\-()]/g,'');
+    if(/^\+?62/.test(wa))wa='0'+wa.replace(/^\+?62/,'');
+    if(!/^08[1-9][0-9]{7,10}$/.test(wa)){first=first||setInv('editPotensiWa','Nomor telepon tidak valid. Contoh: 08123456789.');ok=false;}
+    else{clrInv('editPotensiWa');document.getElementById('editPotensiWa').value=wa;}
+    var em=document.getElementById('editPotensiEmail').value.trim().toLowerCase();
+    if(em){var eRe=/^[a-z0-9._%+\-]+@[a-z0-9\-]+(\.[a-z0-9\-]+)*\.[a-z]{2,}$/;
+      if(em.length>100||!eRe.test(em)){first=first||setInv('editPotensiEmail','Format email tidak valid. Contoh: nama@gmail.com.');ok=false;}else clrInv('editPotensiEmail');
+    }else clrInv('editPotensiEmail');
+    var ad=document.getElementById('editPotensiAddress').value.trim();
+    if(!ad||ad.length<10||ad.length>255){first=first||setInv('editPotensiAddress','Alamat minimal 10 karakter (maks 255).');ok=false;}else clrInv('editPotensiAddress');
+    var ds=document.getElementById('editPotensiDesc').value.trim();
+    if(!ds||ds.length<20||ds.length>1000){first=first||setInv('editPotensiDesc','Deskripsi minimal 20 karakter (maks 1000).');ok=false;}else clrInv('editPotensiDesc');
+    if(first)first.focus();
+    return ok;
+  }
 
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-   PENGATURAN â€” Navigasi panel, Profil, Keamanan, Logo, Notif
-   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  var btnSimpan=document.getElementById('btnSimpanPotensi');
+  if(btnSimpan){
+    btnSimpan.addEventListener('click',function(){
+      if(!validateEdit())return;
+      var id=document.getElementById('editPotensiId').value;
+      var catVal=document.getElementById('editPotensiCategory').value;
+      var body={
+        name:            document.getElementById('editPotensiName').value.trim(),
+        owner_name:      document.getElementById('editPotensiOwner').value.trim(),
+        category_id:     catVal?parseInt(catVal,10):null,
+        whatsapp:        document.getElementById('editPotensiWa').value.trim(),
+        email:           document.getElementById('editPotensiEmail').value.trim().toLowerCase()||null,
+        address:         document.getElementById('editPotensiAddress').value.trim(),
+        description:     document.getElementById('editPotensiDesc').value.trim(),
+        location:        document.getElementById('editPotensiLocation').value.trim()||null,
+        jenis:           document.getElementById('editPotensiJenis').value.trim()||null,
+        jam_operasional: document.getElementById('editPotensiJam').value.trim()||null,
+        status:          document.getElementById('editPotensiStatus').value
+      };
+      btnSimpan.disabled=true;
+      fetch(API_BASE+'/potensi/'+id,{method:'PUT',headers:hdrs(true),body:JSON.stringify(body)})
+        .then(function(r){return r.json().then(function(j){return{ok:r.ok,j:j};});})
+        .then(function(res){
+          if(res.ok){
+            bootstrap.Modal.getOrCreateInstance(document.getElementById('modalEditPotensi')).hide();
+            loadPotensi(true);
+            showAdminToast('Data potensi berhasil diperbarui.','success');
+          }else{btnSimpan.disabled=false;showAdminToast('Gagal menyimpan perubahan.','error');}
+        })
+        .catch(function(){btnSimpan.disabled=false;showAdminToast('Gagal menyimpan perubahan.','error');});
+    });
+    document.getElementById('modalEditPotensi').addEventListener('hidden.bs.modal',function(){
+      btnSimpan.disabled=false;
+    });
+  }
+
+  loadPotensi(false);
+
+})(); /* end Kelola Potensi IIFE */
+
+/* -- Dropdown Kategori Custom -- */
+(function () {
+  'use strict';
+
+  var sel    = document.getElementById('filterKategori');
+  var wrap   = document.getElementById('katDropdown');
+  var toggle = document.getElementById('katDropdownToggle');
+  var menu   = document.getElementById('katDropdownMenu');
+  var label  = toggle ? toggle.querySelector('.kat-dropdown-label') : null;
+
+  if (!sel || !wrap || !toggle || !menu || !label) return;
+
+  /* Build <li> items from <option> */
+  function buildItems() {
+    menu.innerHTML = '';
+    Array.from(sel.options).forEach(function (opt) {
+      var li = document.createElement('li');
+      li.setAttribute('role', 'option');
+      li.dataset.value = opt.value;
+      li.setAttribute('tabindex', '-1');
+
+      var txt = document.createElement("span");
+      txt.textContent = opt.text;
+
+      var chk = document.createElement('i');
+      chk.className = 'bi bi-check2';
+      chk.setAttribute('aria-hidden', 'true');
+
+      li.appendChild(txt);
+      li.appendChild(chk);
+
+      li.addEventListener('click', function () { choose(opt.value); });
+      li.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); choose(opt.value); }
+        else if (e.key === 'ArrowDown') { e.preventDefault(); moveFocus(1); }
+        else if (e.key === 'ArrowUp')   { e.preventDefault(); moveFocus(-1); }
+        else if (e.key === 'Escape')    { closeMenu(); toggle.focus(); }
+        else if (e.key === 'Tab')       { closeMenu(); }
+      });
+
+      menu.appendChild(li);
+    });
+    markActive(sel.value);
+  }
+
+  function markActive(val) {
+    Array.from(menu.children).forEach(function (li) {
+      var active = li.dataset.value === val;
+      li.classList.toggle('active', active);
+      li.setAttribute('aria-selected', active ? 'true' : 'false');
+    });
+    toggle.classList.toggle('is-filtered', val !== 'all');
+  }
+
+  function updateLabel(val) {
+    var opt = Array.from(sel.options).find(function (o) { return o.value === val; });
+    label.textContent = opt ? opt.text : 'Semua Kategori';
+  }
+
+  function openMenu() {
+    menu.removeAttribute('hidden');
+    wrap.classList.add('open');
+    toggle.setAttribute('aria-expanded', 'true');
+    /* focus active item or first item */
+    var active = menu.querySelector('li.active') || menu.querySelector('li');
+    if (active) active.focus();
+  }
+
+  function closeMenu() {
+    menu.setAttribute('hidden', '');
+    wrap.classList.remove('open');
+    toggle.setAttribute('aria-expanded', 'false');
+  }
+
+  function moveFocus(dir) {
+    var items = Array.from(menu.querySelectorAll('li'));
+    var cur   = document.activeElement;
+    var idx   = items.indexOf(cur);
+    var next  = items[Math.max(0, Math.min(items.length - 1, idx + dir))];
+    if (next) next.focus();
+  }
+
+  function choose(val) {
+    var changed = sel.value !== val;
+    if (changed) {
+      sel.value = val;
+      sel.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+    updateLabel(val);
+    markActive(val);
+    closeMenu();
+    toggle.focus();
+  }
+
+  toggle.addEventListener('click', function (e) {
+    e.stopPropagation();
+    if (menu.hasAttribute('hidden')) { buildItems(); openMenu(); }
+    else { closeMenu(); }
+  });
+
+  toggle.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowDown') {
+      e.preventDefault();
+      buildItems(); openMenu();
+    }
+  });
+
+  /* Close on outside click */
+  document.addEventListener('click', function (e) {
+    if (!wrap.contains(e.target)) closeMenu();
+  });
+
+  /* Close on Esc from anywhere inside wrap */
+  wrap.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') { closeMenu(); toggle.focus(); }
+  });
+
+  /* Init label */
+  updateLabel(sel.value);
+  buildItems();
+
+})(); /* end Dropdown Kategori IIFE */
+
+
 (function () {
   'use strict';
 
@@ -1802,50 +2386,6 @@ document.getElementById('btnSavePengaturan').addEventListener('click',function()
   });
 
 })(); /* end Pengaturan IIFE */
-/* â”€â”€ Search & Filter Table â”€â”€ */
-var searchInput  = document.getElementById('searchPotensi');
-var filterSelect = document.getElementById('filterKategori');
-function filterTable(){
-  var q   = searchInput  ? searchInput.value.toLowerCase().trim() : '';
-  var sel = filterSelect ? filterSelect.value : 'all';
-  var visibleRows = 0;
-  var rows = document.querySelectorAll('#tabelPotensi tbody tr:not(.empty-row)');
-  rows.forEach(function(row){
-    var name = row.cells[1] ? row.cells[1].textContent.toLowerCase() : '';
-    var cat  = row.dataset.kat || '';
-    var matchSearch = !q || name.includes(q) || cat.includes(q);
-    var matchCat = (sel === 'all' || cat === sel);
-    if (matchSearch && matchCat) {
-      row.style.display = '';
-      visibleRows++;
-    } else {
-      row.style.display = 'none';
-    }
-  });
-
-  var emptyRow = document.querySelector('#tabelPotensi tbody tr.empty-row');
-  if (visibleRows === 0) {
-    if (!emptyRow) {
-      emptyRow = document.createElement('tr');
-      emptyRow.className = 'empty-row text-center';
-      emptyRow.innerHTML = '<td colspan="6" class="py-4 text-muted"><i class="bi bi-search me-2"></i>Tidak ada potensi yang cocok dengan pencarian</td>';
-      document.querySelector('#tabelPotensi tbody').appendChild(emptyRow);
-    }
-    emptyRow.style.display = '';
-  } else if (emptyRow) {
-    emptyRow.style.display = 'none';
-  }
-}
-if (searchInput)  searchInput.addEventListener('input',  filterTable);
-if (filterSelect) filterSelect.addEventListener('change',filterTable);
-
-/* â”€â”€ Pagination â”€â”€ */
-document.querySelectorAll('.page-btn').forEach(function(btn){
-  btn.addEventListener('click',function(){
-    document.querySelectorAll('.page-btn').forEach(function(b){b.classList.remove('active');});
-    this.classList.add('active');
-  });
-});
 
 /* â”€â”€ Galeri Admin â”€â”€ */
 var galeriIdCounter = 6;

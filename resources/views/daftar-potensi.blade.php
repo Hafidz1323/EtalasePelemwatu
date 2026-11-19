@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="UTF-8">
@@ -56,6 +56,13 @@
     .step-guide-num { width:26px;height:26px;background:var(--clr-orange);color:var(--white);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.78rem;font-weight:700;flex-shrink:0; }
     .step-guide-text { font-size:.88rem;color:var(--clr-blue);padding-top:.2rem; }
     .inline-err { display:none;background:rgba(220,53,69,.1);border:1px solid rgba(220,53,69,.3);border-radius:8px;padding:.65rem 1rem;color:#842029;font-size:.85rem;align-items:center;gap:.5rem;margin-top:1rem; }
+    /* A. Teks tidak meluber di kartu Konfirmasi */
+    .preview-card .row > [class*="col"] { min-width:0; }
+    .preview-value { overflow-wrap:anywhere; word-break:break-word; }
+    #prev-deskripsi { white-space:pre-line; }
+    /* D. Saran email */
+    #emailSuggest { display:none; font-size:.8rem; color:var(--text-mid,#6b7280); margin-top:.3rem; }
+    #emailSuggest button { background:none; border:none; padding:0; color:var(--clr-orange,#f2630f); font-weight:600; font-size:.8rem; cursor:pointer; text-decoration:underline; }
   </style>
 </head>
 <body class="form-page">
@@ -147,7 +154,7 @@
                 <div class="row g-3">
                   <div class="col-md-6">
                     <label class="form-label">Nama Lengkap <span class="required-mark">*</span></label>
-                    <input type="text" class="form-control" id="f-nama" placeholder="Masukkan nama lengkap Anda" required>
+                    <input type="text" class="form-control" id="f-nama" placeholder="Masukkan nama lengkap Anda" required maxlength="100">
                   </div>
                   <div class="col-md-6">
                     <label class="form-label">NIK</label>
@@ -155,15 +162,16 @@
                   </div>
                   <div class="col-md-6">
                     <label class="form-label">Nomor Telepon <span class="required-mark">*</span></label>
-                    <input type="tel" class="form-control" id="f-telp" placeholder="Contoh: 08123456789" required>
+                    <input type="tel" class="form-control" id="f-telp" placeholder="Contoh: 08123456789" required inputmode="tel" maxlength="20">
                   </div>
                   <div class="col-md-6">
                     <label class="form-label">Email</label>
-                    <input type="email" class="form-control" id="f-email" placeholder="email@contoh.com (opsional)">
+                    <input type="email" class="form-control" id="f-email" placeholder="email@contoh.com (opsional)" maxlength="100">
+                    <div id="emailSuggest"></div>
                   </div>
                   <div class="col-12">
                     <label class="form-label">Alamat Rumah <span class="required-mark">*</span></label>
-                    <textarea class="form-control" id="f-alamat" rows="2" placeholder="Alamat lengkap di Desa Pelemwatu" required></textarea>
+                    <textarea class="form-control" id="f-alamat" rows="2" placeholder="Alamat lengkap di Desa Pelemwatu" required maxlength="255"></textarea>
                   </div>
                 </div>
 
@@ -212,28 +220,28 @@
                 <div class="row g-3">
                   <div class="col-md-6">
                     <label class="form-label">Nama Potensi / Usaha <span class="required-mark">*</span></label>
-                    <input type="text" class="form-control" id="f-nama-potensi" placeholder="Nama usaha, produk, atau jasa Anda" required>
+                    <input type="text" class="form-control" id="f-nama-potensi" placeholder="Nama usaha, produk, atau jasa Anda" required maxlength="100">
                   </div>
                   <div class="col-md-6">
                     <label class="form-label">Jenis / Subkategori</label>
-                    <input type="text" class="form-control" id="f-jenis" placeholder="Contoh: Laundry kiloan, Kost putra">
+                    <input type="text" class="form-control" id="f-jenis" placeholder="Contoh: Laundry kiloan, Kost putra" maxlength="100">
                   </div>
                   <div class="col-12">
                     <label class="form-label">Deskripsi <span class="required-mark">*</span></label>
-                    <textarea class="form-control" id="f-deskripsi" rows="4" placeholder="Jelaskan potensi Anda secara singkat dan jelas..." required></textarea>
-                    <div class="form-text">Minimal 20 karakter.</div>
+                    <textarea class="form-control" id="f-deskripsi" rows="4" placeholder="Jelaskan potensi Anda secara singkat dan jelas..." required maxlength="1000"></textarea>
+                    <div class="form-text">Minimal 20 karakter dan 3 kata. Tulis dengan kalimat yang jelas.</div>
                   </div>
                   <div class="col-md-6">
                     <label class="form-label">Alamat / Lokasi Potensi</label>
-                    <input type="text" class="form-control" id="f-lokasi" placeholder="Alamat usaha jika berbeda dari rumah">
+                    <input type="text" class="form-control" id="f-lokasi" placeholder="Alamat usaha jika berbeda dari rumah" maxlength="255">
                   </div>
                   <div class="col-md-6">
                     <label class="form-label">Jam Operasional</label>
-                    <input type="text" class="form-control" id="f-jam" placeholder="Contoh: Senin–Sabtu, 08.00–20.00 WIB">
+                    <input type="text" class="form-control" id="f-jam" placeholder="Contoh: Senin–Sabtu, 08.00–20.00 WIB" maxlength="100">
                   </div>
                   <div class="col-12">
                     <label class="form-label">Kontak Usaha</label>
-                    <input type="tel" class="form-control" id="f-kontak-usaha" placeholder="Nomor yang dapat dihubungi calon pelanggan">
+                    <input type="tel" class="form-control" id="f-kontak-usaha" placeholder="Nomor yang dapat dihubungi calon pelanggan" inputmode="tel" maxlength="20">
                   </div>
                 </div>
 
@@ -272,11 +280,16 @@
                   <div class="row g-3">
                     <div class="col-md-6"><div class="preview-label">Nama Pendaftar</div><div class="preview-value" id="prev-nama">—</div></div>
                     <div class="col-md-6"><div class="preview-label">Nomor Telepon</div><div class="preview-value" id="prev-telp">—</div></div>
+                    <div class="col-12"><div class="preview-label">Alamat Rumah</div><div class="preview-value" id="prev-alamat">—</div></div>
+                    <div class="col-md-6"><div class="preview-label">Email</div><div class="preview-value" id="prev-email">—</div></div>
                     <div class="col-md-6"><div class="preview-label">Kategori Potensi</div><div class="preview-value" id="prev-kategori">—</div></div>
                     <div class="col-md-6"><div class="preview-label">Nama Potensi / Usaha</div><div class="preview-value" id="prev-potensi">—</div></div>
+                    <div class="col-md-6"><div class="preview-label">Jenis Potensi</div><div class="preview-value" id="prev-jenis">—</div></div>
                     <div class="col-12"><div class="preview-label">Deskripsi</div><div class="preview-value" id="prev-deskripsi" style="font-size:.9rem;font-weight:400;color:var(--text-mid);">—</div></div>
                     <div class="col-md-6"><div class="preview-label">Lokasi</div><div class="preview-value" id="prev-lokasi">—</div></div>
                     <div class="col-md-6"><div class="preview-label">Jam Operasional</div><div class="preview-value" id="prev-jam">—</div></div>
+                    <div class="col-md-6"><div class="preview-label">Kontak Usaha</div><div class="preview-value" id="prev-kontak-usaha">—</div></div>
+                    <div class="col-md-6"><div class="preview-label">Jumlah Foto</div><div class="preview-value" id="prev-foto">—</div></div>
                   </div>
                 </div>
 
@@ -448,7 +461,40 @@ function showErr(num, msg) {
   var el = document.getElementById('err' + num);
   var m  = document.getElementById('err' + num + 'msg');
   if (m) m.textContent = msg;
-  if (el) { el.style.display = 'flex'; setTimeout(function(){ el.style.display='none'; }, 4000); }
+  if (el) {
+    el.style.display = 'flex';
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    clearTimeout(el._hideTimer);
+    el._hideTimer = setTimeout(function(){ el.style.display = 'none'; }, 5000);
+  }
+}
+
+/* ── Helpers ── */
+function cleanSpaces(s) { return s.replace(/\s+/g, ' ').trim(); }
+
+function normalizePhone(raw) {
+  // Hapus spasi, tanda hubung, tanda kurung
+  var s = raw.replace(/[\s\-()]/g, '');
+  // Ubah awalan +62 atau 62 (tanpa leading 0) menjadi 0
+  s = s.replace(/^\+?62(?=8)/, '0');
+  return s;
+}
+
+function validatePhone(raw) {
+  var s = raw.replace(/[\s\-()]/g, '');
+  s = s.replace(/^\+?62(?=8)/, '0');
+  return /^(?:\+?62|0)8[1-9][0-9]{7,10}$/.test(raw.replace(/[\s\-()]/g, ''))
+      || /^08[1-9][0-9]{7,10}$/.test(s);
+}
+
+function markInvalid(id) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  el.classList.add('is-invalid');
+  el.addEventListener('input', function onInput() {
+    el.classList.remove('is-invalid');
+    el.removeEventListener('input', onInput);
+  });
 }
 
 /* ── Step UI ── */
@@ -485,40 +531,258 @@ function goToStep(step) {
   if (step === 3) fillPreview();
 }
 
-/* ── Validation ── */
+/* ── B. Validasi ── */
 function validateStep1() {
-  var nama   = document.getElementById('f-nama').value.trim();
-  var telp   = document.getElementById('f-telp').value.trim();
-  var alamat = document.getElementById('f-alamat').value.trim();
-  var kat    = document.querySelector('input[name="kategori"]:checked');
-  if (!nama)   { showErr(1, 'Nama lengkap wajib diisi.');      document.getElementById('f-nama').focus();   return false; }
-  if (!telp)   { showErr(1, 'Nomor telepon wajib diisi.');     document.getElementById('f-telp').focus();   return false; }
-  if (!alamat) { showErr(1, 'Alamat rumah wajib diisi.');      document.getElementById('f-alamat').focus(); return false; }
-  if (!kat)    { showErr(1, 'Silakan pilih kategori potensi.');                                               return false; }
-  return true;
-}
-function validateStep2() {
-  var namaP = document.getElementById('f-nama-potensi').value.trim();
-  var desk  = document.getElementById('f-deskripsi').value.trim();
-  if (!namaP)         { showErr(2, 'Nama potensi/usaha wajib diisi.'); document.getElementById('f-nama-potensi').focus(); return false; }
-  if (!desk)          { showErr(2, 'Deskripsi wajib diisi.');          document.getElementById('f-deskripsi').focus();    return false; }
-  if (desk.length < 20) { showErr(2, 'Deskripsi minimal 20 karakter.');  document.getElementById('f-deskripsi').focus(); return false; }
+  // Nama Lengkap
+  var namaEl = document.getElementById('f-nama');
+  var nama = cleanSpaces(namaEl.value);
+  namaEl.value = nama;
+  if (!nama || nama.length < 3 || nama.length > 100 || !/^[A-Za-zÀ-ÖØ-öø-ÿ\s.''\-]+$/.test(nama)) {
+    showErr(1, 'Nama lengkap minimal 3 huruf dan hanya boleh berisi huruf.');
+    markInvalid('f-nama'); namaEl.focus(); return false;
+  }
+
+  // Nomor Telepon
+  var telpEl = document.getElementById('f-telp');
+  var telp = telpEl.value.trim();
+  if (!telp) {
+    showErr(1, 'Nomor telepon wajib diisi.');
+    markInvalid('f-telp'); telpEl.focus(); return false;
+  }
+  if (!validatePhone(telp)) {
+    showErr(1, 'Nomor telepon tidak valid. Contoh: 08123456789.');
+    markInvalid('f-telp'); telpEl.focus(); return false;
+  }
+
+  // Email (opsional)
+  var emailEl = document.getElementById('f-email');
+  var email = emailEl.value.trim().toLowerCase();
+  if (email) {
+    if (email.length > 100 || !/^[a-z0-9._%+\-]+@[a-z0-9\-]+(\.[a-z0-9\-]+)*\.[a-z]{2,}$/.test(email)) {
+      showErr(1, 'Format email tidak valid. Contoh: nama@gmail.com.');
+      markInvalid('f-email'); emailEl.focus(); return false;
+    }
+  }
+
+  // NIK (opsional)
+  var nikEl = document.getElementById('f-nik');
+  var nik = nikEl.value.trim();
+  if (nik && !/^\d{16}$/.test(nik)) {
+    showErr(1, 'NIK harus 16 digit angka.');
+    markInvalid('f-nik'); nikEl.focus(); return false;
+  }
+
+  // Alamat Rumah
+  var alamatEl = document.getElementById('f-alamat');
+  var alamat = cleanSpaces(alamatEl.value);
+  alamatEl.value = alamat;
+  if (alamat.length < 10 || alamat.length > 255) {
+    showErr(1, 'Alamat rumah minimal 10 karakter.');
+    markInvalid('f-alamat'); alamatEl.focus(); return false;
+  }
+
+  // Kategori
+  var kat = document.querySelector('input[name="kategori"]:checked');
+  if (!kat) { showErr(1, 'Silakan pilih kategori potensi.'); return false; }
+
   return true;
 }
 
-/* ── Preview ── */
+function validateStep2() {
+  // Nama Potensi
+  var namaPEl = document.getElementById('f-nama-potensi');
+  var namaP = cleanSpaces(namaPEl.value);
+  namaPEl.value = namaP;
+  if (!namaP || namaP.length < 3 || namaP.length > 100 || !/[A-Za-zÀ-ÖØ-öø-ÿ0-9]/.test(namaP)) {
+    showErr(2, 'Nama potensi minimal 3 karakter.');
+    markInvalid('f-nama-potensi'); namaPEl.focus(); return false;
+  }
+
+  // Deskripsi
+  var deskEl = document.getElementById('f-deskripsi');
+  var desk = cleanSpaces(deskEl.value);
+  deskEl.value = desk;
+  if (desk.length < 20 || desk.length > 1000) {
+    showErr(2, 'Deskripsi minimal 20 karakter.');
+    markInvalid('f-deskripsi'); deskEl.focus(); return false;
+  }
+  var deskWords = desk.split(/\s+/).filter(function(w){ return w.length > 0; });
+  if (deskWords.length < 3) {
+    showErr(2, 'Deskripsi minimal 3 kata.');
+    markInvalid('f-deskripsi'); deskEl.focus(); return false;
+  }
+  if (/([A-Za-z])\1{7,}/.test(desk)) {
+    showErr(2, 'Deskripsi mengandung huruf yang diulang-ulang, mohon ditulis dengan kalimat yang jelas.');
+    markInvalid('f-deskripsi'); deskEl.focus(); return false;
+  }
+  var hasLongWord = deskWords.some(function(w) {
+    if (w.length <= 50) return false;
+    var lower = w.toLowerCase();
+    return !(lower.indexOf('http') === 0 || lower.indexOf('www.') === 0 || w.charAt(0) === '@');
+  });
+  if (hasLongWord) {
+    showErr(2, 'Ada kata yang terlalu panjang dalam deskripsi.');
+    markInvalid('f-deskripsi'); deskEl.focus(); return false;
+  }
+
+  // Lokasi (opsional)
+  var lokasiEl = document.getElementById('f-lokasi');
+  var lokasi = cleanSpaces(lokasiEl.value);
+  lokasiEl.value = lokasi;
+  if (lokasi && (lokasi.length < 3 || lokasi.length > 255)) {
+    showErr(2, 'Lokasi minimal 3 karakter jika diisi.');
+    markInvalid('f-lokasi'); lokasiEl.focus(); return false;
+  }
+
+  // Jam Operasional (opsional)
+  var jamEl = document.getElementById('f-jam');
+  var jam = cleanSpaces(jamEl.value);
+  jamEl.value = jam;
+  if (jam.length > 100) {
+    showErr(2, 'Jam operasional maksimal 100 karakter.');
+    markInvalid('f-jam'); jamEl.focus(); return false;
+  }
+
+  // Kontak Usaha (opsional)
+  var kontakEl = document.getElementById('f-kontak-usaha');
+  var kontak = kontakEl.value.trim();
+  if (kontak && !validatePhone(kontak)) {
+    showErr(2, 'Nomor telepon tidak valid. Contoh: 08123456789.');
+    markInvalid('f-kontak-usaha'); kontakEl.focus(); return false;
+  }
+
+  return true;
+}
+
+/* ── C. Penyaringan ketikan ── */
+function filterTelInput(el) {
+  el.addEventListener('input', function() {
+    var pos = el.selectionStart;
+    var orig = el.value;
+    var filtered = orig.replace(/[^0-9+\s\-()]/g, '');
+    if (filtered !== orig) {
+      var diff = orig.length - filtered.length;
+      el.value = filtered;
+      el.setSelectionRange(Math.max(0, pos - diff), Math.max(0, pos - diff));
+    }
+  });
+}
+filterTelInput(document.getElementById('f-telp'));
+filterTelInput(document.getElementById('f-kontak-usaha'));
+
+document.getElementById('f-nik').addEventListener('input', function() {
+  var pos = this.selectionStart;
+  var orig = this.value;
+  var filtered = orig.replace(/\D/g, '');
+  if (filtered !== orig) {
+    var diff = orig.length - filtered.length;
+    this.value = filtered;
+    this.setSelectionRange(Math.max(0, pos - diff), Math.max(0, pos - diff));
+  }
+});
+
+/* ── D. Saran email otomatis ── */
+(function() {
+  var emailEl  = document.getElementById('f-email');
+  var suggestEl = document.getElementById('emailSuggest');
+  if (!emailEl || !suggestEl) return;
+
+  var TYPOS = {
+    'gmial.com': 'gmail.com',
+    'gmaill.com': 'gmail.com',
+    'gmai.com': 'gmail.com',
+    'gmal.com': 'gmail.com',
+    'gmail.co': 'gmail.com',
+    'gmail.con': 'gmail.com',
+    'gmail.cm': 'gmail.com',
+    'yaho.com': 'yahoo.com',
+    'yahooo.com': 'yahoo.com',
+    'hotmial.com': 'hotmail.com'
+  };
+  var GMAIL_PREFIX = 'gmail.com';
+
+  function getSuggestion(val) {
+    if (!val) return null;
+    var atIdx = val.indexOf('@');
+    if (atIdx === -1) {
+      // Belum ada @, hanya karakter sah bagian depan email, min 3
+      if (val.length < 3) return null;
+      if (!/^[a-zA-Z0-9._%+\-]+$/.test(val)) return null;
+      return val + '@gmail.com';
+    }
+    var local  = val.slice(0, atIdx);
+    var domain = val.slice(atIdx + 1).toLowerCase();
+    if (!local) return null;
+    // Domain adalah awalan dari gmail.com tapi belum lengkap
+    if (domain.length > 0 && domain.length < GMAIL_PREFIX.length && GMAIL_PREFIX.indexOf(domain) === 0) {
+      return local + '@gmail.com';
+    }
+    // Domain salah ketik umum
+    if (TYPOS[domain]) {
+      return local + '@' + TYPOS[domain];
+    }
+    return null;
+  }
+
+  function isValidEmail(v) {
+    return /^[a-z0-9._%+\-]+@[a-z0-9\-]+(\.[a-z0-9\-]+)*\.[a-z]{2,}$/.test(v.toLowerCase());
+  }
+
+  function updateSuggest() {
+    var val = emailEl.value.trim();
+    if (!val) { suggestEl.style.display = 'none'; suggestEl.textContent = ''; return; }
+    // Sembunyikan jika valid dan bukan domain typo/gmail-prefix
+    var sugg = getSuggestion(val);
+    if (!sugg) { suggestEl.style.display = 'none'; suggestEl.textContent = ''; return; }
+    if (isValidEmail(val) && !sugg) { suggestEl.style.display = 'none'; return; }
+
+    // Bangun teks dengan textContent dan button
+    suggestEl.textContent = '';
+    var prefix = document.createTextNode('Maksud Anda ');
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.textContent = sugg;
+    var suffix = document.createTextNode('?');
+    suggestEl.appendChild(prefix);
+    suggestEl.appendChild(btn);
+    suggestEl.appendChild(suffix);
+    suggestEl.style.display = 'block';
+
+    btn.addEventListener('click', function() {
+      emailEl.value = sugg;
+      suggestEl.style.display = 'none';
+      suggestEl.textContent = '';
+      emailEl.focus();
+    });
+  }
+
+  emailEl.addEventListener('input', updateSuggest);
+  emailEl.addEventListener('blur', updateSuggest);
+})();
+
+/* ── E. Preview ── */
 function fillPreview() {
-  var g = function(id){ var el=document.getElementById(id); return el ? el.value.trim() : ''; };
+  var g = function(id){ var el=document.getElementById(id); return el ? cleanSpaces(el.value) : ''; };
   var kat    = document.querySelector('input[name="kategori"]:checked');
   var katMap = { usaha: 'Usaha & Produk', jasa: 'Jasa', hunian: 'Hunian', barang: 'Barang Warga' };
   var katLbl = kat ? (katMap[kat.value] || kat.value) : '—';
+
   document.getElementById('prev-nama').textContent      = g('f-nama') || '—';
-  document.getElementById('prev-telp').textContent      = g('f-telp') || '—';
+  document.getElementById('prev-telp').textContent      = normalizePhone(g('f-telp')) || '—';
+  document.getElementById('prev-alamat').textContent    = g('f-alamat') || '—';
+  document.getElementById('prev-email').textContent     = g('f-email').toLowerCase() || '(Tidak diisi)';
   document.getElementById('prev-kategori').textContent  = katLbl;
   document.getElementById('prev-potensi').textContent   = g('f-nama-potensi') || '—';
-  document.getElementById('prev-deskripsi').textContent = g('f-deskripsi')    || '—';
+  document.getElementById('prev-jenis').textContent     = g('f-jenis') || '(Tidak diisi)';
+  document.getElementById('prev-deskripsi').textContent = g('f-deskripsi') || '—';
   document.getElementById('prev-lokasi').textContent    = g('f-lokasi') || '(Tidak diisi)';
   document.getElementById('prev-jam').textContent       = g('f-jam')    || '(Tidak diisi)';
+  document.getElementById('prev-kontak-usaha').textContent = g('f-kontak-usaha') || '(Tidak diisi)';
+
+  // Jumlah foto
+  var preview = document.getElementById('photoPreview');
+  var fotoCount = preview ? preview.querySelectorAll('img').length : 0;
+  document.getElementById('prev-foto').textContent = fotoCount > 0 ? (fotoCount + ' foto') : 'Tidak ada foto';
 }
 
 /* ── Buttons ── */
@@ -528,6 +792,10 @@ document.getElementById('btnNext2').addEventListener('click', function(){ if (va
 document.getElementById('btnPrev3').addEventListener('click', function(){ goToStep(2); });
 
 document.getElementById('btnSubmit').addEventListener('click', async function () {
+  // Validasi ulang semua sebelum mengirim
+  if (!validateStep1()) { goToStep(1); return; }
+  if (!validateStep2()) { goToStep(2); return; }
+
   if (!document.getElementById('agreeCheck').checked) {
     showErr(3, 'Anda harus menyetujui pernyataan sebelum mengirim.');
     return;
@@ -547,20 +815,35 @@ document.getElementById('btnSubmit').addEventListener('click', async function ()
       barang: 4
     };
 
+    // Bersihkan nilai
+    var namaVal    = cleanSpaces(document.getElementById('f-nama').value);
+    var telpRaw    = document.getElementById('f-telp').value.trim();
+    var telpNorm   = normalizePhone(telpRaw.replace(/[\s\-()]/g, ''));
+    var alamatVal  = cleanSpaces(document.getElementById('f-alamat').value);
+    var namaPVal   = cleanSpaces(document.getElementById('f-nama-potensi').value);
+    var deskVal    = cleanSpaces(document.getElementById('f-deskripsi').value);
+    var lokasiVal  = cleanSpaces(document.getElementById('f-lokasi').value);
+    var emailVal   = document.getElementById('f-email').value.trim().toLowerCase();
+    var jenisVal   = cleanSpaces(document.getElementById('f-jenis').value);
+    var jamVal     = cleanSpaces(document.getElementById('f-jam').value);
+    var kontakRaw  = document.getElementById('f-kontak-usaha').value.trim();
+    var kontakNorm = kontakRaw ? normalizePhone(kontakRaw.replace(/[\s\-()]/g, '')) : '';
+
     const payload = {
       category_id: categoryMap[kategori.value],
-      name: document.getElementById('f-nama-potensi').value.trim(),
-      owner_name: document.getElementById('f-nama').value.trim(),
-      whatsapp:
-        document.getElementById('f-kontak-usaha').value.trim() ||
-        document.getElementById('f-telp').value.trim(),
-      address: document.getElementById('f-alamat').value.trim(),
-      description: document.getElementById('f-deskripsi').value.trim(),
-      location:
-        document.getElementById('f-lokasi').value.trim() ||
-        document.getElementById('f-alamat').value.trim(),
+      name: namaPVal,
+      owner_name: namaVal,
+      whatsapp: kontakNorm || telpNorm,
+      address: alamatVal,
+      description: deskVal,
+      location: lokasiVal || alamatVal,
       status: 'pending'
     };
+
+    // F. Tambah kunci baru hanya jika diisi
+    if (emailVal)  payload.email           = emailVal;
+    if (jenisVal)  payload.jenis           = jenisVal;
+    if (jamVal)    payload.jam_operasional = jamVal;
 
     const API_BASE = (window.location.protocol === 'file:' || window.location.port === '5500') ? 'http://localhost:8000/api' : (window.location.port === '3000' ? 'http://localhost:3000/api' : '/api');
     const response = await fetch(API_BASE + '/potensi', {
@@ -574,7 +857,20 @@ document.getElementById('btnSubmit').addEventListener('click', async function ()
     const result = await response.json();
 
     if (!response.ok) {
-      throw new Error(result.message || 'Gagal mengirim pendaftaran.');
+      // F. Error 422: tampilkan pesan pertama dari errors
+      var errMsg = 'Gagal mengirim pendaftaran.';
+      if (response.status === 422 && result.errors) {
+        var firstKey = Object.keys(result.errors)[0];
+        if (firstKey && result.errors[firstKey] && result.errors[firstKey].length) {
+          errMsg = result.errors[firstKey][0];
+        }
+      } else if (result.message) {
+        errMsg = result.message;
+      }
+      showErr(3, errMsg);
+      btnSubmit.disabled = false;
+      btnSubmit.innerHTML = '<i class="bi bi-send me-1"></i> Kirim Pendaftaran';
+      return;
     }
 
     document.getElementById('pendaftaranForm').style.display = 'none';
@@ -589,7 +885,6 @@ document.getElementById('btnSubmit').addEventListener('click', async function ()
   } catch (error) {
     console.error('Gagal mengirim pendaftaran:', error);
     showErr(3, error.message || 'Terjadi kesalahan saat mengirim data.');
-  } finally {
     btnSubmit.disabled = false;
     btnSubmit.innerHTML = '<i class="bi bi-send me-1"></i> Kirim Pendaftaran';
   }
