@@ -200,6 +200,10 @@
                     <i class="bi bi-bag"></i> Barang Warga
                   </label>
                 </div>
+                <div class="inline-err" id="kategoriLoadErr" style="margin-top:.6rem;">
+                  <i class="bi bi-exclamation-circle-fill flex-shrink-0"></i>
+                  <span>Gagal memuat daftar kategori dari server. Pilihan kategori mungkin tidak akurat.</span>
+                </div>
 
                 <div class="inline-err" id="err1">
                   <i class="bi bi-exclamation-circle-fill flex-shrink-0"></i>
@@ -252,7 +256,7 @@
                   <input type="file" id="fileInput" accept="image/jpeg,image/jpg,image/png,image/webp" multiple style="display:none;">
                   <i class="bi bi-image" style="font-size:2rem;color:var(--clr-blue);opacity:.45;display:block;margin-bottom:.5rem;"></i>
                   <div class="dz-title">Pilih file atau seret ke sini</div>
-                  <div class="dz-hint">JPG, PNG, WebP, hingga 10 MB per foto, maks. 3 foto</div>
+                  <div class="dz-hint">JPG, PNG, WebP, hingga 2 MB per foto, maks. 3 foto</div>
                   <button type="button" class="dz-btn" id="dzBtnTelusuri">Telusuri file</button>
                 </div>
                 <div id="photoPreview"></div>
@@ -808,12 +812,18 @@ document.getElementById('btnSubmit').addEventListener('click', async function ()
   try {
     const kategori = document.querySelector('input[name="kategori"]:checked');
 
-    const categoryMap = {
-      usaha: 1,
-      jasa: 2,
-      hunian: 3,
-      barang: 4
-    };
+    // Bug 1 fix: lookup category_id dari data API, bukan hard-coded map
+    var katSlug   = kategori ? kategori.value : '';
+    var katEntry  = _categoryApiData.find(function(c){ return c.slug === katSlug; });
+    var categoryId = katEntry ? katEntry.id : null;
+
+    // Jika kategori gagal dimuat dari API, tampilkan peringatan
+    if (!categoryId && _categoryLoadError) {
+      showErr(3, 'Kategori tidak dapat dimuat dari server. Coba muat ulang halaman.');
+      btnSubmit.disabled = false;
+      btnSubmit.innerHTML = '<i class="bi bi-send me-1"></i> Kirim Pendaftaran';
+      return;
+    }
 
     // Bersihkan nilai
     var namaVal    = cleanSpaces(document.getElementById('f-nama').value);
@@ -829,29 +839,32 @@ document.getElementById('btnSubmit').addEventListener('click', async function ()
     var kontakRaw  = document.getElementById('f-kontak-usaha').value.trim();
     var kontakNorm = kontakRaw ? normalizePhone(kontakRaw.replace(/[\s\-()]/g, '')) : '';
 
-    const payload = {
-      category_id: categoryMap[kategori.value],
-      name: namaPVal,
-      owner_name: namaVal,
-      whatsapp: kontakNorm || telpNorm,
-      address: alamatVal,
-      description: deskVal,
-      location: lokasiVal || alamatVal,
-      status: 'pending'
-    };
+    // Bug 2 fix: gunakan FormData agar foto ikut terkirim
+    var formData = new FormData();
+    if (categoryId) formData.append('category_id', categoryId);
+    formData.append('name',        namaPVal);
+    formData.append('owner_name',  namaVal);
+    formData.append('whatsapp',    kontakNorm || telpNorm);
+    formData.append('address',     alamatVal);
+    formData.append('description', deskVal);
+    formData.append('location',    lokasiVal || alamatVal);
+    formData.append('status',      'pending');
 
     // F. Tambah kunci baru hanya jika diisi
-    if (emailVal)  payload.email           = emailVal;
-    if (jenisVal)  payload.jenis           = jenisVal;
-    if (jamVal)    payload.jam_operasional = jamVal;
+    if (emailVal)  formData.append('email',           emailVal);
+    if (jenisVal)  formData.append('jenis',           jenisVal);
+    if (jamVal)    formData.append('jam_operasional', jamVal);
+
+    // Lampirkan foto yang terpilih
+    _selectedFiles.forEach(function(file, idx){
+      formData.append('images[' + idx + ']', file, file.name);
+    });
 
     const API_BASE = (window.location.protocol === 'file:' || window.location.port === '5500') ? 'http://localhost:8000/api' : (window.location.port === '3000' ? 'http://localhost:3000/api' : '/api');
     const response = await fetch(API_BASE + '/potensi', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(payload)
+      // Tanpa Content-Type: biarkan browser set multipart boundary otomatis
+      body: formData
     });
 
     const result = await response.json();
@@ -895,6 +908,7 @@ document.getElementById('btnDaftarLagi').addEventListener('click', function(){
   document.querySelectorAll('.kat-pill').forEach(function(p){ p.classList.remove('selected'); });
   var prev = document.getElementById('photoPreview');
   prev.style.display = 'none'; prev.innerHTML = '';
+  _selectedFiles = [];
   document.getElementById('successState').style.display    = 'none';
   document.getElementById('pendaftaranForm').style.display = '';
   document.getElementById('stepIndicator').style.display   = 'block';
@@ -911,12 +925,51 @@ document.querySelectorAll('.kat-pill').forEach(function(pill){
   });
 });
 
-/* ── File Upload (Dropzone) ── */
-var uploadArea = document.getElementById('uploadArea');
-var fileInput  = document.getElementById('fileInput');
-var dzBtn      = document.getElementById('dzBtnTelusuri');
+/* ── Bug 1: Muat kategori dari API (bukan hard-coded) ── */
+var _categoryApiData = []; // [{id, name, slug}]
+var _categoryLoadError = false;
+
+function slugKategori(name) {
+  if (!name) return '';
+  var n = name.toLowerCase();
+  if (n.indexOf('usaha') !== -1 || n.indexOf('produk') !== -1) return 'usaha';
+  if (n.indexOf('jasa') !== -1) return 'jasa';
+  if (n.indexOf('hunian') !== -1 || n.indexOf('kost') !== -1) return 'hunian';
+  if (n.indexOf('barang') !== -1) return 'barang';
+  return '';
+}
+
+(function loadCategories() {
+  var API_BASE_CAT = (window.location.protocol === 'file:' || window.location.port === '5500')
+    ? 'http://localhost:8000/api'
+    : (window.location.port === '3000' ? 'http://localhost:3000/api' : '/api');
+  fetch(API_BASE_CAT + '/categories')
+    .then(function(r){ return r.json(); })
+    .then(function(json){
+      if (json && Array.isArray(json.data) && json.data.length) {
+        _categoryApiData = json.data.map(function(c){
+          return { id: c.id, name: c.name, slug: slugKategori(c.name) };
+        });
+      } else {
+        _categoryLoadError = true;
+        var errEl = document.getElementById('kategoriLoadErr');
+        if (errEl) errEl.style.display = 'flex';
+      }
+    })
+    .catch(function(){
+      _categoryLoadError = true;
+      var errEl = document.getElementById('kategoriLoadErr');
+      if (errEl) errEl.style.display = 'flex';
+    });
+})();
+
+/* ── Bug 2: File Upload (Dropzone) — simpan file ke array ── */
+var uploadArea   = document.getElementById('uploadArea');
+var fileInput    = document.getElementById('fileInput');
+var dzBtn        = document.getElementById('dzBtnTelusuri');
 var PHOTO_ALLOWED = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
-var PHOTO_MAX     = 10 * 1024 * 1024; // 10 MB
+var PHOTO_MAX     = 2 * 1024 * 1024; // 2 MB (sesuai batas server)
+var _selectedFiles = []; // array File yang akan dikirim ke server
 
 if (dzBtn) dzBtn.addEventListener('click', function(e){ e.stopPropagation(); fileInput.click(); });
 uploadArea.addEventListener('click', function(){ fileInput.click(); });
@@ -931,18 +984,20 @@ fileInput.addEventListener('change', function(){ if (this.files.length) handleFi
 function handleFiles(files) {
   var preview = document.getElementById('photoPreview');
   preview.innerHTML = '';
+  _selectedFiles = [];
   var valid = Array.from(files).filter(function(file){
     if (PHOTO_ALLOWED.indexOf(file.type) === -1){
       showErr(2, 'Format foto tidak didukung. Gunakan JPG, PNG, atau WebP.');
       return false;
     }
     if (file.size > PHOTO_MAX){
-      showErr(2, 'Ukuran foto melebihi 10 MB: ' + file.name);
+      showErr(2, 'Ukuran foto melebihi 2 MB: ' + file.name);
       return false;
     }
     return true;
   }).slice(0, 3);
   if (!valid.length){ preview.style.display = 'none'; return; }
+  _selectedFiles = valid;
   preview.style.display = 'flex';
   valid.forEach(function(file){
     var reader = new FileReader();

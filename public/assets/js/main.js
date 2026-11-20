@@ -431,11 +431,18 @@ async function loadKatalog() {
 
   let list;
   try {
-    const res = await fetch(API_BASE + '/potensi', { headers: { 'Accept': 'application/json' } });
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const json = await res.json();
-    if (!json || !Array.isArray(json.data)) throw new Error('format tidak dikenal');
-    list = json.data;
+    // Muat semua halaman (per_page maks 50); untuk katalog publik biasanya cukup 1-2 halaman
+    let page = 1, lastPage = 1;
+    list = [];
+    do {
+      const res = await fetch(API_BASE + '/potensi?per_page=50&page=' + page, { headers: { 'Accept': 'application/json' } });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const json = await res.json();
+      if (!json || !Array.isArray(json.data)) throw new Error('format tidak dikenal');
+      list = list.concat(json.data);
+      lastPage = (json.meta && json.meta.last_page) ? json.meta.last_page : 1;
+      page++;
+    } while (page <= lastPage);
   } catch (err) {
     // Server tidak terjangkau: biarkan kartu statis bawaan tetap tampil.
     console.warn('Katalog dinamis gagal dimuat, memakai data bawaan:', err.message);

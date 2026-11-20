@@ -580,9 +580,8 @@
               <div class="col-md-6">
                 <label class="form-label fw-semibold" style="color:var(--clr-blue);">Status</label>
                 <select class="form-control" id="editPotensiStatus">
-                  <option value="aktif">Aktif</option>
+                  <option value="approved">Aktif / Disetujui</option>
                   <option value="pending">Menunggu</option>
-                  <option value="approved">Disetujui</option>
                   <option value="rejected">Ditolak</option>
                 </select>
               </div>
@@ -1258,7 +1257,7 @@ document.getElementById('btnExport').addEventListener('click',function(){showAdm
         var _s = localStorage.getItem('ep_admin_session') || sessionStorage.getItem('ep_admin_session');
         if (_s) _tok = JSON.parse(_s).token || null;
       } catch (e) {}
-      fetch(API_BASE + '/potensi', { headers: _tok ? { 'Accept': 'application/json', 'Authorization': 'Bearer ' + _tok } : { 'Accept': 'application/json' } })
+      fetch(API_BASE + '/potensi?per_page=50', { headers: _tok ? { 'Accept': 'application/json', 'Authorization': 'Bearer ' + _tok } : { 'Accept': 'application/json' } })
         .then(function (r) { return r.json(); })
         .then(function (res) {
           if (res && Array.isArray(res.data)) {
@@ -1481,29 +1480,39 @@ document.querySelectorAll('.btn-lihat-db').forEach(function(b){
   }
 
   function load() {
-    fetch(API + '/potensi', { headers: headers(false) })
-      .then(function (r) { if (r.status === 401) throw new Error('401'); return r.json(); })
-      .then(function (res) {
-        var all = (res && Array.isArray(res.data)) ? res.data : [];
-        var pending = all.filter(function (p) { return p.status === 'pending'; });
-        var verified = all.filter(function (p) { return p.status === 'aktif' || p.status === 'approved'; });
+    // Muat semua halaman agar hitungan KPI akurat
+    var page = 1, lastPage = 1, collected = [];
+    function fetchPage() {
+      fetch(API + '/potensi?per_page=50&page=' + page, { headers: headers(false) })
+        .then(function (r) { if (r.status === 401) throw new Error('401'); return r.json(); })
+        .then(function (res) {
+          var rows = (res && Array.isArray(res.data)) ? res.data : [];
+          collected = collected.concat(rows);
+          lastPage = (res && res.meta && res.meta.last_page) ? res.meta.last_page : 1;
+          if (page < lastPage) { page++; fetchPage(); return; }
 
-        setText('kpiTotal', all.length);
-        setText('kpiPending', pending.length);
-        setText('kpiVerified', verified.length);
-        setText('pendingCount', pending.length);
-        setText('verifikasiBadge', pending.length > 0 ? pending.length : '');
-        if (warn) warn.style.display = pending.length ? '' : 'none';
+          var all     = collected;
+          var pending  = all.filter(function (p) { return p.status === 'pending'; });
+          var verified = all.filter(function (p) { return p.status === 'approved'; });
 
-        list.textContent = '';
-        pending.forEach(function (p) { list.appendChild(card(p)); });
-        if (emptyBox) emptyBox.style.display = pending.length ? 'none' : '';
-      })
-      .catch(function () {
-        list.textContent = '';
-        var e = el('div', 'admin-alert warning', 'Gagal memuat daftar verifikasi. Muat ulang halaman atau login ulang.');
-        list.appendChild(e);
-      });
+          setText('kpiTotal', all.length);
+          setText('kpiPending', pending.length);
+          setText('kpiVerified', verified.length);
+          setText('pendingCount', pending.length);
+          setText('verifikasiBadge', pending.length > 0 ? pending.length : '');
+          if (warn) warn.style.display = pending.length ? '' : 'none';
+
+          list.textContent = '';
+          pending.forEach(function (p) { list.appendChild(card(p)); });
+          if (emptyBox) emptyBox.style.display = pending.length ? 'none' : '';
+        })
+        .catch(function () {
+          list.textContent = '';
+          var e = el('div', 'admin-alert warning', 'Gagal memuat daftar verifikasi. Muat ulang halaman atau login ulang.');
+          list.appendChild(e);
+        });
+    }
+    fetchPage();
   }
 
   window.refreshVerifikasi = load;
@@ -1575,7 +1584,7 @@ document.querySelectorAll('.btn-lihat-db').forEach(function(b){
       : '-';
     var st = item.status || '';
     var stClass, stLabel;
-    if (st==='aktif'||st==='approved')    { stClass='status-aktif';   stLabel='Aktif'; }
+    if (st==='approved')                  { stClass='status-aktif';   stLabel='Aktif'; }
     else if (st==='pending')              { stClass='status-pending'; stLabel='Menunggu'; }
     else if (st==='rejected')             { stClass='status-ditolak'; stLabel='Ditolak'; }
     else                                  { stClass='status-pending'; stLabel=escapeHtml(st); }
@@ -1680,17 +1689,26 @@ document.querySelectorAll('.btn-lihat-db').forEach(function(b){
   window.reloadPotensiTable = function () { loadPotensi(true); };
   function loadPotensi(keepPage) {
     if (!keepPage) _page=1;
-    fetch(API_BASE+'/potensi',{headers:hdrs(false)})
-      .then(function(r){return r.json();})
-      .then(function(json){
-        _allData=(json&&Array.isArray(json.data))?json.data:[];
-        applyFilter();
-      })
-      .catch(function(){
-        tbody.innerHTML='<tr class="empty-row text-center"><td colspan="6" class="py-4 text-muted">Gagal memuat data potensi.</td></tr>';
-        pagDiv.innerHTML='';
-        showAdminToast('Gagal memuat data potensi.','error');
-      });
+    // Muat semua halaman dari API (per_page maks 50) agar tabel admin selalu lengkap
+    var page = 1, lastPage = 1, collected = [];
+    function fetchPage() {
+      fetch(API_BASE+'/potensi?per_page=50&page='+page,{headers:hdrs(false)})
+        .then(function(r){return r.json();})
+        .then(function(json){
+          var rows = (json&&Array.isArray(json.data))?json.data:[];
+          collected = collected.concat(rows);
+          lastPage = (json&&json.meta&&json.meta.last_page)?json.meta.last_page:1;
+          if (page < lastPage) { page++; fetchPage(); return; }
+          _allData = collected;
+          applyFilter();
+        })
+        .catch(function(){
+          tbody.innerHTML='<tr class="empty-row text-center"><td colspan="6" class="py-4 text-muted">Gagal memuat data potensi.</td></tr>';
+          pagDiv.innerHTML='';
+          showAdminToast('Gagal memuat data potensi.','error');
+        });
+    }
+    fetchPage();
   }
 
   tbody.addEventListener('click',function(e){
@@ -1754,7 +1772,7 @@ document.querySelectorAll('.btn-lihat-db').forEach(function(b){
       document.getElementById('editPotensiJam').value     = item.jam_operasional||'';
       var catId=(item.category_id)||(item.category?item.category.id:'');
       sel.value=catId||'';
-      document.getElementById('editPotensiStatus').value  = item.status||'aktif';
+      document.getElementById('editPotensiStatus').value  = item.status||'approved';
       ['editPotensiName','editPotensiOwner','editPotensiWa','editPotensiEmail',
        'editPotensiAddress','editPotensiDesc'].forEach(function(fid){
         document.getElementById(fid).classList.remove('is-invalid');
@@ -1987,7 +2005,17 @@ document.querySelectorAll('.btn-lihat-db').forEach(function(b){
     return h;
   }
   function handle401(res) {
-    if (res.status === 401) { showAdminToast('Sesi tidak valid, silakan login ulang lewat halaman login.', 'error'); return true; }
+    if (res.status === 401) {
+      // Gunakan fungsi bersama dari auth.js jika sudah dimuat; fallback manual jika belum.
+      if (typeof window.epHandleUnauthorized === 'function') {
+        window.epHandleUnauthorized();
+      } else {
+        ['adminLoggedIn', 'adminUser', 'ep_admin_session'].forEach(function (k) { localStorage.removeItem(k); });
+        sessionStorage.removeItem('ep_admin_session');
+        window.location.replace('login.html?unauthorized=true');
+      }
+      return true;
+    }
     return false;
   }
   function extractApiError(data) {

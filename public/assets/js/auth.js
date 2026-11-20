@@ -60,6 +60,17 @@
     });
   }
 
+  // Fungsi bersama: tangani 401 — hapus semua data sesi dan redirect ke halaman login.
+  // Diekspor ke window agar bisa dipakai oleh admin.blade.php dan kode lain.
+  function handleUnauthorized() {
+    localStorage.removeItem('adminLoggedIn');
+    localStorage.removeItem('adminUser');
+    localStorage.removeItem('ep_admin_session');
+    sessionStorage.removeItem('ep_admin_session');
+    window.location.replace('login.html?unauthorized=true');
+  }
+  window.epHandleUnauthorized = handleUnauthorized;
+
   // Handle Logout
   function handleLogout(e) {
     if (e) e.preventDefault();
@@ -146,11 +157,12 @@
       let loginSuccess = false;
       let authToken = null;
       let userData = { name: 'Administrator', role: 'admin' };
+      let errorMsg = 'Email atau password salah.';
 
-      // 1. Try backend API with timeout
+      // 1. Try backend API with timeout (10 detik agar server lambat tidak dianggap gagal)
       try {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 2000);
+        const timeoutId = setTimeout(() => controller.abort(), 10000);
 
         const response = await fetch(API_LOGIN_URL, {
           method: 'POST',
@@ -167,9 +179,14 @@
             authToken = resData.data.token;
             if (resData.data.user) userData = resData.data.user;
           }
+        } else if (response.status === 401) {
+          errorMsg = 'Email atau password salah.';
+        } else if (response.status === 429) {
+          errorMsg = 'Terlalu banyak percobaan, coba lagi nanti.';
         }
       } catch (err) {
-        // Backend not reachable or timed out - continue to fallback check
+        // AbortError = timeout; TypeError = jaringan putus — keduanya tampil pesan yang sama
+        errorMsg = 'Server tidak dapat dihubungi. Periksa koneksi Anda.';
       }
 
       // Handle Result
@@ -189,7 +206,7 @@
         submitBtn.disabled = false;
         submitBtn.innerHTML = originalBtnText;
         if (alertBox && alertMsg) {
-          alertMsg.textContent = 'Username atau kata sandi tidak sesuai. Silakan coba lagi.';
+          alertMsg.textContent = errorMsg;
           alertBox.classList.remove('d-none');
         }
         if (passwordInput) passwordInput.value = '';

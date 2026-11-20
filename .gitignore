@@ -27,7 +27,15 @@ Homestead.yaml
 Thumbs.db
 
 /public/uploads/
+!/public/uploads/.htaccess
 /frontend/
 *.zip
 .env.*
 !.env.example
+
+# AI agent files
+.claude/
+CLAUDE.md
+AGENTS.md
+boost.json
+.mcp.json

@@ -13,7 +13,14 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        // Percayai proxy tertentu berdasarkan env TRUSTED_PROXIES.
+        // Isi dengan IP proxy (koma-pisah) atau '*' untuk semua, kosongkan jika tidak ada proxy.
+        $trustedProxies = env('TRUSTED_PROXIES', '');
+        if (!empty($trustedProxies)) {
+            $middleware->trustProxies(
+                at: $trustedProxies === '*' ? '*' : array_map('trim', explode(',', $trustedProxies))
+            );
+        }
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

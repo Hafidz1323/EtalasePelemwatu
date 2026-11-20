@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Validation\Rules\Password;
 
@@ -45,16 +46,19 @@ class ProfileController extends Controller
         $user->email = $data['email'];
 
         if ($request->hasFile('avatar')) {
-            // Hapus avatar lama jika ada
+            // Hapus avatar lama jika ada; validasi path berada di dalam public/uploads
             if ($user->avatar) {
-                $oldPath = public_path(ltrim($user->avatar, '/'));
-                if (file_exists($oldPath)) {
-                    @unlink($oldPath);
+                $oldPath    = public_path(ltrim($user->avatar, '/'));
+                $uploadsDir = realpath(public_path('uploads'));
+                $realOld    = file_exists($oldPath) ? realpath($oldPath) : null;
+                if ($realOld && $uploadsDir && str_starts_with($realOld, $uploadsDir . DIRECTORY_SEPARATOR)) {
+                    @unlink($realOld);
                 }
             }
 
+            // Gunakan ekstensi dari ISI file (bukan nama klien) + nama acak
             $file     = $request->file('avatar');
-            $filename = 'avatar_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $filename = 'avatar-' . Str::lower(Str::random(24)) . '.' . $file->extension();
             $file->move(public_path('uploads'), $filename);
             $user->avatar = '/uploads/' . $filename;
         }
@@ -95,8 +99,36 @@ class ProfileController extends Controller
             ]);
         }
 
+        // Tentukan ID token saat ini agar tidak ikut dicabut.
+        // Prioritas: (1) currentAccessToken() dari Sanctum, (2) parse bearer token plain-text.
+        // Format plain-text Sanctum: "{id}|{hash}" — ID selalu integer di awal.
+        $currentTokenId = null;
+
+        $accessToken = $user->currentAccessToken();
+        if ($accessToken && method_exists($accessToken, 'getKey') && $accessToken->getKey()) {
+            $currentTokenId = $accessToken->getKey();
+        } elseif ($accessToken && isset($accessToken->id) && $accessToken->id) {
+            $currentTokenId = $accessToken->id;
+        }
+
+        if ($currentTokenId === null && $request->bearerToken()) {
+            $parts = explode('|', $request->bearerToken(), 2);
+            if (count($parts) === 2 && ctype_digit($parts[0])) {
+                $currentTokenId = (int) $parts[0];
+            }
+        }
+
         $user->password = Hash::make($data['password']);
         $user->save();
+
+        // Cabut semua token lain milik user ini kecuali token sesi saat ini,
+        // sehingga perangkat / sesi lain dipaksa login ulang.
+        if ($currentTokenId !== null) {
+            $user->tokens()->where('id', '!=', $currentTokenId)->delete();
+        } else {
+            // Token transient (tidak ada di DB) — cabut semua token persisten
+            $user->tokens()->delete();
+        }
 
         return response()->json([
             'status'  => 'success',

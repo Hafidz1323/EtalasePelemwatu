@@ -24,8 +24,8 @@ Route::get('/status', function () {
     ]);
 });
 
-// Login dibatasi 5 percobaan per menit per IP
-Route::middleware('throttle:5,1')->group(function () {
+// Login dibatasi oleh RateLimiter 'login' (5x/menit per email+IP, didefinisikan di AppServiceProvider)
+Route::middleware('throttle:login')->group(function () {
     Route::post('/login', [AuthController::class, 'login']);
     Route::post('/auth/login', [AuthController::class, 'login']);
 });

@@ -8,6 +8,7 @@ use App\Models\Potensi;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
@@ -179,7 +180,7 @@ class ApiSecurityTest extends TestCase
         $this->putJson("/api/potensi/{$p->id}", [
             'name' => 'Edit', 'owner_name' => 'Budi', 'category_id' => $cat->id, 'whatsapp' => '081234567890',
             'email' => null, 'address' => 'Jl. Melati No. 12', 'description' => 'Deskripsi cukup panjang sekali.',
-            'location' => null, 'jenis' => null, 'jam_operasional' => null, 'status' => 'aktif',
+            'location' => null, 'jenis' => null, 'jam_operasional' => null, 'status' => 'approved',
         ])->assertOk();
     }
 
@@ -216,19 +217,23 @@ class ApiSecurityTest extends TestCase
     public function test_pendaftaran_publik_default_pending(): void
     {
         $r = $this->postJson('/api/potensi', $this->payload(['status' => 'aktif']))->assertStatus(201);
-        $this->assertSame('pending', $r->json('data.status'));
+        // Respons hanya mengembalikan id (data pribadi tidak dikembalikan);
+        // verifikasi status 'pending' langsung dari DB.
+        $this->assertNotNull($r->json('data.id'));
         $this->assertSame('pending', Potensi::first()->status);
     }
 
     public function test_daftar_publik_hanya_yang_disetujui(): void
     {
+        // Status 'aktif' dihapus — kini hanya 'approved' yang tampil ke publik
         $this->potensi('aktif', ['name' => 'Aktif Satu']);
         $this->potensi('approved', ['name' => 'Disetujui']);
         $this->potensi('pending', ['name' => 'Pending Satu']);
         $this->potensi('rejected', ['name' => 'Ditolak Satu']);
 
         $names = collect($this->getJson('/api/potensi')->assertOk()->json('data'))->pluck('name')->all();
-        $this->assertEqualsCanonicalizing(['Aktif Satu', 'Disetujui'], $names);
+        // Setelah normalisasi: hanya 'approved' yang tampil (bukan 'aktif')
+        $this->assertEqualsCanonicalizing(['Disetujui'], $names);
 
         // guest tidak bisa memaksa filter status
         $names = collect($this->getJson('/api/potensi?status=pending')->json('data'))->pluck('name')->all();
@@ -238,7 +243,7 @@ class ApiSecurityTest extends TestCase
     public function test_detail_publik_tidak_menampilkan_yang_belum_disetujui(): void
     {
         $p = $this->potensi('pending');
-        $a = $this->potensi('aktif');
+        $a = $this->potensi('approved'); // 'aktif' dihapus — gunakan 'approved'
         $this->getJson("/api/potensi/{$p->id}")->assertStatus(404);
         $this->getJson("/api/potensi/{$a->id}")->assertOk();
     }
@@ -343,5 +348,232 @@ class ApiSecurityTest extends TestCase
         $this->assertTrue(\Hash::check('SeedPass123', $u->password));
         $this->assertFalse(\Hash::check('admin123', $u->password));
         $this->assertNull(User::where('email', 'admin@pelemwatu.desa.id')->first());
+    }
+
+    public function test_seed_dua_kali_tidak_mereset_password_yang_sudah_diubah(): void
+    {
+        // Seed pertama: buat akun admin
+        config(['admin.email' => 'seed2@test.id', 'admin.password' => 'PasswordAwal1']);
+        $this->seed();
+
+        $u = User::where('email', 'seed2@test.id')->first();
+        $this->assertNotNull($u);
+        $this->assertTrue(\Hash::check('PasswordAwal1', $u->password));
+
+        // Simulasi admin mengubah passwordnya sendiri
+        $u->password = \Hash::make('PasswordBaru99');
+        $u->save();
+
+        // Seed kedua: password di config berbeda (atau kosong)
+        config(['admin.password' => 'PasswordLain2']);
+        $this->seed();
+
+        // Password harus TETAP PasswordBaru99, bukan ditimpa config
+        $u = $u->fresh();
+        $this->assertTrue(
+            \Hash::check('PasswordBaru99', $u->password),
+            'Seed kedua tidak boleh menimpa password yang sudah diubah admin'
+        );
+        $this->assertFalse(\Hash::check('PasswordLain2', $u->password));
+        // Pastikan hanya 1 user (tidak duplikat)
+        $this->assertSame(1, User::where('email', 'seed2@test.id')->count());
+    }
+
+    public function test_seed_di_production_tidak_mengisi_tabel_potensi(): void
+    {
+        // Override env ke 'production' — app()->environment() harus mengembalikan 'production'
+        $this->app->instance('env', 'production');
+        $this->assertSame('production', app()->environment());
+
+        config(['admin.email' => 'prod@test.id', 'admin.password' => 'ProdPass123']);
+
+        // Jalankan seeder secara langsung (tanpa artisan command runner)
+        // agar tidak memunculkan dialog interaktif dari Mockery
+        $seeder = new \Database\Seeders\DatabaseSeeder();
+        $seeder->run();
+
+        // Tabel potensi harus tetap kosong di production
+        $this->assertSame(
+            0,
+            DB::table('potensi')->count(),
+            'Seeder tidak boleh mengisi tabel potensi di environment production'
+        );
+
+        // Kategori tetap ter-seed (data master)
+        $this->assertGreaterThan(0, DB::table('categories')->count());
+    }
+
+    // ---------- Field sensitif di endpoint publik ----------
+
+    private function potensiPayload(array $override = []): array
+    {
+        return array_merge([
+            'name'        => 'Usaha Test Privasi',
+            'owner_name'  => 'Budi Santoso',
+            'whatsapp'    => '081234567890',
+            'address'     => 'Jl. Melati No. 12 Pelemwatu',
+            'description' => 'Deskripsi usaha cukup panjang untuk pengujian privasi data warga.',
+            'status'      => 'approved',
+        ], $override);
+    }
+
+    public function test_tamu_tidak_melihat_field_sensitif_pada_daftar_potensi(): void
+    {
+        $p = Potensi::create($this->potensiPayload());
+
+        $response = $this->getJson('/api/potensi')->assertOk();
+        $data     = collect($response->json('data'));
+
+        $this->assertNotEmpty($data, 'Harus ada data potensi yang dikembalikan');
+
+        $item = $data->firstWhere('id', $p->id);
+        $this->assertNotNull($item, 'Potensi yang baru dibuat harus ada di response');
+
+        // Field yang HARUS ada di respons publik
+        $this->assertArrayHasKey('id',          $item);
+        $this->assertArrayHasKey('name',        $item);
+        $this->assertArrayHasKey('description', $item);
+
+        // Field sensitif yang TIDAK BOLEH ada
+        $this->assertArrayNotHasKey('owner_name',       $item, 'owner_name tidak boleh bocor ke publik');
+        $this->assertArrayNotHasKey('email',             $item, 'email tidak boleh bocor ke publik');
+        $this->assertArrayNotHasKey('address',           $item, 'address tidak boleh bocor ke publik');
+        $this->assertArrayNotHasKey('reviewed_by',       $item, 'reviewed_by tidak boleh bocor ke publik');
+        $this->assertArrayNotHasKey('reviewed_at',       $item, 'reviewed_at tidak boleh bocor ke publik');
+        $this->assertArrayNotHasKey('rejection_reason',  $item, 'rejection_reason tidak boleh bocor ke publik');
+        $this->assertArrayNotHasKey('status',            $item, 'status tidak boleh bocor ke publik');
+    }
+
+    public function test_tamu_tidak_melihat_field_sensitif_pada_detail_potensi(): void
+    {
+        $p = Potensi::create($this->potensiPayload());
+
+        $response = $this->getJson("/api/potensi/{$p->id}")->assertOk();
+        $item     = $response->json('data');
+
+        $this->assertNotNull($item);
+        $this->assertSame($p->id, $item['id']);
+
+        $this->assertArrayNotHasKey('owner_name',      $item, 'owner_name tidak boleh bocor ke publik');
+        $this->assertArrayNotHasKey('email',            $item, 'email tidak boleh bocor ke publik');
+        $this->assertArrayNotHasKey('address',          $item, 'address tidak boleh bocor ke publik');
+        $this->assertArrayNotHasKey('reviewed_by',      $item, 'reviewed_by tidak boleh bocor ke publik');
+        $this->assertArrayNotHasKey('reviewed_at',      $item, 'reviewed_at tidak boleh bocor ke publik');
+        $this->assertArrayNotHasKey('rejection_reason', $item, 'rejection_reason tidak boleh bocor ke publik');
+        $this->assertArrayNotHasKey('status',           $item, 'status tidak boleh bocor ke publik');
+    }
+
+    public function test_admin_melihat_semua_field_termasuk_sensitif(): void
+    {
+        Sanctum::actingAs($this->admin());
+        $p = Potensi::create($this->potensiPayload());
+
+        // Index
+        $response = $this->getJson('/api/potensi')->assertOk();
+        $item     = collect($response->json('data'))->firstWhere('id', $p->id);
+        $this->assertNotNull($item);
+        $this->assertArrayHasKey('owner_name',      $item);
+        $this->assertArrayHasKey('email',           $item);
+        $this->assertArrayHasKey('address',         $item);
+        $this->assertArrayHasKey('reviewed_by',     $item);
+        $this->assertArrayHasKey('rejection_reason', $item);
+        $this->assertArrayHasKey('status',          $item);
+
+        // Detail
+        $detail = $this->getJson("/api/potensi/{$p->id}")->assertOk()->json('data');
+        $this->assertArrayHasKey('owner_name',  $detail);
+        $this->assertArrayHasKey('address',     $detail);
+        $this->assertArrayHasKey('status',      $detail);
+        $this->assertArrayHasKey('reviewed_by', $detail);
+    }
+
+    public function test_pendaftaran_publik_hanya_mengembalikan_id(): void
+    {
+        $response = $this->postJson('/api/potensi', $this->potensiPayload())->assertStatus(201);
+
+        $data = $response->json('data');
+
+        // Harus ada id
+        $this->assertArrayHasKey('id', $data);
+        $this->assertNotNull($data['id']);
+
+        // Tidak boleh ada field pribadi
+        $this->assertArrayNotHasKey('owner_name', $data, 'owner_name tidak boleh ada di respons store()');
+        $this->assertArrayNotHasKey('whatsapp',   $data, 'whatsapp tidak boleh ada di respons store()');
+        $this->assertArrayNotHasKey('address',    $data, 'address tidak boleh ada di respons store()');
+        $this->assertArrayNotHasKey('email',      $data, 'email tidak boleh ada di respons store()');
+    }
+
+    // ---------- Autentikasi lanjutan ----------
+
+    public function test_token_kadaluwarsa_ditolak_401(): void
+    {
+        // Aktifkan expiration 1 menit agar mudah disimulasikan
+        config(['sanctum.expiration' => 1]);
+
+        $user  = $this->admin();
+        $token = $user->createToken('expired-test');
+
+        // Mundurkan created_at token lebih dari 1 menit agar dianggap kadaluwarsa
+        \DB::table('personal_access_tokens')
+            ->where('id', $token->accessToken->id)
+            ->update(['created_at' => now()->subMinutes(2)]);
+
+        $this->getJson('/api/auth/verify', [
+            'Authorization' => 'Bearer ' . $token->plainTextToken,
+        ])->assertStatus(401);
+    }
+
+    public function test_ganti_password_mencabut_token_lain(): void
+    {
+        $u      = $this->admin();
+        $tok1   = $u->createToken('sesi-1');
+        $tok2   = $u->createToken('sesi-2');
+        $token1 = $tok1->plainTextToken;
+        $t1Id   = $tok1->accessToken->id;
+        $t2Id   = $tok2->accessToken->id;
+
+        $this->assertSame(2, $u->tokens()->count(), 'Harus ada 2 token sebelum ganti password');
+
+        // Ganti password menggunakan token1
+        $this->putJson('/api/admin/password', [
+            'current_password'      => 'Rahasia123',
+            'password'              => 'BaruBanget99',
+            'password_confirmation' => 'BaruBanget99',
+        ], ['Authorization' => "Bearer $token1"])->assertOk();
+
+        // Verifikasi langsung dari DB: token2 harus sudah dihapus, token1 harus masih ada
+        $this->assertNull(
+            \DB::table('personal_access_tokens')->where('id', $t2Id)->first(),
+            'token sesi-2 harus dihapus setelah ganti password'
+        );
+        $this->assertNotNull(
+            \DB::table('personal_access_tokens')->where('id', $t1Id)->first(),
+            'token sesi-1 (sesi aktif) harus tetap ada'
+        );
+        $this->assertSame(1, (int) \DB::table('personal_access_tokens')->where('tokenable_id', $u->id)->count());
+    }
+
+    public function test_throttle_login_berbeda_untuk_email_berbeda_dari_ip_sama(): void
+    {
+        // Habiskan throttle untuk email1 (5 percobaan)
+        for ($i = 0; $i < 5; $i++) {
+            $this->postJson('/api/auth/login', [
+                'email'    => 'emailsatu@test.id',
+                'password' => 'salah',
+            ]);
+        }
+
+        // Percobaan ke-6 dengan email1 harus kena throttle (429)
+        $this->postJson('/api/auth/login', [
+            'email'    => 'emailsatu@test.id',
+            'password' => 'salah',
+        ])->assertStatus(429);
+
+        // email2 dari IP yang sama TIDAK kena throttle (kunci berbeda karena email berbeda)
+        $this->postJson('/api/auth/login', [
+            'email'    => 'emaildua@test.id',
+            'password' => 'salah',
+        ])->assertStatus(401); // 401 bukan 429
     }
 }

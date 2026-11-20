@@ -11,7 +11,7 @@ class PotensiReviewController extends Controller
     public function review(Request $request, $id)
     {
         $data = $request->validate([
-            'status' => 'required|in:approved,rejected,pending,aktif',
+            'status' => 'required|in:approved,rejected,pending',
             'reason' => 'required_if:status,rejected|nullable|string|max:1000',
         ], [
             'reason.required_if' => 'Alasan penolakan wajib diisi.',
