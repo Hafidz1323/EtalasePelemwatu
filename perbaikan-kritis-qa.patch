@@ -1,0 +1,1194 @@
+From 0b0e7dc831b78e6e442ef44fa9a6a27e6682eaf5 Mon Sep 17 00:00:00 2001
+From: qa <qa@local>
+Date: Fri, 20 Nov 2026 09:43:45 +0000
+Subject: [PATCH] Perbaiki keamanan: proteksi rute, hapus login hardcoded,
+ validasi, throttle, status pending
+
+---
+ .env.example                                  |  13 +-
+ app/Http/Controllers/API/AuthController.php   |  85 ++---
+ .../Controllers/API/CategoryController.php    |  15 +-
+ .../Controllers/API/MessageController.php     |   8 +-
+ .../Controllers/API/PotensiController.php     |  42 ++-
+ .../API/PotensiReviewController.php           |  11 +-
+ app/Http/Controllers/API/StatsController.php  |   2 +-
+ app/Http/Controllers/API/UploadController.php |  16 +-
+ app/Models/Potensi.php                        |   3 +
+ config/admin.php                              |   8 +
+ database/seeders/DatabaseSeeder.php           |  22 +-
+ public/assets/js/auth.js                      |  38 +-
+ resources/views/admin.blade.php               |  27 +-
+ resources/views/login.blade.php               |  29 +-
+ routes/api.php                                |  65 ++--
+ tests/Feature/ApiSecurityTest.php             | 347 ++++++++++++++++++
+ tests/Feature/ExampleTest.php                 |  19 -
+ tests/Feature/PageSmokeTest.php               |  23 ++
+ tests/Unit/ExampleTest.php                    |  16 -
+ 19 files changed, 596 insertions(+), 193 deletions(-)
+ create mode 100644 config/admin.php
+ create mode 100644 tests/Feature/ApiSecurityTest.php
+ delete mode 100644 tests/Feature/ExampleTest.php
+ create mode 100644 tests/Feature/PageSmokeTest.php
+ delete mode 100644 tests/Unit/ExampleTest.php
+
+diff --git a/.env.example b/.env.example
+index 40bb13b..b094417 100644
+--- a/.env.example
++++ b/.env.example
+@@ -4,9 +4,9 @@ APP_KEY=
+ APP_DEBUG=true
+ APP_URL=http://localhost:8000
+ 
+-APP_LOCALE=en
++APP_LOCALE=id
+ APP_FALLBACK_LOCALE=en
+-APP_FAKER_LOCALE=en_US
++APP_FAKER_LOCALE=id_ID
+ 
+ APP_MAINTENANCE_DRIVER=file
+ # APP_MAINTENANCE_STORE=database
+@@ -63,3 +63,12 @@ AWS_BUCKET=
+ AWS_USE_PATH_STYLE_ENDPOINT=false
+ 
+ VITE_APP_NAME="${APP_NAME}"
++
++# Akun admin awal (dipakai oleh `php artisan db:seed`). Wajib diganti!
++ADMIN_NAME="Administrator Desa"
++ADMIN_EMAIL=admin@pelemwatu.desa.id
++ADMIN_PASSWORD=
++
++# --- PRODUKSI: pakai nilai berikut di server, bukan di sini ---
++# APP_ENV=production
++# APP_DEBUG=false
+diff --git a/app/Http/Controllers/API/AuthController.php b/app/Http/Controllers/API/AuthController.php
+index 685ce3a..d5ae3d1 100644
+--- a/app/Http/Controllers/API/AuthController.php
++++ b/app/Http/Controllers/API/AuthController.php
+@@ -3,68 +3,48 @@
+ namespace App\Http\Controllers\API;
+ 
+ use App\Http\Controllers\Controller;
++use App\Models\User;
+ use Illuminate\Http\Request;
+ use Illuminate\Support\Facades\Hash;
+-use Illuminate\Support\Str;
+-use App\Models\User;
++use Laravel\Sanctum\PersonalAccessToken;
+ 
+ class AuthController extends Controller
+ {
+-    /**
+-     * Simple login that checks against users table or fallback admin.
+-     */
+     public function login(Request $request)
+     {
+-        $email = strtolower(trim($request->input('email')));
+-        $password = $request->input('password');
++        $data = $request->validate([
++            'email' => ['required', 'string', 'max:255'],
++            'password' => ['required', 'string', 'max:255'],
++        ]);
+ 
+-        // Try to find user
+-        $user = User::whereRaw('LOWER(email) = ?', [$email])->first();
++        $user = User::whereRaw('LOWER(email) = ?', [strtolower(trim($data['email']))])->first();
+ 
+-        if ($user && Hash::check($password, $user->password)) {
+-            $token = $user->createToken('api-token')->plainTextToken;
++        if (! $user || ! Hash::check($data['password'], $user->password)) {
+             return response()->json([
+-                'status' => 'success',
+-                'message' => 'Login berhasil',
+-                'data' => [
+-                    'token' => $token,
+-                    'user' => $user,
+-                ],
+-            ]);
+-        }
+-
+-        // Fallback default admin (hardcoded as in original Node.js)
+-        $default = [
+-            'id' => 1,
+-            'name' => 'Administrator Desa',
+-            'email' => 'admin@pelemwatu.desa.id',
+-            'role' => 'Admin Desa',
+-            'password' => 'admin123',
+-        ];
+-        if ($email === strtolower($default['email']) && $password === $default['password']) {
+-            $token = 'ep-session-'.$default['id'].'-'.time();
+-            return response()->json([
+-                'status' => 'success',
+-                'message' => 'Login admin berhasil',
+-                'data' => [
+-                    'token' => $token,
+-                    'user' => $default,
+-                ],
+-            ]);
++                'status' => 'error',
++                'message' => 'Email atau password salah',
++            ], 401);
+         }
+ 
+         return response()->json([
+-            'status' => 'error',
+-            'message' => 'Email atau password salah',
+-        ], 401);
++            'status' => 'success',
++            'message' => 'Login berhasil',
++            'data' => [
++                'token' => $user->createToken('api-token')->plainTextToken,
++                'user' => $user,
++            ],
++        ]);
+     }
+ 
+     public function logout(Request $request)
+     {
+-        // If token based, revoke all tokens for user
+-        if ($request->user()) {
+-            $request->user()->tokens()->delete();
++        // Hanya cabut token yang dipakai sekarang (perangkat lain tetap login).
++        // Sesi non-token (TransientToken) tidak punya delete(), jadi dicek dulu.
++        $token = $request->user()->currentAccessToken();
++        if ($token instanceof PersonalAccessToken) {
++            $token->delete();
+         }
++
+         return response()->json([
+             'status' => 'success',
+             'message' => 'Logout berhasil',
+@@ -73,18 +53,11 @@ public function logout(Request $request)
+ 
+     public function verify(Request $request)
+     {
+-        // Simple verification: check Authorization header format
+-        $auth = $request->header('Authorization');
+-        if ($auth && Str::startsWith($auth, 'Bearer ')) {
+-            return response()->json([
+-                'status' => 'success',
+-                'message' => 'Sesi aktif',
+-            ]);
+-        }
++        // Sampai di sini berarti token sudah divalidasi middleware auth:sanctum.
+         return response()->json([
+-            'status' => 'error',
+-            'message' => 'Sesi tidak valid',
+-        ], 401);
++            'status' => 'success',
++            'message' => 'Sesi aktif',
++            'data' => ['user' => $request->user()],
++        ]);
+     }
+ }
+-
+diff --git a/app/Http/Controllers/API/CategoryController.php b/app/Http/Controllers/API/CategoryController.php
+index a8e9a61..b146c88 100644
+--- a/app/Http/Controllers/API/CategoryController.php
++++ b/app/Http/Controllers/API/CategoryController.php
+@@ -8,6 +8,7 @@
+ 
+ class CategoryController extends Controller
+ {
++
+     public function index()
+     {
+         return response()->json([
+@@ -18,8 +19,11 @@ public function index()
+ 
+     public function store(Request $request)
+     {
+-        $request->validate(['name' => 'required|string']);
+-        $category = Category::create($request->all());
++        $data = $request->validate([
++            'name' => 'required|string|max:100',
++            'description' => 'nullable|string|max:500',
++        ]);
++        $category = Category::create($data);
+         return response()->json(['status' => 'success', 'data' => $category], 201);
+     }
+ 
+@@ -27,7 +31,11 @@ public function update(Request $request, $id)
+     {
+         $category = Category::find($id);
+         if (!$category) return response()->json(['status' => 'error', 'message' => 'Not found'], 404);
+-        $category->update($request->all());
++        $data = $request->validate([
++            'name' => 'sometimes|required|string|max:100',
++            'description' => 'sometimes|nullable|string|max:500',
++        ]);
++        $category->update($data);
+         return response()->json(['status' => 'success', 'data' => $category]);
+     }
+ 
+@@ -39,4 +47,3 @@ public function destroy($id)
+         return response()->json(['status' => 'success', 'message' => 'Kategori dihapus']);
+     }
+ }
+-
+diff --git a/app/Http/Controllers/API/MessageController.php b/app/Http/Controllers/API/MessageController.php
+index e3ac658..f3aca74 100644
+--- a/app/Http/Controllers/API/MessageController.php
++++ b/app/Http/Controllers/API/MessageController.php
+@@ -19,10 +19,10 @@ public function index()
+     public function store(Request $request)
+     {
+         $validated = $request->validate([
+-            'name' => 'required|string',
+-            'email' => 'required|email',
+-            'subject' => 'nullable|string',
+-            'message' => 'required|string',
++            'name' => 'required|string|max:100',
++            'email' => 'required|email|max:100',
++            'subject' => 'nullable|string|max:150',
++            'message' => 'required|string|max:5000',
+         ]);
+ 
+         $msg = Message::create($validated);
+diff --git a/app/Http/Controllers/API/PotensiController.php b/app/Http/Controllers/API/PotensiController.php
+index 3566ad9..7a140df 100644
+--- a/app/Http/Controllers/API/PotensiController.php
++++ b/app/Http/Controllers/API/PotensiController.php
+@@ -13,6 +13,12 @@ public function index(Request $request)
+     {
+         $query = Potensi::with('category', 'images');
+ 
++        // Pengunjung publik hanya melihat yang sudah disetujui; admin (token valid) melihat semua.
++        $isAdmin = (bool) $request->user('sanctum');
++        if (! $isAdmin) {
++            $query->whereIn('status', Potensi::STATUS_PUBLIK);
++        }
++
+         if ($request->has('category') && $request->category !== 'all') {
+             $cat = $request->category;
+             $query->whereHas('category', function ($q) use ($cat) {
+@@ -20,7 +26,7 @@ public function index(Request $request)
+             });
+         }
+ 
+-        if ($request->has('status')) {
++        if ($isAdmin && $request->filled('status')) {
+             $query->where('status', $request->status);
+         }
+ 
+@@ -94,8 +100,8 @@ public function store(Request $request)
+             'email.email'            => 'Format email tidak valid. Contoh: nama@gmail.com.',
+         ]);
+ 
+-        // d. Paksa status (tidak diubah)
+-        $validated['status'] = 'aktif';
++        // d. Pendaftaran warga selalu menunggu verifikasi admin
++        $validated['status'] = 'pending';
+ 
+         $potensi = Potensi::create($validated);
+ 
+@@ -106,11 +112,11 @@ public function store(Request $request)
+         ], 201);
+     }
+ 
+-    public function show($id)
++    public function show(Request $request, $id)
+     {
+         $potensi = Potensi::with('category', 'images')->find($id);
+ 
+-        if (!$potensi) {
++        if (! $potensi || (! $request->user('sanctum') && ! in_array($potensi->status, Potensi::STATUS_PUBLIK, true))) {
+             return response()->json(['status' => 'error', 'message' => 'Potensi tidak ditemukan'], 404);
+         }
+ 
+@@ -125,12 +131,34 @@ public function update(Request $request, $id)
+             return response()->json(['status' => 'error', 'message' => 'Potensi tidak ditemukan'], 404);
+         }
+ 
+-        $potensi->update($request->all());
++        $data = $request->validate([
++            'name'            => 'sometimes|required|string|min:3|max:100',
++            'owner_name'      => ['sometimes', 'required', 'string', 'min:3', 'max:100'],
++            'category_id'     => 'sometimes|nullable|integer|exists:categories,id',
++            'whatsapp'        => ['sometimes', 'required', 'regex:/^08[1-9][0-9]{7,10}$/'],
++            'address'         => 'sometimes|required|string|min:10|max:255',
++            'description'     => 'sometimes|required|string|min:20|max:1000',
++            'location'        => 'sometimes|nullable|string|max:255',
++            'email'           => 'sometimes|nullable|email:rfc|max:100',
++            'jenis'           => 'sometimes|nullable|string|max:100',
++            'jam_operasional' => 'sometimes|nullable|string|max:100',
++            'latitude'        => 'sometimes|nullable|numeric|between:-90,90',
++            'longitude'       => 'sometimes|nullable|numeric|between:-180,180',
++            'status'          => 'sometimes|required|in:aktif,approved,pending,rejected',
++        ]);
++
++        // Perubahan status oleh admin dicatat sebagai hasil review.
++        if (isset($data['status']) && $data['status'] !== $potensi->status) {
++            $data['reviewed_by'] = $request->user()->id;
++            $data['reviewed_at'] = now();
++        }
++
++        $potensi->update($data);
+ 
+         return response()->json([
+             'status' => 'success',
+             'message' => 'Potensi berhasil diperbarui',
+-            'data' => $potensi,
++            'data' => $potensi->fresh(['category', 'images']),
+         ]);
+     }
+ 
+diff --git a/app/Http/Controllers/API/PotensiReviewController.php b/app/Http/Controllers/API/PotensiReviewController.php
+index d126204..f630299 100644
+--- a/app/Http/Controllers/API/PotensiReviewController.php
++++ b/app/Http/Controllers/API/PotensiReviewController.php
+@@ -10,8 +10,11 @@ class PotensiReviewController extends Controller
+ {
+     public function review(Request $request, $id)
+     {
+-        $request->validate([
++        $data = $request->validate([
+             'status' => 'required|in:approved,rejected,pending,aktif',
++            'reason' => 'required_if:status,rejected|nullable|string|max:1000',
++        ], [
++            'reason.required_if' => 'Alasan penolakan wajib diisi.',
+         ]);
+ 
+         $potensi = Potensi::find($id);
+@@ -19,9 +22,10 @@ public function review(Request $request, $id)
+             return response()->json(['status' => 'error', 'message' => 'Potensi tidak ditemukan'], 404);
+         }
+ 
+-        $potensi->status = $request->status;
++        $potensi->status = $data['status'];
++        $potensi->reviewed_by = $request->user()->id;
+         $potensi->reviewed_at = now();
+-        $potensi->rejection_reason = $request->reason;
++        $potensi->rejection_reason = $data['status'] === 'rejected' ? ($data['reason'] ?? null) : null;
+         $potensi->save();
+ 
+         return response()->json([
+@@ -30,4 +34,3 @@ public function review(Request $request, $id)
+         ]);
+     }
+ }
+-
+diff --git a/app/Http/Controllers/API/StatsController.php b/app/Http/Controllers/API/StatsController.php
+index e1da05e..4b7010e 100644
+--- a/app/Http/Controllers/API/StatsController.php
++++ b/app/Http/Controllers/API/StatsController.php
+@@ -19,7 +19,7 @@ public function index()
+                 'count' => $c->potensi_count,
+             ];
+         });
+-        $pending = Potensi::where('status', '!=', 'aktif')->count();
++        $pending = Potensi::where('status', 'pending')->count();
+ 
+         return response()->json([
+             'status' => 'success',
+diff --git a/app/Http/Controllers/API/UploadController.php b/app/Http/Controllers/API/UploadController.php
+index 0c76fe1..e7c88ed 100644
+--- a/app/Http/Controllers/API/UploadController.php
++++ b/app/Http/Controllers/API/UploadController.php
+@@ -4,17 +4,24 @@
+ 
+ use App\Http\Controllers\Controller;
+ use Illuminate\Http\Request;
++use Illuminate\Support\Str;
+ 
+ class UploadController extends Controller
+ {
+     public function upload(Request $request)
+     {
+-        if (!$request->hasFile('image')) {
+-            return response()->json(['status' => 'error', 'message' => 'No file uploaded'], 400);
+-        }
++        $request->validate([
++            'image' => ['required', 'file', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
++        ], [
++            'image.required' => 'Pilih file gambar terlebih dahulu.',
++            'image.image'    => 'File harus berupa gambar.',
++            'image.mimes'    => 'Format gambar harus JPG, PNG, atau WEBP.',
++            'image.max'      => 'Ukuran gambar maksimal 2 MB.',
++        ]);
+ 
+         $file = $request->file('image');
+-        $filename = 'image-' . time() . '-' . rand(1000, 9999) . '.' . $file->getClientOriginalExtension();
++        // extension() ditebak dari ISI file, bukan dari nama yang dikirim pengguna.
++        $filename = 'image-' . Str::lower(Str::random(24)) . '.' . $file->extension();
+         $file->move(public_path('uploads'), $filename);
+ 
+         return response()->json([
+@@ -24,4 +31,3 @@ public function upload(Request $request)
+         ]);
+     }
+ }
+-
+diff --git a/app/Models/Potensi.php b/app/Models/Potensi.php
+index e2f4732..f72896e 100644
+--- a/app/Models/Potensi.php
++++ b/app/Models/Potensi.php
+@@ -9,6 +9,9 @@ class Potensi extends Model
+ {
+     use HasFactory;
+ 
++    /** Status yang tampil di halaman publik. */
++    public const STATUS_PUBLIK = ['aktif', 'approved'];
++
+     protected $table = 'potensi';
+ 
+     protected $fillable = [
+diff --git a/config/admin.php b/config/admin.php
+new file mode 100644
+index 0000000..92a5f71
+--- /dev/null
++++ b/config/admin.php
+@@ -0,0 +1,8 @@
++<?php
++
++return [
++    // Akun admin awal untuk seeder. Atur lewat .env (jangan di-commit).
++    'email' => env('ADMIN_EMAIL', 'admin@pelemwatu.desa.id'),
++    'name' => env('ADMIN_NAME', 'Administrator Desa'),
++    'password' => env('ADMIN_PASSWORD'),
++];
+diff --git a/database/seeders/DatabaseSeeder.php b/database/seeders/DatabaseSeeder.php
+index 87ab3e7..c932f33 100644
+--- a/database/seeders/DatabaseSeeder.php
++++ b/database/seeders/DatabaseSeeder.php
+@@ -5,22 +5,36 @@
+ use Illuminate\Database\Seeder;
+ use Illuminate\Support\Facades\DB;
+ use Illuminate\Support\Facades\Hash;
++use Illuminate\Support\Str;
+ 
+ class DatabaseSeeder extends Seeder
+ {
+     public function run(): void
+     {
+-        // 1. Admin Default
++        // 1. Admin awal: kredensial dari .env (ADMIN_EMAIL / ADMIN_PASSWORD)
++        $password = config('admin.password');
++        $generated = false;
++        if (empty($password)) {
++            $password = Str::password(16, symbols: false);
++            $generated = true;
++        }
++
+         DB::table('users')->updateOrInsert(
+-            ['email' => 'admin@pelemwatu.desa.id'],
++            ['email' => strtolower(config('admin.email'))],
+             [
+-                'name' => 'Administrator Desa',
+-                'password' => Hash::make('admin123'),
++                'name' => config('admin.name'),
++                'password' => Hash::make($password),
+                 'created_at' => now(),
+                 'updated_at' => now(),
+             ]
+         );
+ 
++        if ($generated && $this->command) {
++            $this->command->warn('ADMIN_PASSWORD belum diatur di .env. Password sementara dibuat acak:');
++            $this->command->warn('  ' . config('admin.email') . ' / ' . $password);
++            $this->command->warn('Catat sekarang lalu ganti lewat menu profil admin (tidak akan ditampilkan lagi).');
++        }
++
+         // 2. Kategori Default
+         $categories = [
+             ['id' => 1, 'name' => 'Usaha & Produk', 'description' => 'Usaha kuliner, kerajinan, dan produk olahan warga desa'],
+diff --git a/public/assets/js/auth.js b/public/assets/js/auth.js
+index 7286a83..9347d0b 100644
+--- a/public/assets/js/auth.js
++++ b/public/assets/js/auth.js
+@@ -64,13 +64,24 @@
+   function handleLogout(e) {
+     if (e) e.preventDefault();
+     if (confirm('Apakah Anda yakin ingin keluar dari panel admin?')) {
++      // Ambil token SEBELUM sesi dihapus, lalu kirim agar server mencabut token ini.
++      var logoutToken = null;
++      try {
++        var rawSession = localStorage.getItem('ep_admin_session') || sessionStorage.getItem('ep_admin_session');
++        if (rawSession) logoutToken = JSON.parse(rawSession).token || null;
++      } catch (err) {}
+       localStorage.removeItem('adminLoggedIn');
+       localStorage.removeItem('adminUser');
+       localStorage.removeItem('ep_admin_session');
+       sessionStorage.removeItem('ep_admin_session');
+-      try {
+-        fetch((typeof API_BASE !== 'undefined' ? API_BASE : '/api') + '/auth/logout', { method: 'POST' }).catch(() => {});
+-      } catch (err) {}
++      if (logoutToken) {
++        try {
++          fetch((typeof API_BASE !== 'undefined' ? API_BASE : '/api') + '/auth/logout', {
++            method: 'POST',
++            headers: { 'Accept': 'application/json', 'Authorization': 'Bearer ' + logoutToken }
++          }).catch(() => {});
++        } catch (err) {}
++      }
+       
+       // If currently on admin page, redirect to index
+       if (window.location.pathname.endsWith('admin.html')) {
+@@ -133,6 +144,7 @@
+       submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status"></span>Memverifikasi...';
+ 
+       let loginSuccess = false;
++      let authToken = null;
+       let userData = { name: 'Administrator', role: 'admin' };
+ 
+       // 1. Try backend API with timeout
+@@ -143,38 +155,28 @@
+         const response = await fetch(API_LOGIN_URL, {
+           method: 'POST',
+           headers: { 'Content-Type': 'application/json' },
+-          body: JSON.stringify({ username, password }),
++          body: JSON.stringify({ email: username, password }),
+           signal: controller.signal
+         });
+         clearTimeout(timeoutId);
+ 
+         if (response.ok) {
+           const resData = await response.json();
+-          if (resData.status === 'success') {
++          if (resData.status === 'success' && resData.data && resData.data.token) {
+             loginSuccess = true;
+-            if (resData.user) userData = resData.user;
++            authToken = resData.data.token;
++            if (resData.data.user) userData = resData.data.user;
+           }
+         }
+       } catch (err) {
+         // Backend not reachable or timed out - continue to fallback check
+       }
+ 
+-      // 2. Client-side fallback check (for static frontend / demo)
+-      if (!loginSuccess) {
+-        if (
+-          (username === 'admin' || username === 'admin@pelemwatu.desa.id') &&
+-          password === 'admin123'
+-        ) {
+-          loginSuccess = true;
+-          userData = { name: 'Administrator Desa', role: 'admin' };
+-        }
+-      }
+-
+       // Handle Result
+       if (loginSuccess) {
+         localStorage.setItem('adminLoggedIn', 'true');
+         localStorage.setItem('adminUser', JSON.stringify(userData));
+-        localStorage.setItem('ep_admin_session', JSON.stringify({ isLoggedIn: true, user: userData, token: 'session-' + Date.now() }));
++        localStorage.setItem('ep_admin_session', JSON.stringify({ isLoggedIn: true, user: userData, token: authToken }));
+ 
+         submitBtn.innerHTML = '<i class="bi bi-check-circle me-1"></i> Login Berhasil!';
+         submitBtn.classList.remove('btn-primary-custom');
+diff --git a/resources/views/admin.blade.php b/resources/views/admin.blade.php
+index d108286..9dfa5db 100644
+--- a/resources/views/admin.blade.php
++++ b/resources/views/admin.blade.php
+@@ -10,9 +10,23 @@
+   <link rel="stylesheet" href="assets/css/admin.css">
+   <link rel="stylesheet" href="assets/css/galeri.css">
+   <script>
+-    if (localStorage.getItem('adminLoggedIn') !== 'true') {
+-      window.location.replace('index.html?action=login');
+-    }
++    (function () {
++      function toLogin() {
++        ['adminLoggedIn', 'adminUser', 'ep_admin_session'].forEach(function (k) { localStorage.removeItem(k); });
++        sessionStorage.removeItem('ep_admin_session');
++        window.location.replace('login.html?unauthorized=true');
++      }
++      var token = null;
++      try {
++        var raw = localStorage.getItem('ep_admin_session') || sessionStorage.getItem('ep_admin_session');
++        if (raw) token = JSON.parse(raw).token || null;
++      } catch (e) {}
++      if (localStorage.getItem('adminLoggedIn') !== 'true' || !token) { toLogin(); return; }
++      // Flag di localStorage bisa dipalsukan; sesi sebenarnya harus disahkan server.
++      fetch('/api/auth/verify', { headers: { 'Accept': 'application/json', 'Authorization': 'Bearer ' + token } })
++        .then(function (r) { if (r.status === 401) toLogin(); })
++        .catch(function () { /* server tidak terjangkau: biarkan, tiap aksi tetap dicek server */ });
++    })();
+   </script>
+   <style>
+     /* â”€â”€ Pengaturan Menu Rows â”€â”€ */
+@@ -1301,7 +1315,12 @@ function load(showLoading) {
+ 
+     clearTimeout(_loadTimer);
+     _loadTimer = setTimeout(function () {
+-      fetch(API_BASE + '/potensi')
++      var _tok = null;
++      try {
++        var _s = localStorage.getItem('ep_admin_session') || sessionStorage.getItem('ep_admin_session');
++        if (_s) _tok = JSON.parse(_s).token || null;
++      } catch (e) {}
++      fetch(API_BASE + '/potensi', { headers: _tok ? { 'Accept': 'application/json', 'Authorization': 'Bearer ' + _tok } : { 'Accept': 'application/json' } })
+         .then(function (r) { return r.json(); })
+         .then(function (res) {
+           if (res && Array.isArray(res.data)) {
+diff --git a/resources/views/login.blade.php b/resources/views/login.blade.php
+index f940dcf..bb1b6fd 100644
+--- a/resources/views/login.blade.php
++++ b/resources/views/login.blade.php
+@@ -453,32 +453,23 @@ function showAlert(msg, type) {
+               loginSuccess = true;
+               userData = result.data.user;
+               authToken = result.data.token;
+-            } else if (response.status === 401 || response.status === 400) {
+-              showAlert(result.message || 'Email atau password salah.', 'error');
++            } else if ([400, 401, 422, 429].includes(response.status)) {
++              const msg = response.status === 429
++                ? 'Terlalu banyak percobaan login. Tunggu sekitar 1 menit lalu coba lagi.'
++                : (result.message || 'Email atau password salah.');
++              showAlert(msg, 'error');
+               resetButton();
+               return;
+             }
+           } catch (netErr) {
+-            console.warn('Backend server tidak dapat dihubungi, menggunakan verifikasi lokal:', netErr.message);
++            console.warn('Backend server tidak dapat dihubungi:', netErr.message);
+           }
+ 
+-          // 2. Fallback verifikasi lokal jika server offline
++          // Tidak ada login lokal/offline: sesi hanya sah jika server menerbitkan token.
+           if (!loginSuccess) {
+-            const isDefaultEmail =
+-              email.toLowerCase() === 'admin@pelemwatu.desa.id' ||
+-              email.toLowerCase() === 'admin';
+-            const isDefaultPass = password === 'admin123';
+-
+-            if (isDefaultEmail && isDefaultPass) {
+-              loginSuccess = true;
+-              userData = {
+-                id: 1,
+-                name: 'Administrator Desa',
+-                email: 'admin@pelemwatu.desa.id',
+-                role: 'Admin Desa'
+-              };
+-              authToken = 'ep-local-session-' + Date.now();
+-            }
++            showAlert('Server tidak dapat dihubungi. Coba lagi beberapa saat.', 'error');
++            resetButton();
++            return;
+           }
+ 
+           if (loginSuccess && userData) {
+diff --git a/routes/api.php b/routes/api.php
+index a6298dc..033f419 100644
+--- a/routes/api.php
++++ b/routes/api.php
+@@ -11,7 +11,11 @@
+ use App\Http\Controllers\API\ProfileController;
+ use App\Http\Controllers\API\SettingController;
+ 
+-// Status
++/*
++|--------------------------------------------------------------------------
++| Rute publik (tanpa login)
++|--------------------------------------------------------------------------
++*/
+ Route::get('/status', function () {
+     return response()->json([
+         'status' => 'success',
+@@ -20,45 +24,46 @@
+     ]);
+ });
+ 
+-// Auth
+-Route::post('/login', [AuthController::class, 'login']);
+-Route::post('/auth/login', [AuthController::class, 'login']);
+-Route::post('/auth/logout', [AuthController::class, 'logout']);
+-Route::get('/auth/verify', [AuthController::class, 'verify']);
++// Login dibatasi 5 percobaan per menit per IP
++Route::middleware('throttle:5,1')->group(function () {
++    Route::post('/login', [AuthController::class, 'login']);
++    Route::post('/auth/login', [AuthController::class, 'login']);
++});
+ 
+-// Potensi
++// Data publik: GET /potensi hanya menampilkan yang disetujui bagi pengunjung biasa
+ Route::get('/potensi', [PotensiController::class, 'index']);
+-Route::post('/potensi', [PotensiController::class, 'store']);
+ Route::get('/potensi/{id}', [PotensiController::class, 'show']);
+-Route::put('/potensi/{id}', [PotensiController::class, 'update']);
+-Route::delete('/potensi/{id}', [PotensiController::class, 'destroy']);
+-
+-// Categories
+ Route::get('/categories', [CategoryController::class, 'index']);
+-Route::post('/categories', [CategoryController::class, 'store']);
+-Route::put('/categories/{id}', [CategoryController::class, 'update']);
+-Route::delete('/categories/{id}', [CategoryController::class, 'destroy']);
++Route::get('/settings/logo', [SettingController::class, 'getLogo']);
+ 
+-// Messages
+-Route::get('/messages', [MessageController::class, 'index']);
+-Route::post('/messages', [MessageController::class, 'store']);
++// Formulir publik (dibatasi agar tidak bisa dipakai spam)
++Route::post('/potensi', [PotensiController::class, 'store'])->middleware('throttle:10,1');
++Route::post('/messages', [MessageController::class, 'store'])->middleware('throttle:5,1');
+ 
+-// Stats & Review
+-Route::get('/stats', [StatsController::class, 'index']);
+-Route::post('/potensi/{id}/review', [PotensiReviewController::class, 'review']);
+-Route::post('/potensi-review/{id}', [PotensiReviewController::class, 'review']);
++/*
++|--------------------------------------------------------------------------
++| Rute admin (wajib token Sanctum)
++|--------------------------------------------------------------------------
++*/
++Route::middleware('auth:sanctum')->group(function () {
++    Route::post('/auth/logout', [AuthController::class, 'logout']);
++    Route::get('/auth/verify', [AuthController::class, 'verify']);
+ 
+-// Upload
+-Route::post('/upload', [UploadController::class, 'upload']);
++    Route::put('/potensi/{id}', [PotensiController::class, 'update']);
++    Route::delete('/potensi/{id}', [PotensiController::class, 'destroy']);
++    Route::post('/potensi/{id}/review', [PotensiReviewController::class, 'review']);
++    Route::post('/potensi-review/{id}', [PotensiReviewController::class, 'review']);
++
++    Route::post('/categories', [CategoryController::class, 'store']);
++    Route::put('/categories/{id}', [CategoryController::class, 'update']);
++    Route::delete('/categories/{id}', [CategoryController::class, 'destroy']);
++
++    Route::get('/messages', [MessageController::class, 'index']);
++    Route::get('/stats', [StatsController::class, 'index']);
++    Route::post('/upload', [UploadController::class, 'upload']);
+ 
+-// Admin Profile (protected by Sanctum)
+-Route::middleware('auth:sanctum')->group(function () {
+     Route::get('/admin/profile', [ProfileController::class, 'show']);
+     Route::post('/admin/profile', [ProfileController::class, 'update']);
+     Route::put('/admin/password', [ProfileController::class, 'changePassword']);
+     Route::post('/settings/logo', [SettingController::class, 'uploadLogo']);
+ });
+-
+-// Settings (public)
+-Route::get('/settings/logo', [SettingController::class, 'getLogo']);
+-
+diff --git a/tests/Feature/ApiSecurityTest.php b/tests/Feature/ApiSecurityTest.php
+new file mode 100644
+index 0000000..5840aa3
+--- /dev/null
++++ b/tests/Feature/ApiSecurityTest.php
+@@ -0,0 +1,347 @@
++<?php
++
++namespace Tests\Feature;
++
++use App\Models\Category;
++use App\Models\Message;
++use App\Models\Potensi;
++use App\Models\User;
++use Illuminate\Foundation\Testing\RefreshDatabase;
++use Illuminate\Http\UploadedFile;
++use Laravel\Sanctum\Sanctum;
++use Tests\TestCase;
++
++class ApiSecurityTest extends TestCase
++{
++    use RefreshDatabase;
++
++    private function admin(): User
++    {
++        return User::factory()->create(['email' => 'admin@test.id', 'password' => 'Rahasia123']);
++    }
++
++    private function potensi(string $status = 'aktif', array $extra = []): Potensi
++    {
++        return Potensi::create(array_merge([
++            'name' => 'Usaha Uji', 'owner_name' => 'Budi Santoso', 'whatsapp' => '081234567890',
++            'address' => 'Jl. Melati No. 12', 'description' => 'Deskripsi usaha untuk pengujian.',
++            'status' => $status,
++        ], $extra));
++    }
++
++    private function payload(array $o = []): array
++    {
++        return array_merge([
++            'name' => 'Warung Baru', 'owner_name' => 'Siti Aminah', 'whatsapp' => '081298765432',
++            'address' => 'Jl. Raya Pelemwatu 45', 'description' => 'Warung makan rumahan dengan menu harian.',
++        ], $o);
++    }
++
++    // ---------- Proteksi rute ----------
++
++    public function test_rute_tulis_ditolak_tanpa_token(): void
++    {
++        $p = $this->potensi();
++        $c = Category::create(['name' => 'Jasa']);
++
++        $this->putJson("/api/potensi/{$p->id}", ['name' => 'Diretas'])->assertStatus(401);
++        $this->deleteJson("/api/potensi/{$p->id}")->assertStatus(401);
++        $this->postJson('/api/categories', ['name' => 'X'])->assertStatus(401);
++        $this->putJson("/api/categories/{$c->id}", ['name' => 'X'])->assertStatus(401);
++        $this->deleteJson("/api/categories/{$c->id}")->assertStatus(401);
++        $this->postJson("/api/potensi/{$p->id}/review", ['status' => 'approved'])->assertStatus(401);
++        $this->postJson('/api/upload', [])->assertStatus(401);
++        $this->getJson('/api/messages')->assertStatus(401);
++        $this->getJson('/api/stats')->assertStatus(401);
++
++        $this->assertSame('Usaha Uji', $p->fresh()->name);
++        $this->assertNotNull(Category::find($c->id));
++    }
++
++    public function test_pesan_masuk_tidak_bocor_ke_publik(): void
++    {
++        Message::create(['name' => 'A', 'email' => 'a@b.id', 'message' => 'rahasia']);
++        $this->getJson('/api/messages')->assertStatus(401)->assertDontSee('rahasia');
++    }
++
++    public function test_rute_publik_tetap_bisa_diakses(): void
++    {
++        $this->getJson('/api/status')->assertOk();
++        $this->getJson('/api/categories')->assertOk();
++        $this->getJson('/api/potensi')->assertOk();
++        $this->getJson('/api/settings/logo')->assertOk();
++        $this->postJson('/api/messages', ['name' => 'A', 'email' => 'a@b.id', 'message' => 'Halo'])->assertStatus(201);
++    }
++
++    // ---------- Login ----------
++
++    public function test_login_hardcoded_admin_tidak_berlaku(): void
++    {
++        $this->postJson('/api/login', ['email' => 'admin@pelemwatu.desa.id', 'password' => 'admin123'])
++            ->assertStatus(401);
++    }
++
++    public function test_login_user_db_berhasil_dan_salah_password_gagal(): void
++    {
++        $this->admin();
++        $this->postJson('/api/auth/login', ['email' => 'ADMIN@test.id', 'password' => 'Rahasia123'])
++            ->assertOk()->assertJsonStructure(['data' => ['token', 'user']])
++            ->assertJsonMissing(['password']);
++        $this->postJson('/api/auth/login', ['email' => 'admin@test.id', 'password' => 'salah'])->assertStatus(401);
++    }
++
++    public function test_login_tanpa_input_tidak_500(): void
++    {
++        $this->postJson('/api/login', [])->assertStatus(422);
++        $this->postJson('/api/login', ['email' => ['x'], 'password' => 'y'])->assertStatus(422);
++    }
++
++    public function test_login_dibatasi_throttle(): void
++    {
++        $last = null;
++        for ($i = 0; $i < 12; $i++) {
++            $last = $this->postJson('/api/login', ['email' => 'x@y.id', 'password' => 'salah'])->status();
++        }
++        $this->assertSame(429, $last);
++    }
++
++    // ---------- Verify & logout ----------
++
++    public function test_verify_menolak_token_palsu(): void
++    {
++        $this->getJson('/api/auth/verify', ['Authorization' => 'Bearer palsu'])->assertStatus(401);
++        $this->getJson('/api/auth/verify')->assertStatus(401);
++    }
++
++    public function test_verify_menerima_token_asli(): void
++    {
++        $token = $this->admin()->createToken('t')->plainTextToken;
++        $this->getJson('/api/auth/verify', ['Authorization' => "Bearer $token"])->assertOk();
++    }
++
++    public function test_logout_hanya_cabut_token_saat_ini(): void
++    {
++        $u = $this->admin();
++        $t1 = $u->createToken('a')->plainTextToken;
++        $u->createToken('b');
++        $this->postJson('/api/auth/logout', [], ['Authorization' => "Bearer $t1"])->assertOk();
++        $this->assertSame(1, $u->tokens()->count());
++    }
++
++    public function test_logout_tanpa_token_ditolak(): void
++    {
++        $this->postJson('/api/auth/logout')->assertStatus(401);
++    }
++
++    public function test_logout_sesi_transient_tidak_500(): void
++    {
++        Sanctum::actingAs($this->admin());
++        $this->postJson('/api/auth/logout')->assertOk();
++    }
++
++    // ---------- Validasi / mass assignment ----------
++
++    public function test_kategori_validasi_dan_mass_assignment(): void
++    {
++        Sanctum::actingAs($this->admin());
++        $this->postJson('/api/categories', [])->assertStatus(422);
++        $this->postJson('/api/categories', ['name' => str_repeat('a', 300)])->assertStatus(422);
++        $r = $this->postJson('/api/categories', ['name' => 'Baru', 'id' => 999, 'created_at' => '2000-01-01'])->assertStatus(201);
++        $this->assertNotSame(999, $r->json('data.id'));
++        $c = Category::find($r->json('data.id'));
++        $this->assertNotSame('2000', $c->created_at->format('Y'));
++        $this->putJson("/api/categories/{$c->id}", ['name' => ''])->assertStatus(422);
++        $this->putJson("/api/categories/{$c->id}", ['name' => 'Ubah'])->assertOk();
++    }
++
++    public function test_update_potensi_divalidasi_dan_tidak_bisa_set_kolom_terlarang(): void
++    {
++        $admin = $this->admin();
++        Sanctum::actingAs($admin);
++        $p = $this->potensi();
++
++        $this->putJson("/api/potensi/{$p->id}", ['status' => 'hacked'])->assertStatus(422);
++        $this->putJson("/api/potensi/{$p->id}", ['whatsapp' => 'abc'])->assertStatus(422);
++        $this->putJson("/api/potensi/{$p->id}", ['category_id' => 9999])->assertStatus(422);
++        $this->putJson("/api/potensi/{$p->id}", ['name' => 'Nama Baru', 'reviewed_by' => 999, 'id' => 500])->assertOk();
++
++        $p = $p->fresh();
++        $this->assertSame('Nama Baru', $p->name);
++        $this->assertNotSame(999, $p->reviewed_by);
++        $this->assertSame(1, Potensi::count());
++    }
++
++    public function test_update_potensi_menerima_payload_form_admin(): void
++    {
++        Sanctum::actingAs($this->admin());
++        $cat = Category::create(['name' => 'Jasa']);
++        $p = $this->potensi();
++        $this->putJson("/api/potensi/{$p->id}", [
++            'name' => 'Edit', 'owner_name' => 'Budi', 'category_id' => $cat->id, 'whatsapp' => '081234567890',
++            'email' => null, 'address' => 'Jl. Melati No. 12', 'description' => 'Deskripsi cukup panjang sekali.',
++            'location' => null, 'jenis' => null, 'jam_operasional' => null, 'status' => 'aktif',
++        ])->assertOk();
++    }
++
++    // ---------- Upload ----------
++
++    public function test_upload_menolak_file_berbahaya(): void
++    {
++        Sanctum::actingAs($this->admin());
++        $this->postJson('/api/upload', ['image' => UploadedFile::fake()->create('shell.php', 10, 'application/x-php')])->assertStatus(422);
++        $this->postJson('/api/upload', ['image' => UploadedFile::fake()->create('a.html', 10, 'text/html')])->assertStatus(422);
++        $this->postJson('/api/upload', ['image' => UploadedFile::fake()->image('besar.jpg')->size(5000)])->assertStatus(422);
++        $this->postJson('/api/upload', [])->assertStatus(422);
++    }
++
++    public function test_upload_gambar_sah_dan_ekstensi_dari_isi_file(): void
++    {
++        Sanctum::actingAs($this->admin());
++        // PNG sungguhan dengan nama .php -> ekstensi harus mengikuti isi file
++        $file = UploadedFile::fake()->image('evil.php', 20, 20);
++        $res = $this->postJson('/api/upload', ['image' => $file]);
++        if ($res->status() === 200) {
++            $this->assertStringNotContainsString('.php', $res->json('path'));
++            @unlink(public_path($res->json('path')));
++        } else {
++            $res->assertStatus(422);
++        }
++        $ok = $this->postJson('/api/upload', ['image' => UploadedFile::fake()->image('foto.png', 20, 20)])->assertOk();
++        $this->assertMatchesRegularExpression('#^/uploads/[A-Za-z0-9_\-]+\.png$#', $ok->json('path'));
++        @unlink(public_path($ok->json('path')));
++    }
++
++    // ---------- Status & publikasi ----------
++
++    public function test_pendaftaran_publik_default_pending(): void
++    {
++        $r = $this->postJson('/api/potensi', $this->payload(['status' => 'aktif']))->assertStatus(201);
++        $this->assertSame('pending', $r->json('data.status'));
++        $this->assertSame('pending', Potensi::first()->status);
++    }
++
++    public function test_daftar_publik_hanya_yang_disetujui(): void
++    {
++        $this->potensi('aktif', ['name' => 'Aktif Satu']);
++        $this->potensi('approved', ['name' => 'Disetujui']);
++        $this->potensi('pending', ['name' => 'Pending Satu']);
++        $this->potensi('rejected', ['name' => 'Ditolak Satu']);
++
++        $names = collect($this->getJson('/api/potensi')->assertOk()->json('data'))->pluck('name')->all();
++        $this->assertEqualsCanonicalizing(['Aktif Satu', 'Disetujui'], $names);
++
++        // guest tidak bisa memaksa filter status
++        $names = collect($this->getJson('/api/potensi?status=pending')->json('data'))->pluck('name')->all();
++        $this->assertNotContains('Pending Satu', $names);
++    }
++
++    public function test_detail_publik_tidak_menampilkan_yang_belum_disetujui(): void
++    {
++        $p = $this->potensi('pending');
++        $a = $this->potensi('aktif');
++        $this->getJson("/api/potensi/{$p->id}")->assertStatus(404);
++        $this->getJson("/api/potensi/{$a->id}")->assertOk();
++    }
++
++    public function test_admin_melihat_semua_status_dan_bisa_filter(): void
++    {
++        $this->potensi('aktif');
++        $this->potensi('pending');
++        $this->potensi('rejected');
++        $token = $this->admin()->createToken('t')->plainTextToken;
++        $h = ['Authorization' => "Bearer $token"];
++
++        $this->assertCount(3, $this->getJson('/api/potensi', $h)->json('data'));
++        $this->assertCount(1, $this->getJson('/api/potensi?status=pending', $h)->json('data'));
++        $this->getJson('/api/potensi/' . Potensi::where('status', 'pending')->value('id'), $h)->assertOk();
++    }
++
++    // ---------- Review & stats ----------
++
++    public function test_review_mengisi_reviewed_by_dan_validasi(): void
++    {
++        $admin = $this->admin();
++        Sanctum::actingAs($admin);
++        $p = $this->potensi('pending');
++
++        $this->postJson("/api/potensi/{$p->id}/review", ['status' => 'bogus'])->assertStatus(422);
++        $this->postJson("/api/potensi/{$p->id}/review", ['status' => 'rejected'])->assertStatus(422); // alasan wajib
++        $this->postJson("/api/potensi/{$p->id}/review", ['status' => 'rejected', 'reason' => 'Data tidak lengkap'])->assertOk();
++        $p = $p->fresh();
++        $this->assertSame('rejected', $p->status);
++        $this->assertSame($admin->id, $p->reviewed_by);
++        $this->assertNotNull($p->reviewed_at);
++
++        $this->postJson("/api/potensi/{$p->id}/review", ['status' => 'approved'])->assertOk();
++        $p = $p->fresh();
++        $this->assertNull($p->rejection_reason);
++        $this->postJson('/api/potensi/99999/review', ['status' => 'approved'])->assertStatus(404);
++    }
++
++    public function test_stats_pending_dihitung_benar(): void
++    {
++        Sanctum::actingAs($this->admin());
++        $this->potensi('aktif');
++        $this->potensi('approved');
++        $this->potensi('pending');
++        $this->potensi('pending');
++        $this->potensi('rejected');
++
++        $d = $this->getJson('/api/stats')->assertOk()->json('data');
++        $this->assertSame(5, $d['totalPotensi']);
++        $this->assertSame(2, $d['pendingReviews']);
++    }
++
++    // ---------- Throttle pendaftaran & pesan ----------
++
++    public function test_pendaftaran_dan_pesan_dibatasi_throttle(): void
++    {
++        $s = null;
++        for ($i = 0; $i < 15; $i++) {
++            $s = $this->postJson('/api/potensi', $this->payload())->status();
++        }
++        $this->assertSame(429, $s);
++
++        for ($i = 0; $i < 15; $i++) {
++            $s = $this->postJson('/api/messages', ['name' => 'A', 'email' => 'a@b.id', 'message' => 'Halo'])->status();
++        }
++        $this->assertSame(429, $s);
++    }
++
++    public function test_pesan_divalidasi_panjangnya(): void
++    {
++        $this->postJson('/api/messages', ['name' => 'A', 'email' => 'bukan-email', 'message' => 'x'])->assertStatus(422);
++        $this->postJson('/api/messages', ['name' => 'A', 'email' => 'a@b.id', 'message' => str_repeat('x', 6000)])->assertStatus(422);
++    }
++
++    // ---------- Profil / password ----------
++
++    public function test_profil_dan_password_butuh_login(): void
++    {
++        $this->getJson('/api/admin/profile')->assertStatus(401);
++        $this->putJson('/api/admin/password', [])->assertStatus(401);
++        Sanctum::actingAs($this->admin());
++        $this->getJson('/api/admin/profile')->assertOk()->assertJsonPath('data.email', 'admin@test.id');
++    }
++
++    public function test_ganti_password_alur_lengkap(): void
++    {
++        $u = $this->admin();
++        Sanctum::actingAs($u);
++        $this->putJson('/api/admin/password', ['current_password' => 'salah', 'password' => 'Baru12345', 'password_confirmation' => 'Baru12345'])->assertStatus(422);
++        $this->putJson('/api/admin/password', ['current_password' => 'Rahasia123', 'password' => 'lemah', 'password_confirmation' => 'lemah'])->assertStatus(422);
++        $this->putJson('/api/admin/password', ['current_password' => 'Rahasia123', 'password' => 'Baru12345', 'password_confirmation' => 'Baru12345'])->assertOk();
++        $this->assertTrue(\Hash::check('Baru12345', $u->fresh()->password));
++    }
++
++    public function test_seeder_tidak_memakai_password_bawaan(): void
++    {
++        config(['admin.email' => 'seed@test.id', 'admin.password' => 'SeedPass123']);
++        $this->seed();
++        $u = User::where('email', 'seed@test.id')->first();
++        $this->assertNotNull($u);
++        $this->assertTrue(\Hash::check('SeedPass123', $u->password));
++        $this->assertFalse(\Hash::check('admin123', $u->password));
++        $this->assertNull(User::where('email', 'admin@pelemwatu.desa.id')->first());
++    }
++}
+diff --git a/tests/Feature/ExampleTest.php b/tests/Feature/ExampleTest.php
+deleted file mode 100644
+index 8364a84..0000000
+--- a/tests/Feature/ExampleTest.php
++++ /dev/null
+@@ -1,19 +0,0 @@
+-<?php
+-
+-namespace Tests\Feature;
+-
+-// use Illuminate\Foundation\Testing\RefreshDatabase;
+-use Tests\TestCase;
+-
+-class ExampleTest extends TestCase
+-{
+-    /**
+-     * A basic test example.
+-     */
+-    public function test_the_application_returns_a_successful_response(): void
+-    {
+-        $response = $this->get('/');
+-
+-        $response->assertStatus(200);
+-    }
+-}
+diff --git a/tests/Feature/PageSmokeTest.php b/tests/Feature/PageSmokeTest.php
+new file mode 100644
+index 0000000..5d1d49d
+--- /dev/null
++++ b/tests/Feature/PageSmokeTest.php
+@@ -0,0 +1,23 @@
++<?php
++
++namespace Tests\Feature;
++
++use Illuminate\Foundation\Testing\RefreshDatabase;
++use Tests\TestCase;
++
++class PageSmokeTest extends TestCase
++{
++    use RefreshDatabase;
++
++    public function test_semua_halaman_web_terbuka(): void
++    {
++        foreach (['/', '/index.html', '/login', '/login.html', '/admin', '/admin.html', '/daftar-potensi', '/daftar-potensi.html'] as $url) {
++            $this->get($url)->assertOk();
++        }
++    }
++
++    public function test_halaman_tidak_ada_404(): void
++    {
++        $this->get('/tidak-ada')->assertNotFound();
++    }
++}
+diff --git a/tests/Unit/ExampleTest.php b/tests/Unit/ExampleTest.php
+deleted file mode 100644
+index 5773b0c..0000000
+--- a/tests/Unit/ExampleTest.php
++++ /dev/null
+@@ -1,16 +0,0 @@
+-<?php
+-
+-namespace Tests\Unit;
+-
+-use PHPUnit\Framework\TestCase;
+-
+-class ExampleTest extends TestCase
+-{
+-    /**
+-     * A basic test example.
+-     */
+-    public function test_that_true_is_true(): void
+-    {
+-        $this->assertTrue(true);
+-    }
+-}
+-- 
+2.43.0
+
