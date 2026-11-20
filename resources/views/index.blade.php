@@ -22,7 +22,7 @@
   <!-- NAVBAR -->
   <nav class="navbar navbar-expand-lg" id="mainNavbar">
     <div class="container">
-      <a class="navbar-brand-wrap" href="index.html">
+      <a class="navbar-brand-wrap" href="/">
         <img class="brand-logo" src="assets/img/logo-desa.png" alt="Logo Desa Pelemwatu" data-site-logo>
         <div class="brand-text-wrap">
           <span class="brand-name">EtalasePelemwatu</span>
@@ -33,21 +33,25 @@
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navMenu">
-        <ul class="navbar-nav ms-auto gap-1">
+        <ul class="navbar-nav mx-auto gap-1">
           <li class="nav-item"><a class="nav-link active" href="#hero-desa">Beranda</a></li>
           <li class="nav-item"><a class="nav-link" href="#profil-desa">Profil Desa</a></li>
-          <li class="nav-item"><a class="nav-link" href="#pengenalan-etalase">Tentang Etalase</a></li>
-          <li class="nav-item"><a class="nav-link" href="#katalog">Katalog Potensi</a></li>
+          <li class="nav-item"><a class="nav-link" href="#pengenalan-etalase">Tentang</a></li>
+          <li class="nav-item"><a class="nav-link" href="#katalog">Katalog</a></li>
           <li class="nav-item"><a class="nav-link" href="#layanan">Layanan</a></li>
           <li class="nav-item"><a class="nav-link" href="#kontak-section">Kontak</a></li>
         </ul>
-        <div class="d-flex align-items-center gap-2 mt-2 mt-lg-0 ms-lg-3 flex-wrap">
+        <div class="d-flex align-items-center gap-2 mt-2 mt-lg-0 ms-lg-2 flex-wrap">
           <div id="navWargaWrap"></div>
           <div id="navAdminWrap">
             <button type="button" class="btn-nav-admin" data-bs-toggle="modal" data-bs-target="#modalLoginAdmin">
               Login Admin
             </button>
           </div>
+          <a href="/daftar-potensi" class="nav-link btn-nav-daftar" id="navBtnDaftar">
+            Daftarkan Potensi
+            <span class="nav-cta-arrow"><i class="bi bi-arrow-up-right"></i></span>
+          </a>
         </div>
       </div>
     </div>
@@ -57,26 +61,24 @@
 <!-- ============================================================
      HERO — PENGENALAN DESA PELEMWATU
      ============================================================ -->
-<section id="hero-desa">
-  <div class="container position-relative" style="z-index:2;">
-    <div class="hero-content" style="padding: 180px 0 100px;">
-      <h1>Selamat Datang di<br>Desa Pelemwatu</h1>
-      <p class="hero-desc">
-        Desa Pelemwatu berada di Kecamatan Menganti, Kabupaten Gresik.
-        Warganya menjalankan usaha kuliner, laundry, kost, dan masih banyak
-        lagi. Semuanya dikumpulkan di satu etalase supaya mudah ditemukan.
-      </p>
-      <div class="hero-cta-wrap">
-        <a href="#katalog" class="btn-hero-primary">
-          Lihat Usaha Warga
-        </a>
-        <a href="#profil-desa" class="btn-hero-outline">
-          Kenali Desanya
-        </a>
+<div class="hero-frame-wrap">
+  <section id="hero-desa">
+    <div class="container position-relative" style="z-index:2;">
+      <div class="hero-content">
+        <h1>Selamat Datang di<br>Desa Pelemwatu</h1>
+        <p class="hero-desc">
+          Desa Pelemwatu berada di Kecamatan Menganti, Kabupaten Gresik.
+          Warganya menjalankan usaha kuliner, laundry, kost, dan masih banyak
+          lagi. Semuanya dikumpulkan di satu etalase supaya mudah ditemukan.
+        </p>
+        <div class="hero-cta-wrap">
+          <a href="#katalog" class="btn-hero-primary">Lihat Usaha Warga</a>
+          <a href="#profil-desa" class="btn-hero-outline">Kenali Desanya</a>
+        </div>
       </div>
     </div>
-  </div>
-</section>
+  </section>
+</div>
 
 <!-- ============================================================
      PROFIL DESA
@@ -315,186 +317,70 @@
 </section>
 
 <!-- ============================================================
-     KATALOG POTENSI LOKAL
+     KATALOG POTENSI LOKAL — Horizontal Slider + Search
      ============================================================ -->
-<section id="katalog" class="py-5">
+<section id="katalog" class="katalog-slider-section">
   <div class="container">
-    <div class="section-header center reveal">
-      <h2>Temukan Potensi Lokal</h2>
-      <p>Berbagai usaha, jasa, hunian, dan produk warga Desa Pelemwatu yang terdaftar di EtalasePelemwatu.</p>
+
+    {{-- Header: judul kiri, deskripsi kanan --}}
+    <div class="ks-header">
+      <div class="ks-header-left">
+        <h2 class="ks-title">Temukan Potensi Lokal</h2>
+      </div>
+      <div class="ks-header-right">
+        <p class="ks-desc">Berbagai usaha, jasa, hunian, dan produk warga Desa Pelemwatu. Geser atau cari untuk menjelajahi.</p>
+      </div>
     </div>
 
-    <!-- Toolbar: Pencarian & Filter Kategori -->
-    <div class="katalog-toolbar reveal">
-      <div class="row g-3 align-items-start">
-        <!-- Input Pencarian -->
-        <div class="col-lg-5 col-md-6">
-          <div class="katalog-search-box">
-            <i class="bi bi-search search-icon"></i>
-            <input type="text" id="katalogSearch" class="form-control" placeholder="Cari potensi, usaha, jasa, atau produk..." autocomplete="off">
-            <button type="button" id="katalogSearchClear" class="search-clear-btn" style="display:none;" title="Hapus pencarian">
-              <i class="bi bi-x-circle-fill"></i>
-            </button>
-          </div>
-          <div class="katalog-quick-tags d-flex align-items-center gap-1 flex-wrap mt-2" style="font-size:.8rem;">
-            <span class="text-muted fw-semibold me-1">Populer:</span>
-            <button type="button" class="quick-tag-btn" data-keyword="dimsum">Dimsum</button>
-            <button type="button" class="quick-tag-btn" data-keyword="laundry">Laundry</button>
-            <button type="button" class="quick-tag-btn" data-keyword="kost">Kost</button>
-            <button type="button" class="quick-tag-btn" data-keyword="frozen">Frozen Food</button>
-            <button type="button" class="quick-tag-btn" data-keyword="prasmanan">Prasmanan</button>
-          </div>
-        </div>
-
-        <!-- Filter Kategori -->
-        <div class="col-lg-7 col-md-6">
-          <div class="katalog-filter-bar">
-            <button class="filter-btn active" data-filter="all">Semua</button>
-            <button class="filter-btn" data-filter="usaha">Usaha &amp; Produk</button>
-            <button class="filter-btn" data-filter="jasa">Jasa</button>
-            <button class="filter-btn" data-filter="hunian">Hunian</button>
-            <button class="filter-btn" data-filter="barang">Barang Warga</button>
-          </div>
-        </div>
+    {{-- Search bar --}}
+    <div class="ks-search-wrap">
+      <div class="ks-search-box">
+        <i class="bi bi-search ks-search-icon"></i>
+        <input type="text" id="ksSearchInput" class="ks-search-input" placeholder="Cari nama usaha, kategori, atau deskripsi..." autocomplete="off">
+        <button type="button" id="ksSearchClear" class="ks-search-clear" style="display:none;" title="Hapus">
+          <i class="bi bi-x-circle-fill"></i>
+        </button>
       </div>
+      <div class="ks-filter-tags" id="ksFilterTags">
+        <button class="ks-tag active" data-cat="">Semua</button>
+        <button class="ks-tag" data-cat="usaha">Usaha</button>
+        <button class="ks-tag" data-cat="jasa">Jasa</button>
+        <button class="ks-tag" data-cat="hunian">Hunian</button>
+        <button class="ks-tag" data-cat="barang">Barang</button>
+      </div>
+    </div>
 
-      <!-- Info Hasil Pencarian -->
-      <div id="katalogSearchResultInfo" class="search-result-info mt-3" style="display:none;">
-        <span id="searchResultText"></span>
-        <button type="button" id="btnResetFilterSearch" class="btn-link-reset ms-2">
-          Reset Pencarian
+    {{-- Loading skeleton / hasil --}}
+    <div class="ks-viewport" id="ksViewport">
+      <div class="ks-track" id="ksTrack">
+        <div class="ks-skeleton"></div>
+        <div class="ks-skeleton"></div>
+        <div class="ks-skeleton"></div>
+        <div class="ks-skeleton"></div>
+      </div>
+    </div>
+    <div id="ksEmpty" class="ks-empty" style="display:none;">
+      <i class="bi bi-search" style="font-size:2rem;color:#ccc;"></i>
+      <p>Tidak ada potensi yang cocok.</p>
+    </div>
+
+    {{-- Footer: tombol Daftarkan kiri, Prev/Next kanan --}}
+    <div class="ks-footer">
+      <a href="/daftar-potensi" class="ks-btn-all">Daftarkan Potensimu</a>
+      <div class="ks-nav">
+        <button class="ks-nav-btn" id="ksPrev" title="Sebelumnya">
+          <i class="bi bi-chevron-left"></i>
+        </button>
+        <button class="ks-nav-btn" id="ksNext" title="Berikutnya">
+          <i class="bi bi-chevron-right"></i>
         </button>
       </div>
     </div>
 
-    <div class="katalog-grid">
-      <!-- USAHA -->
-      <div class="potensi-card" data-category="usaha">
-        <div class="potensi-card-img">
-          <img src="assets/img/foto-warung-desa.jpg" alt="Omah Dimsum" loading="lazy">
-        </div>
-        <div class="potensi-card-body">
-          <span class="potensi-name-tag">Omah Dimsum</span>
-          <p>Usaha kuliner yang menyajikan berbagai jenis dimsum pilihan dengan cita rasa khas. Melayani pembelian langsung maupun pemesanan.</p>
-          <button class="btn-detail" data-id="omah-dimsum" data-bs-toggle="modal" data-bs-target="#detailModal">
-            Lihat Detail →
-          </button>
-        </div>
-      </div>
-
-      <div class="potensi-card" data-category="usaha">
-        <div class="potensi-card-img">
-          <img src="assets/img/foto-daftar-potensi.jpg" alt="Warung Prasmanan Selarasnasi" loading="lazy">
-        </div>
-        <div class="potensi-card-body">
-          <span class="potensi-name-tag">Warung Prasmanan Selarasnasi</span>
-          <p>Warung makan prasmanan pilihan masyarakat dengan menu masakan rumahan yang beragam setiap harinya.</p>
-          <button class="btn-detail" data-id="warung-prasmanan" data-bs-toggle="modal" data-bs-target="#detailModal">
-            Lihat Detail →
-          </button>
-        </div>
-      </div>
-
-      <div class="potensi-card" data-category="usaha">
-        <div class="potensi-card-img">
-          <img src="assets/img/kegiatan-kantor-desa.jpg" alt="Ratu Frozen Food Pelemwatu" loading="lazy">
-        </div>
-        <div class="potensi-card-body">
-          <span class="potensi-name-tag">Ratu Frozen Food Pelemwatu</span>
-          <p>Usaha penjualan produk frozen food berkualitas untuk kebutuhan rumah tangga dan usaha kuliner.</p>
-          <button class="btn-detail" data-id="ratu-frozen" data-bs-toggle="modal" data-bs-target="#detailModal">
-            Lihat Detail →
-          </button>
-        </div>
-      </div>
-
-      <!-- JASA -->
-      <div class="potensi-card" data-category="jasa">
-        <div class="potensi-card-img">
-          <img src="assets/img/kegiatan-kerja-bakti.jpg" alt="Moni Laundry 24 Jam" loading="lazy">
-        </div>
-        <div class="potensi-card-body">
-          <span class="potensi-name-tag">Moni Laundry 24 Jam</span>
-          <p>Layanan jasa laundry yang beroperasi 24 jam untuk memenuhi kebutuhan pencucian pakaian masyarakat.</p>
-          <button class="btn-detail" data-id="moni-laundry" data-bs-toggle="modal" data-bs-target="#detailModal">
-            Lihat Detail →
-          </button>
-        </div>
-      </div>
-
-      <div class="potensi-card" data-category="jasa">
-        <div class="potensi-card-img">
-          <img src="assets/img/kegiatan-penghijauan.jpg" alt="One Laundry Koin" loading="lazy">
-        </div>
-        <div class="potensi-card-body">
-          <span class="potensi-name-tag">One Laundry Koin</span>
-          <p>Layanan laundry mandiri berbasis koin yang praktis dan terjangkau bagi warga desa.</p>
-          <button class="btn-detail" data-id="one-laundry" data-bs-toggle="modal" data-bs-target="#detailModal">
-            Lihat Detail →
-          </button>
-        </div>
-      </div>
-
-      <!-- HUNIAN -->
-      <div class="potensi-card" data-category="hunian">
-        <div class="potensi-card-img">
-          <img src="assets/img/foto-kantor-desa.jpg" alt="My Kost" loading="lazy">
-        </div>
-        <div class="potensi-card-body">
-          <span class="potensi-name-tag">My Kost</span>
-          <p>Hunian kost nyaman dan terjangkau di lingkungan Desa Pelemwatu. Tersedia pilihan kamar yang dapat disesuaikan.</p>
-          <button class="btn-detail" data-id="my-kost" data-bs-toggle="modal" data-bs-target="#detailModal">
-            Lihat Detail →
-          </button>
-        </div>
-      </div>
-
-      <div class="potensi-card" data-category="hunian">
-        <div class="potensi-card-img">
-          <img src="assets/img/foto-warung-desa.jpg" alt="RAMA Kost" loading="lazy">
-        </div>
-        <div class="potensi-card-body">
-          <span class="potensi-name-tag">RAMA Kost</span>
-          <p>Pilihan hunian kost dengan fasilitas yang baik di lingkungan desa. Cocok untuk warga dan pendatang baru.</p>
-          <button class="btn-detail" data-id="rama-kost" data-bs-toggle="modal" data-bs-target="#detailModal">
-            Lihat Detail →
-          </button>
-        </div>
-      </div>
-
-      <!-- BARANG -->
-      <div class="potensi-card" data-category="barang">
-        <div class="potensi-card-img">
-          <img src="assets/img/foto-daftar-potensi.jpg" alt="Barang & Produk Warga" loading="lazy">
-        </div>
-        <div class="potensi-card-body">
-          <span class="potensi-name-tag">Barang &amp; Produk Warga</span>
-          <p>Kategori ini menampung informasi produk dan barang yang dijual oleh warga Desa Pelemwatu.</p>
-          <a href="daftar-potensi.html" class="btn-detail">
-            Daftarkan →
-          </a>
-        </div>
-      </div>
-
-      <!-- Empty State -->
-      <div id="katalogEmptyState" class="katalog-empty-state" style="display:none;">
-        <div class="empty-icon"><i class="bi bi-search"></i></div>
-        <h5>Potensi Tidak Ditemukan</h5>
-        <p id="emptyStateMsg">Tidak ada potensi lokal yang cocok dengan kata kunci pencarian Anda.</p>
-        <button type="button" class="btn-outline-custom btn-sm" id="btnResetEmptyState">
-          Tampilkan Semua Potensi
-        </button>
-      </div>
-    </div><!-- /katalog-grid -->
-
-    <div class="text-center mt-5 reveal">
-      <p class="mb-3" style="color:var(--clr-text-mid);">Ingin menampilkan potensi usaha, produk, jasa, atau hunian Anda?</p>
-      <a href="daftar-potensi.html" class="btn-primary-custom">
-        Daftarkan Potensi Lokal
-      </a>
-    </div>
   </div>
 </section>
+
+
 
 <!-- ============================================================
      LAYANAN DIGITAL
@@ -637,50 +523,66 @@
      MODAL DETAIL POTENSI
      ============================================================ -->
 <div class="modal fade" id="detailModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered modal-lg">
+  <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
     <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="detail-nama-title">Detail Potensi</h5>
+      <div class="modal-header border-0 pb-0">
+        <div>
+          <span class="dm-cat-badge" id="dm-cat">—</span>
+          <h5 class="modal-title dm-title" id="dm-nama">Detail Potensi</h5>
+        </div>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
-      <div class="modal-body">
-        <div id="detail-img" class="detail-img-placeholder" style="background:#fff0e8;border-radius:10px;margin-bottom:1.25rem;">
-          <span id="detail-emoji" style="font-size:5rem;line-height:1;">🥟</span>
-        </div>
-        <div class="detail-info-row">
-          <div class="detail-info-item flex-fill">
-            <label>Nama Potensi</label>
-            <p id="detail-nama">—</p>
-          </div>
-          <div class="detail-info-item flex-fill">
-            <label>Kategori</label>
-            <p id="detail-kategori">—</p>
-          </div>
-          <div class="detail-info-item flex-fill">
-            <label>Status</label>
-            <p id="detail-status">—</p>
+      <div class="modal-body pt-2">
+
+        {{-- Foto --}}
+        <div class="dm-foto-wrap" id="dm-foto-wrap">
+          <img id="dm-foto" src="" alt="" style="display:none;">
+          <div id="dm-foto-placeholder" class="dm-foto-placeholder">
+            <i class="bi bi-image" style="font-size:3rem;color:#ccc;"></i>
           </div>
         </div>
-        <div class="mb-3">
-          <label style="font-size:.78rem;color:var(--text-light);text-transform:uppercase;letter-spacing:.8px;font-weight:600;">Deskripsi</label>
-          <p id="detail-deskripsi" class="mt-1">—</p>
+
+        {{-- Info baris --}}
+        <div class="dm-grid">
+          <div class="dm-field">
+            <span class="dm-label">Nama Potensi / Usaha</span>
+            <span class="dm-value" id="dm-nama-potensi">—</span>
+          </div>
+          <div class="dm-field">
+            <span class="dm-label">Jenis Usaha</span>
+            <span class="dm-value" id="dm-jenis">—</span>
+          </div>
+          <div class="dm-field">
+            <span class="dm-label">Jam Operasional</span>
+            <span class="dm-value" id="dm-jam">—</span>
+          </div>
+          <div class="dm-field">
+            <span class="dm-label">Lokasi / Alamat Usaha</span>
+            <span class="dm-value" id="dm-lokasi">—</span>
+          </div>
+          <div class="dm-field">
+            <span class="dm-label">WhatsApp</span>
+            <span class="dm-value" id="dm-wa">—</span>
+          </div>
+          <div class="dm-field" id="dm-email-field" style="display:none;">
+            <span class="dm-label">Email</span>
+            <span class="dm-value" id="dm-email">—</span>
+          </div>
         </div>
-        <div class="mb-0">
-          <label style="font-size:.78rem;color:var(--text-light);text-transform:uppercase;letter-spacing:.8px;font-weight:600;">Lokasi</label>
-          <p id="detail-lokasi" class="mt-1">—</p>
+
+        <div class="dm-field dm-field-full">
+          <span class="dm-label">Deskripsi</span>
+          <p class="dm-desc" id="dm-deskripsi">—</p>
         </div>
 
       </div>
-      <div class="modal-footer" style="border-top:1px solid var(--border);">
+      <div class="modal-footer border-0 pt-0">
         <button type="button" class="btn-outline-custom" data-bs-dismiss="modal">Tutup</button>
-        <a href="daftar-potensi.html" class="btn-primary-custom">
-          Daftarkan Potensimu
-        </a>
+        <a href="/daftar-potensi" class="btn-primary-custom">Daftarkan Potensimu</a>
       </div>
     </div>
   </div>
 </div>
-
 <!-- Fixed Elements -->
 <div id="toastContainer"></div>
 <button id="backToTop" title="Kembali ke atas"><i class="bi bi-arrow-up"></i></button>
@@ -771,6 +673,8 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="assets/js/main.js"></script>
 <script src="assets/js/auth.js"></script>
+<script>window.APP_URL = "{{ rtrim(config('app.url'), '/') }}";</script>
+<script src="assets/js/katalog-slider.js"></script>
 <script>
   // Animasi scroll: elemen .reveal muncul saat masuk layar
   (function () {

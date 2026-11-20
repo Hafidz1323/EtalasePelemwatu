@@ -57,13 +57,16 @@
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navMenuProfil">
-        <ul class="navbar-nav ms-auto gap-1">
+        <ul class="navbar-nav mx-auto gap-1">
           <li class="nav-item"><a class="nav-link" href="/">Beranda</a></li>
           <li class="nav-item"><a class="nav-link" href="/#katalog">Katalog</a></li>
-          <li class="nav-item"><a class="nav-link" href="/daftar-potensi">Daftarkan Potensi</a></li>
         </ul>
-        <div class="d-flex align-items-center gap-2 mt-2 mt-lg-0 ms-lg-3">
+        <div class="d-flex align-items-center gap-2 mt-2 mt-lg-0 ms-lg-2">
           <div id="navWargaWrap"></div>
+          <a href="/daftar-potensi" class="nav-link btn-nav-daftar" id="navBtnDaftar">
+            Daftarkan Potensi
+            <span class="nav-cta-arrow"><i class="bi bi-arrow-up-right"></i></span>
+          </a>
         </div>
       </div>
     </div>
