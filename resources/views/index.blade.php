@@ -271,19 +271,45 @@
 </section>
 
 <!-- ============================================================
-     TENTANG ETALASE — foto latar + overlay oranye
+     TENTANG ETALASE — layout dua kolom: teks kiri, foto kanan
      ============================================================ -->
-<section id="pengenalan-etalase" class="tentang-etalase">
-  <div class="container position-relative" style="z-index:1;">
-    <div class="tentang-etalase-inner">
-    <h2>EtalasePelemwatu:<br>Satu Tempat untuk<br>Semua Potensi Lokal</h2>
-    <p>
-      EtalasePelemwatu adalah katalog digital milik Desa Pelemwatu, Kecamatan Menganti,
-      Kabupaten Gresik. Warga dapat mendaftarkan usaha kuliner, jasa, hunian, dan barang
-      yang dijual atau disewakan, lengkap dengan deskripsi dan lokasinya. Pengunjung bisa
-      mencari dan menyaring berdasarkan kategori, sehingga usaha warga lebih mudah ditemukan.
-    </p>
-    <a href="#katalog" class="tentang-btn">Lihat Katalog Potensi</a>
+<section id="pengenalan-etalase" class="tentang-etalase-v2">
+  <div class="container">
+    <div class="row align-items-center g-0">
+
+      {{-- Kolom kiri: konten teks --}}
+      <div class="col-lg-6 tentang-v2-left">
+        <div class="tentang-v2-eyebrow">
+          <span class="tentang-v2-line"></span>
+          <span class="tentang-v2-label">Tentang Etalase</span>
+        </div>
+        <h2 class="tentang-v2-title">Siapa <strong>Kami?</strong></h2>
+        <p class="tentang-v2-body">
+          <strong>EtalasePelemwatu</strong> adalah katalog digital resmi Desa Pelemwatu,
+          Kecamatan Menganti, Kabupaten Gresik. Kami hadir untuk menjadi jembatan antara
+          potensi lokal warga dengan pasar yang lebih luas — dari kuliner rumahan, kerajinan
+          tangan, hingga jasa dan hunian sewa.
+        </p>
+        <p class="tentang-v2-body">
+          Setiap usaha yang terdaftar ditampilkan lengkap dengan foto, deskripsi, dan
+          informasi kontak pemilik. Pengunjung dapat mencari dan menyaring berdasarkan
+          kategori, sehingga potensi warga lebih mudah ditemukan oleh siapa saja.
+        </p>
+        <a href="#katalog" class="tentang-v2-btn">Lihat Katalog Potensi</a>
+      </div>
+
+      {{-- Kolom kanan: foto + blok warna backdrop --}}
+      <div class="col-lg-6 tentang-v2-right">
+        <div class="tentang-v2-img-wrap">
+          <div class="tentang-v2-backdrop"></div>
+          <img
+            src="{{ asset('assets/img/foto-warung-desa.jpg') }}"
+            alt="Suasana usaha warga Desa Pelemwatu"
+            class="tentang-v2-photo"
+          >
+        </div>
+      </div>
+
     </div>
   </div>
 </section>

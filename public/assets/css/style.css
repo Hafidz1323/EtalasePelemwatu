@@ -2422,9 +2422,137 @@ body.form-page .form-page-header p {
 
 
 /* ============================================================
-   TENTANG ETALASE — foto di belakang, lapisan oranye transparan,
-   teks di atasnya
+   TENTANG ETALASE v2 — layout dua kolom (teks kiri, foto kanan)
    ============================================================ */
+.tentang-etalase-v2 {
+  padding: 5rem 0;
+  background: #FFFFFF;
+  overflow: hidden;
+}
+
+/* Kolom kiri */
+.tentang-v2-left {
+  padding-right: 3rem;
+}
+
+/* Eyebrow: garis + label */
+.tentang-v2-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  margin-bottom: 1rem;
+}
+.tentang-v2-line {
+  display: block;
+  width: 2.5rem;
+  height: 3px;
+  background: #F2630F;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+.tentang-v2-label {
+  font-size: .78rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: #F2630F;
+}
+
+/* Judul */
+.tentang-v2-title {
+  font-size: clamp(1.8rem, 3.2vw, 2.6rem);
+  font-weight: 400;
+  color: #1F2A24;
+  line-height: 1.25;
+  margin-bottom: 1.5rem;
+}
+.tentang-v2-title strong {
+  font-weight: 800;
+  color: #1F2A24;
+}
+
+/* Paragraf */
+.tentang-v2-body {
+  font-size: .97rem;
+  line-height: 1.8;
+  color: #46524B;
+  margin-bottom: 1.1rem;
+}
+
+/* Tombol */
+.tentang-v2-btn {
+  display: inline-block;
+  margin-top: .75rem;
+  padding: .75rem 2rem;
+  background: #F2630F;
+  color: #FFFFFF;
+  border: 2px solid #F2630F;
+  border-radius: 4px;
+  font-size: .85rem;
+  font-weight: 700;
+  letter-spacing: .5px;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: background .25s, color .25s;
+}
+.tentang-v2-btn:hover {
+  background: #D4540C;
+  border-color: #D4540C;
+  color: #FFFFFF;
+}
+
+/* Kolom kanan: foto + backdrop */
+.tentang-v2-right {
+  display: flex;
+  justify-content: flex-end;
+}
+.tentang-v2-img-wrap {
+  position: relative;
+  width: 100%;
+  max-width: 520px;
+  /* tinggi dinamis mengikuti foto */
+}
+
+/* Blok warna oranye di sudut kanan-atas (backdrop) */
+.tentang-v2-backdrop {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 78%;
+  height: 86%;
+  background: #F2630F;
+  border-radius: 4px;
+  z-index: 0;
+}
+
+/* Foto utama — mengapung ke kiri-bawah, menutupi sudut backdrop */
+.tentang-v2-photo {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 82%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: 4px;
+  box-shadow: 0 12px 32px rgba(30, 59, 44, .18);
+  margin-top: 2.5rem;
+  margin-right: 2.5rem;
+}
+
+/* Responsif */
+@media (max-width: 991px) {
+  .tentang-etalase-v2 { padding: 3.5rem 0; }
+  .tentang-v2-left { padding-right: 1rem; margin-bottom: 3rem; }
+  .tentang-v2-right { justify-content: center; }
+  .tentang-v2-img-wrap { max-width: 420px; }
+}
+@media (max-width: 575px) {
+  .tentang-v2-title { font-size: 1.7rem; }
+  .tentang-v2-photo { width: 85%; margin-top: 2rem; margin-right: 1.5rem; }
+  .tentang-v2-backdrop { width: 75%; height: 82%; }
+}
+
+
 #pengenalan-etalase.tentang-etalase {
   position: relative;
   display: flex;
