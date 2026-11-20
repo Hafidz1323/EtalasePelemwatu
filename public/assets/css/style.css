@@ -3107,3 +3107,52 @@ body.form-page .form-page-header p {
   .dm-grid { grid-template-columns: 1fr; }
   .dm-foto-wrap { height: 160px; }
 }
+
+/* ============================================================
+   NAVBAR BUTTONS — Konsistensi Pill Shape (border-radius: 50px)
+   Semua button di navbar seragam: ep-nav-user, btn-nav-admin, btn-nav-daftar
+   ============================================================ */
+
+/* Tombol warga (icon person / nama singkat) */
+.ep-nav-user {
+  border-radius: 50px !important;
+  padding: .4rem .75rem !important;
+  font-size: 1rem !important;
+  font-weight: 600;
+  border-width: 1.5px !important;
+  height: 36px;
+}
+
+/* Tombol Login Admin */
+.btn-nav-admin {
+  border-radius: 50px !important;
+  padding: .4rem 1rem !important;
+  font-size: .82rem !important;
+  font-weight: 600 !important;
+  height: 36px;
+  display: inline-flex !important;
+  align-items: center !important;
+}
+
+/* Tombol CTA Daftarkan Potensi — sudah pill, selaraskan tinggi */
+.btn-nav-daftar,
+a.btn-nav-daftar,
+.nav-link.btn-nav-daftar {
+  height: 36px !important;
+  padding: 0 1.2rem !important;
+  font-size: .82rem !important;
+  border-radius: 50px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: .4rem !important;
+}
+
+/* Pastikan semua state hover/active/focus juga pill */
+.ep-nav-user:hover,
+.ep-nav-user:focus,
+.ep-nav-user[aria-expanded="true"],
+.btn-nav-admin:hover,
+.btn-nav-admin:focus,
+.btn-nav-admin[aria-expanded="true"] {
+  border-radius: 50px !important;
+}
