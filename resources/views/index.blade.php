@@ -42,9 +42,7 @@
           <li class="nav-item"><a class="nav-link" href="#kontak-section">Kontak</a></li>
         </ul>
         <div class="d-flex align-items-center gap-2 mt-2 mt-lg-0 ms-lg-3 flex-wrap">
-          <a href="daftar-potensi.html" class="nav-link btn-nav-daftar">
-            Daftarkan Potensimu
-          </a>
+          <div id="navWargaWrap"></div>
           <div id="navAdminWrap">
             <button type="button" class="btn-nav-admin" data-bs-toggle="modal" data-bs-target="#modalLoginAdmin">
               Login Admin
@@ -852,6 +850,7 @@
     if (e.key === 'ArrowRight') shiftLightbox(1);
   });
 </script>
+<script src="assets/js/warga-auth.js"></script>
 <script>
 (function () {
   var API_BASE = (window.location.protocol === 'file:' || window.location.port === '5500')

@@ -36,7 +36,7 @@ class PotensiPublicResource extends JsonResource
             'images'          => $this->whenLoaded('images', fn () =>
                 $this->images->map(fn ($img) => [
                     'id'   => $img->id,
-                    'path' => $img->path,
+                    'path' => $img->image_path,
                 ])
             ),
         ];

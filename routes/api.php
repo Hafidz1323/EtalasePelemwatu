@@ -10,6 +10,9 @@ use App\Http\Controllers\API\PotensiReviewController;
 use App\Http\Controllers\API\UploadController;
 use App\Http\Controllers\API\ProfileController;
 use App\Http\Controllers\API\SettingController;
+use App\Http\Controllers\API\WargaAuthController;
+use App\Http\Controllers\API\WargaProfileController;
+use App\Http\Controllers\API\WargaPotensiController;
 
 /*
 |--------------------------------------------------------------------------
@@ -46,6 +49,10 @@ Route::post('/messages', [MessageController::class, 'store'])->middleware('throt
 |--------------------------------------------------------------------------
 */
 Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/admin/deletion-requests',                             [PotensiReviewController::class, 'deletionRequests']);
+    Route::post('/admin/deletion-requests/{id}/approve',               [PotensiReviewController::class, 'approveDeletion']);
+    Route::post('/admin/deletion-requests/{id}/reject',                [PotensiReviewController::class, 'rejectDeletion']);
+
     Route::post('/auth/logout', [AuthController::class, 'logout']);
     Route::get('/auth/verify', [AuthController::class, 'verify']);
 
@@ -66,4 +73,36 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/admin/profile', [ProfileController::class, 'update']);
     Route::put('/admin/password', [ProfileController::class, 'changePassword']);
     Route::post('/settings/logo', [SettingController::class, 'uploadLogo']);
+});
+
+/*
+|--------------------------------------------------------------------------
+| Rute warga (registrasi & login)
+|--------------------------------------------------------------------------
+*/
+Route::middleware('throttle:10,1')->group(function () {
+    Route::post('/warga/register', [WargaAuthController::class, 'register']);
+    Route::post('/warga/login',    [WargaAuthController::class, 'login']);
+});
+
+/*
+|--------------------------------------------------------------------------
+| Rute warga terautentikasi (token Sanctum + role warga)
+|--------------------------------------------------------------------------
+*/
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/warga/logout',                                   [WargaAuthController::class,    'logout']);
+    Route::get('/warga/verify',                                    [WargaAuthController::class,    'verify']);
+
+    Route::get('/warga/profile',                                   [WargaProfileController::class, 'show']);
+    Route::post('/warga/profile',                                  [WargaProfileController::class, 'update']);
+    Route::put('/warga/password',                                  [WargaProfileController::class, 'changePassword']);
+
+    Route::get('/warga/potensi',                                   [WargaPotensiController::class, 'index']);
+    Route::get('/warga/potensi/{id}',                              [WargaPotensiController::class, 'show']);
+    Route::post('/warga/potensi/{id}',                             [WargaPotensiController::class, 'update']);
+    Route::delete('/warga/potensi/{id}',                           [WargaPotensiController::class, 'destroy']);
+    Route::post('/warga/potensi/{id}/request-deletion',            [WargaPotensiController::class, 'requestDeletion']);
+    Route::post('/warga/potensi/{id}/cancel-deletion',             [WargaPotensiController::class, 'cancelDeletion']);
+    Route::delete('/warga/potensi/{id}/images/{imageId}',          [WargaPotensiController::class, 'destroyImage']);
 });

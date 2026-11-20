@@ -14,11 +14,16 @@
     return localStorage.getItem('adminLoggedIn') === 'true';
   }
 
-  // Auth Guard for admin.html
+  // Auth Guard for admin.html and /admin route
   function checkAdminPageGuard() {
-    const isCurrentAdminPage = window.location.pathname.endsWith('admin.html') || window.location.pathname.includes('/admin.html');
+    const p = window.location.pathname;
+    const isCurrentAdminPage =
+      p.endsWith('admin.html') ||
+      p.includes('/admin.html') ||
+      p === '/admin' ||
+      p.endsWith('/admin');
     if (isCurrentAdminPage && !isAdminLoggedIn()) {
-      window.location.replace('index.html?action=login');
+      window.location.replace('/login?unauthorized=true');
     }
   }
 
@@ -37,9 +42,9 @@
               <i class="bi bi-shield-check me-1 text-success"></i> Panel Admin
             </button>
             <ul class="dropdown-menu dropdown-menu-end shadow-sm" style="border-radius:10px;font-size:.88rem;min-width:180px;">
-              <li><a class="dropdown-item py-2" href="admin.html"><i class="bi bi-speedometer2 me-2 text-primary"></i>Dashboard</a></li>
-              <li><a class="dropdown-item py-2" href="admin.html#kelola-potensi"><i class="bi bi-shop me-2 text-warning"></i>Kelola Potensi</a></li>
-              <li><a class="dropdown-item py-2" href="admin.html#galeri"><i class="bi bi-images me-2 text-info"></i>Galeri Kegiatan</a></li>
+              <li><a class="dropdown-item py-2" href="/admin"><i class="bi bi-speedometer2 me-2 text-primary"></i>Dashboard</a></li>
+              <li><a class="dropdown-item py-2" href="/admin#kelola-potensi"><i class="bi bi-shop me-2 text-warning"></i>Kelola Potensi</a></li>
+              <li><a class="dropdown-item py-2" href="/admin#galeri"><i class="bi bi-images me-2 text-info"></i>Galeri Kegiatan</a></li>
               <li><hr class="dropdown-divider my-1"></li>
               <li><button class="dropdown-item py-2 text-danger nav-btn-logout" type="button"><i class="bi bi-box-arrow-right me-2"></i>Logout</button></li>
             </ul>
@@ -67,7 +72,7 @@
     localStorage.removeItem('adminUser');
     localStorage.removeItem('ep_admin_session');
     sessionStorage.removeItem('ep_admin_session');
-    window.location.replace('login.html?unauthorized=true');
+    window.location.replace('/login?unauthorized=true');
   }
   window.epHandleUnauthorized = handleUnauthorized;
 
@@ -95,8 +100,8 @@
       }
       
       // If currently on admin page, redirect to index
-      if (window.location.pathname.endsWith('admin.html')) {
-        window.location.replace('index.html');
+      if (window.location.pathname.endsWith('admin.html') || window.location.pathname === '/admin' || window.location.pathname.endsWith('/admin')) {
+        window.location.replace('/');
       } else {
         // Otherwise re-render navbar and show alert
         renderNavAdmin();
@@ -200,7 +205,7 @@
         submitBtn.classList.add('btn-success');
 
         setTimeout(() => {
-          window.location.href = 'admin.html';
+          window.location.href = '/admin';
         }, 600);
       } else {
         submitBtn.disabled = false;

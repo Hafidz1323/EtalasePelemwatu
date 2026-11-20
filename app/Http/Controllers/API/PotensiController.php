@@ -17,8 +17,9 @@ class PotensiController extends Controller
     {
         $query = Potensi::with('category', 'images');
 
-        // Pengunjung publik hanya melihat yang sudah disetujui; admin (token valid) melihat semua.
-        $isAdmin = (bool) $request->user('sanctum');
+        // Pengunjung publik hanya melihat yang sudah disetujui; hanya admin (role=admin) melihat semua.
+        $authUser = $request->user('sanctum');
+        $isAdmin  = $authUser && $authUser->role === 'admin';
         if (! $isAdmin) {
             $query->whereIn('status', Potensi::STATUS_PUBLIK);
         }
@@ -130,6 +131,13 @@ class PotensiController extends Controller
 
         // Simpan data potensi
         $potensiData = collect($validated)->except('images')->toArray();
+
+        // Jika ada warga yang login, hubungkan potensi ke akun mereka
+        $authUser = $request->user('sanctum');
+        if ($authUser && $authUser->role === 'warga') {
+            $potensiData['user_id'] = $authUser->id;
+        }
+
         $potensi = Potensi::create($potensiData);
 
         // e. Simpan foto jika ada (ekstensi dari isi file, nama acak)
@@ -161,7 +169,7 @@ class PotensiController extends Controller
     {
         $potensi = Potensi::with('category', 'images')->find($id);
 
-        $isAdmin = (bool) $request->user('sanctum');
+        $isAdmin = $request->user('sanctum') && $request->user('sanctum')->role === 'admin';
 
         if (! $potensi || (! $isAdmin && ! in_array($potensi->status, Potensi::STATUS_PUBLIK, true))) {
             return response()->json(['status' => 'error', 'message' => 'Potensi tidak ditemukan'], 404);
@@ -176,6 +184,12 @@ class PotensiController extends Controller
 
     public function update(Request $request, $id)
     {
+        // Hanya admin yang boleh menggunakan endpoint ini
+        $authUser = $request->user();
+        if (!$authUser || $authUser->role !== 'admin') {
+            return response()->json(['status' => 'error', 'message' => 'Akses ditolak.'], 403);
+        }
+
         $potensi = Potensi::find($id);
 
         if (!$potensi) {
@@ -221,6 +235,12 @@ class PotensiController extends Controller
 
     public function destroy($id)
     {
+        // Hanya admin yang boleh menghapus via endpoint ini
+        $authUser = request()->user();
+        if (!$authUser || $authUser->role !== 'admin') {
+            return response()->json(['status' => 'error', 'message' => 'Akses ditolak.'], 403);
+        }
+
         $potensi = Potensi::with('images')->find($id);
 
         if (!$potensi) {

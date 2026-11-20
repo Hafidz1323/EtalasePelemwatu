@@ -15,6 +15,7 @@ class Potensi extends Model
     protected $table = 'potensi';
 
     protected $fillable = [
+        'user_id',
         'category_id',
         'name',
         'owner_name',
@@ -31,7 +32,13 @@ class Potensi extends Model
         'reviewed_by',
         'reviewed_at',
         'rejection_reason',
+        'deletion_requested_at',
     ];
+
+    public function owner()
+    {
+        return $this->belongsTo(\App\Models\User::class, 'user_id');
+    }
 
     public function category()
     {

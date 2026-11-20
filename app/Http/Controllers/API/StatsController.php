@@ -9,8 +9,12 @@ use App\Models\Category;
 
 class StatsController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        if ($request->user() && $request->user()->role !== 'admin') {
+            return response()->json(['status' => 'error', 'message' => 'Akses ditolak.'], 403);
+        }
+
         $total = Potensi::count();
         $categories = Category::withCount('potensi')->get()->map(function ($c) {
             return [

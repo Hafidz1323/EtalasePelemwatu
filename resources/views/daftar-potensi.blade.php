@@ -71,7 +71,7 @@
 <header id="siteHeader">
   <nav class="navbar navbar-expand-lg" id="mainNavbar">
     <div class="container">
-      <a class="navbar-brand-wrap" href="index.html">
+      <a class="navbar-brand-wrap" href="/">
         <img class="brand-logo" src="assets/img/logo-desa.png" alt="Logo Desa Pelemwatu" data-site-logo>
         <div class="brand-text-wrap">
           <span class="brand-name">EtalasePelemwatu</span>
@@ -84,15 +84,15 @@
       </button>
       <div class="collapse navbar-collapse" id="navMenuForm">
         <ul class="navbar-nav ms-auto gap-1">
-          <li class="nav-item"><a class="nav-link" href="index.html#hero-desa">Beranda</a></li>
-          <li class="nav-item"><a class="nav-link" href="index.html#profil-desa">Profil Desa</a></li>
-          <li class="nav-item"><a class="nav-link" href="index.html#pengenalan-etalase">Tentang Etalase</a></li>
-          <li class="nav-item"><a class="nav-link" href="index.html#katalog">Katalog Potensi</a></li>
-          <li class="nav-item"><a class="nav-link" href="index.html#layanan">Layanan</a></li>
-          <li class="nav-item"><a class="nav-link" href="index.html#kontak-section">Kontak</a></li>
+          <li class="nav-item"><a class="nav-link" href="/#hero-desa">Beranda</a></li>
+          <li class="nav-item"><a class="nav-link" href="/#profil-desa">Profil Desa</a></li>
+          <li class="nav-item"><a class="nav-link" href="/#pengenalan-etalase">Tentang Etalase</a></li>
+          <li class="nav-item"><a class="nav-link" href="/#katalog">Katalog Potensi</a></li>
+          <li class="nav-item"><a class="nav-link" href="/#layanan">Layanan</a></li>
+          <li class="nav-item"><a class="nav-link" href="/#kontak-section">Kontak</a></li>
         </ul>
         <div class="d-flex align-items-center gap-2 mt-2 mt-lg-0 ms-lg-3 flex-wrap">
-          <a href="daftar-potensi.html" class="nav-link btn-nav-daftar">Daftarkan Potensimu</a>
+          <div id="navWargaWrap"></div>
           <div id="navAdminWrap">
             <button type="button" class="btn-nav-admin" data-bs-toggle="modal" data-bs-target="#modalLoginAdmin">
               Login Admin
@@ -109,7 +109,7 @@
   <div class="form-page-header">
     <div class="container" style="position:relative;z-index:2;">
       <div class="form-breadcrumb">
-        <a href="index.html"><i class="bi bi-house me-1"></i>Beranda</a>
+        <a href="/"><i class="bi bi-house me-1"></i>Beranda</a>
         <span><i class="bi bi-chevron-right" style="font-size:.7rem;"></i></span>
         <span style="color:var(--clr-yellow);">Daftarkan Potensi</span>
       </div>
@@ -155,10 +155,6 @@
                   <div class="col-md-6">
                     <label class="form-label">Nama Lengkap <span class="required-mark">*</span></label>
                     <input type="text" class="form-control" id="f-nama" placeholder="Masukkan nama lengkap Anda" required maxlength="100">
-                  </div>
-                  <div class="col-md-6">
-                    <label class="form-label">NIK</label>
-                    <input type="text" class="form-control" id="f-nik" placeholder="16 digit NIK (opsional)" maxlength="16">
                   </div>
                   <div class="col-md-6">
                     <label class="form-label">Nomor Telepon <span class="required-mark">*</span></label>
@@ -567,15 +563,6 @@ function validateStep1() {
       markInvalid('f-email'); emailEl.focus(); return false;
     }
   }
-
-  // NIK (opsional)
-  var nikEl = document.getElementById('f-nik');
-  var nik = nikEl.value.trim();
-  if (nik && !/^\d{16}$/.test(nik)) {
-    showErr(1, 'NIK harus 16 digit angka.');
-    markInvalid('f-nik'); nikEl.focus(); return false;
-  }
-
   // Alamat Rumah
   var alamatEl = document.getElementById('f-alamat');
   var alamat = cleanSpaces(alamatEl.value);
@@ -673,17 +660,6 @@ function filterTelInput(el) {
 }
 filterTelInput(document.getElementById('f-telp'));
 filterTelInput(document.getElementById('f-kontak-usaha'));
-
-document.getElementById('f-nik').addEventListener('input', function() {
-  var pos = this.selectionStart;
-  var orig = this.value;
-  var filtered = orig.replace(/\D/g, '');
-  if (filtered !== orig) {
-    var diff = orig.length - filtered.length;
-    this.value = filtered;
-    this.setSelectionRange(Math.max(0, pos - diff), Math.max(0, pos - diff));
-  }
-});
 
 /* ── D. Saran email otomatis ── */
 (function() {
@@ -861,8 +837,17 @@ document.getElementById('btnSubmit').addEventListener('click', async function ()
     });
 
     const API_BASE = (window.location.protocol === 'file:' || window.location.port === '5500') ? 'http://localhost:8000/api' : (window.location.port === '3000' ? 'http://localhost:3000/api' : '/api');
+
+    // Sertakan token warga jika sedang login
+    var wargaHeaders = {};
+    try {
+      var _ws = JSON.parse(localStorage.getItem('ep_warga_session') || 'null');
+      if (_ws && _ws.token) wargaHeaders['Authorization'] = 'Bearer ' + _ws.token;
+    } catch(e) {}
+
     const response = await fetch(API_BASE + '/potensi', {
       method: 'POST',
+      headers: wargaHeaders,
       // Tanpa Content-Type: biarkan browser set multipart boundary otomatis
       body: formData
     });
@@ -1082,6 +1067,7 @@ btt.addEventListener('click', function(){ window.scrollTo({ top: 0, behavior: 's
   </div>
 </div>
 
+<script src="assets/js/warga-auth.js"></script>
 <script src="assets/js/auth.js"></script>
 <script>
 (function () {

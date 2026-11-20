@@ -7,8 +7,8 @@ return [
     |--------------------------------------------------------------------------
     | Jika true, field whatsapp akan disertakan dalam PotensiPublicResource.
     | Set ke true jika tombol "Hubungi" di frontend membutuhkan nomor WA.
-    | Default: true (tombol hubungi aktif di landing page).
+    | Default: false — lindungi privasi nomor WA warga di endpoint publik.
     |
     */
-    'show_contact' => env('POTENSI_SHOW_CONTACT', true),
+    'show_contact' => env('POTENSI_SHOW_CONTACT', false),
 ];

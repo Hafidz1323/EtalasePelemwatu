@@ -10,6 +10,10 @@ class UploadController extends Controller
 {
     public function upload(Request $request)
     {
+        if ($request->user() && $request->user()->role !== 'admin') {
+            return response()->json(['status' => 'error', 'message' => 'Akses ditolak.'], 403);
+        }
+
         $request->validate([
             'image' => ['required', 'file', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
         ], [

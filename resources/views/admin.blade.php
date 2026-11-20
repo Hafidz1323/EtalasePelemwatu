@@ -96,6 +96,10 @@
       <i class="bi bi-clipboard-check"></i><span>Verifikasi</span>
       <span class="nav-badge" id="verifikasiBadge"></span>
     </button>
+    <button class="sidebar-nav-item" data-section="permintaan-hapus">
+      <i class="bi bi-trash"></i><span>Permintaan Hapus</span>
+      <span class="nav-badge" id="deletionBadge" style="display:none;"></span>
+    </button>
     <div class="sidebar-nav-section">DATA DESA</div>
     <button class="sidebar-nav-item" data-section="galeri">
       <i class="bi bi-images"></i><span>Galeri Kegiatan</span>
@@ -381,6 +385,18 @@
         <i class="bi bi-check2-circle fs-1 d-block mb-2"></i>Tidak ada pendaftaran yang menunggu verifikasi.
       </div>
     </div><!-- /verifikasi -->
+
+    <!-- ─── PERMINTAAN HAPUS ─── -->
+    <div class="admin-section" id="section-permintaan-hapus">
+      <div class="admin-page-header">
+        <h2>Permintaan Penghapusan</h2>
+        <p>Warga mengajukan permintaan penghapusan untuk potensi yang sudah disetujui. Tinjau dan putuskan.</p>
+      </div>
+      <div id="deletionRequestList"></div>
+      <div class="text-center py-5" id="deletionEmpty" style="display:none;color:var(--text-light);">
+        <i class="bi bi-check2-circle fs-1 d-block mb-2"></i>Tidak ada permintaan penghapusan.
+      </div>
+    </div><!-- /permintaan-hapus -->
 
     <!-- â”€â”€â”€ GALERI KEGIATAN â”€â”€â”€ -->
     <div class="admin-section" id="section-galeri">
@@ -1519,6 +1535,136 @@ document.querySelectorAll('.btn-lihat-db').forEach(function(b){
   load();
   var nav = document.querySelector('[data-section="verifikasi"]');
   if (nav) nav.addEventListener('click', load);
+})();
+
+/* -- Permintaan Penghapusan: Load dan Handle -- */
+(function () {
+  'use strict';
+  var API = (window.location.protocol === 'file:' || window.location.port === '5500')
+    ? 'http://localhost:8000/api'
+    : (window.location.port === '3000' ? 'http://localhost:3000/api' : '/api');
+
+  var listEl   = document.getElementById('deletionRequestList');
+  var emptyEl  = document.getElementById('deletionEmpty');
+  var badge    = document.getElementById('deletionBadge');
+  if (!listEl) return;
+
+  function token() {
+    try {
+      var s = localStorage.getItem('ep_admin_session') || sessionStorage.getItem('ep_admin_session');
+      if (s) return JSON.parse(s).token || null;
+    } catch(e){}
+    return null;
+  }
+  function hdrs(json) {
+    var h = { 'Accept': 'application/json' };
+    if (json) h['Content-Type'] = 'application/json';
+    var t = token(); if (t) h['Authorization'] = 'Bearer ' + t;
+    return h;
+  }
+  function fmtDate(iso) {
+    if (!iso) return '-';
+    var d = new Date(iso);
+    return isNaN(d) ? '-' : d.toLocaleDateString('id-ID', { day:'2-digit', month:'long', year:'numeric' });
+  }
+
+  function loadDeletionRequests() {
+    listEl.innerHTML = '<div class="text-center py-4" style="color:#9ca3af;">Memuat data...</div>';
+    if (emptyEl) emptyEl.style.display = 'none';
+
+    fetch(API + '/admin/deletion-requests', { headers: hdrs(false) })
+      .then(function(r) { return r.json(); })
+      .then(function(res) {
+        listEl.innerHTML = '';
+        var items = (res && Array.isArray(res.data)) ? res.data : [];
+
+        // Update badge di sidebar
+        if (badge) {
+          badge.textContent = items.length;
+          badge.style.display = items.length ? '' : 'none';
+        }
+
+        if (!items.length) {
+          if (emptyEl) emptyEl.style.display = '';
+          return;
+        }
+
+        items.forEach(function(p) {
+          var card = document.createElement('div');
+          card.className = 'admin-card mb-3';
+          card.style.cssText = 'border-left:4px solid #dc3545;';
+
+          var imgHtml = '';
+          if (p.images && p.images.length) {
+            imgHtml = '<div class="d-flex gap-2 flex-wrap mt-2">';
+            p.images.forEach(function(img) {
+              imgHtml += '<img src="' + (img.path||'') + '" style="width:60px;height:60px;object-fit:cover;border-radius:6px;border:1px solid #e5e9f0;" onerror="this.style.display=\'none\'">';
+            });
+            imgHtml += '</div>';
+          }
+
+          card.innerHTML =
+            '<div class="admin-card-body">' +
+              '<div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">' +
+                '<div class="flex-grow-1">' +
+                  '<div style="font-weight:700;color:var(--clr-blue);font-size:.95rem;">' + (p.name||'') + '</div>' +
+                  '<div style="font-size:.82rem;color:#9ca3af;margin-top:.2rem;">' +
+                    'Pemilik: <strong>' + (p.owner_name||'-') + '</strong>' +
+                    ' &middot; WA: ' + (p.owner_phone||'-') +
+                    ' &middot; Status: <span class="fw-semibold text-success">' + (p.status||'-') + '</span>' +
+                  '</div>' +
+                  '<div style="font-size:.8rem;color:#9ca3af;margin-top:.15rem;">' +
+                    'Diajukan: ' + fmtDate(p.deletion_requested_at) +
+                  '</div>' +
+                  imgHtml +
+                '</div>' +
+                '<div class="d-flex gap-2 flex-shrink-0 align-items-center">' +
+                  '<button class="btn btn-sm btn-danger btn-approve-del" data-id="' + p.id + '" data-name="' + (p.name||'').replace(/"/g,'') + '" style="font-size:.82rem;">' +
+                    '<i class="bi bi-trash-fill me-1"></i>Setujui Hapus' +
+                  '</button>' +
+                  '<button class="btn btn-sm btn-outline-secondary btn-reject-del" data-id="' + p.id + '" style="font-size:.82rem;">' +
+                    '<i class="bi bi-x-lg me-1"></i>Tolak' +
+                  '</button>' +
+                '</div>' +
+              '</div>' +
+            '</div>';
+
+          card.querySelector('.btn-approve-del').addEventListener('click', function() {
+            var id   = this.dataset.id;
+            var name = this.dataset.name;
+            if (!confirm('Setujui penghapusan "' + name + '"? Data akan benar-benar terhapus.')) return;
+            fetch(API + '/admin/deletion-requests/' + id + '/approve', { method: 'POST', headers: hdrs(true) })
+              .then(function(r) { return r.json(); })
+              .then(function(res) {
+                if (res && res.status === 'success') { showAdminToast('Potensi berhasil dihapus.', 'success'); loadDeletionRequests(); }
+                else showAdminToast(res.message || 'Gagal.', 'error');
+              }).catch(function() { showAdminToast('Terjadi kesalahan.', 'error'); });
+          });
+
+          card.querySelector('.btn-reject-del').addEventListener('click', function() {
+            var id = this.dataset.id;
+            if (!confirm('Tolak permintaan penghapusan ini? Potensi akan tetap ada.')) return;
+            fetch(API + '/admin/deletion-requests/' + id + '/reject', { method: 'POST', headers: hdrs(true) })
+              .then(function(r) { return r.json(); })
+              .then(function(res) {
+                if (res && res.status === 'success') { showAdminToast('Permintaan penghapusan ditolak.', 'info'); loadDeletionRequests(); }
+                else showAdminToast(res.message || 'Gagal.', 'error');
+              }).catch(function() { showAdminToast('Terjadi kesalahan.', 'error'); });
+          });
+
+          listEl.appendChild(card);
+        });
+      })
+      .catch(function() { listEl.innerHTML = '<div class="text-center py-4 text-danger">Gagal memuat data.</div>'; });
+  }
+
+  // Load saat section diklik
+  document.querySelectorAll('[data-section="permintaan-hapus"]').forEach(function(btn) {
+    btn.addEventListener('click', loadDeletionRequests);
+  });
+
+  // Load juga saat init untuk update badge
+  loadDeletionRequests();
 })();
 
 /* -- Kelola Potensi: Load, Filter, Paginate, Edit, Delete -- */

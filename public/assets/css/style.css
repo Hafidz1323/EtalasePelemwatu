@@ -1936,6 +1936,60 @@ body.form-page .form-page-header p {
   color: #FFFFFF !important;
 }
 
+/* ── Tombol Akun Warga (icon-only + dropdown) ── */
+.ep-nav-user {
+  background: transparent;
+  border: 1.5px solid var(--clr-blue);
+  color: var(--clr-blue) !important;
+  border-radius: var(--radius) !important;
+  padding: .4rem .65rem !important;
+  font-size: 1.15rem;
+  line-height: 1;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: .3rem;
+  transition: all var(--transition);
+  white-space: nowrap;
+}
+.ep-nav-user::after { display: none !important; } /* Bootstrap dropdown caret hidden */
+.ep-nav-user:hover,
+.ep-nav-user:focus,
+.ep-nav-user[aria-expanded="true"] {
+  background: var(--clr-blue) !important;
+  color: #fff !important;
+  border-color: var(--clr-blue) !important;
+}
+/* Nama singkat di samping icon (sembunyikan di layar kecil) */
+.ep-nav-user-name {
+  font-size: .78rem;
+  font-weight: 600;
+  max-width: 80px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+@media (max-width: 575px) {
+  .ep-nav-user-name { display: none; }
+}
+
+/* Dropdown menu warga */
+.ep-user-menu {
+  min-width: 190px !important;
+  border-radius: 10px !important;
+  font-size: .875rem;
+  padding: .4rem 0;
+}
+.ep-user-menu-header {
+  padding: .45rem 1rem .3rem;
+  font-weight: 700;
+  color: var(--clr-blue);
+  font-size: .82rem;
+  pointer-events: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 /* Modal Login Admin */
 .modal-login-admin .modal-content {
   border-radius: var(--radius-lg);
