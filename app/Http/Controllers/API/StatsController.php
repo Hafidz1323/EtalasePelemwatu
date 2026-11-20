@@ -19,7 +19,7 @@ class StatsController extends Controller
                 'count' => $c->potensi_count,
             ];
         });
-        $pending = Potensi::where('status', '!=', 'aktif')->count();
+        $pending = Potensi::where('status', 'pending')->count();
 
         return response()->json([
             'status' => 'success',

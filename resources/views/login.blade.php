@@ -453,32 +453,23 @@
               loginSuccess = true;
               userData = result.data.user;
               authToken = result.data.token;
-            } else if (response.status === 401 || response.status === 400) {
-              showAlert(result.message || 'Email atau password salah.', 'error');
+            } else if ([400, 401, 422, 429].includes(response.status)) {
+              const msg = response.status === 429
+                ? 'Terlalu banyak percobaan login. Tunggu sekitar 1 menit lalu coba lagi.'
+                : (result.message || 'Email atau password salah.');
+              showAlert(msg, 'error');
               resetButton();
               return;
             }
           } catch (netErr) {
-            console.warn('Backend server tidak dapat dihubungi, menggunakan verifikasi lokal:', netErr.message);
+            console.warn('Backend server tidak dapat dihubungi:', netErr.message);
           }
 
-          // 2. Fallback verifikasi lokal jika server offline
+          // Tidak ada login lokal/offline: sesi hanya sah jika server menerbitkan token.
           if (!loginSuccess) {
-            const isDefaultEmail =
-              email.toLowerCase() === 'admin@pelemwatu.desa.id' ||
-              email.toLowerCase() === 'admin';
-            const isDefaultPass = password === 'admin123';
-
-            if (isDefaultEmail && isDefaultPass) {
-              loginSuccess = true;
-              userData = {
-                id: 1,
-                name: 'Administrator Desa',
-                email: 'admin@pelemwatu.desa.id',
-                role: 'Admin Desa'
-              };
-              authToken = 'ep-local-session-' + Date.now();
-            }
+            showAlert('Server tidak dapat dihubungi. Coba lagi beberapa saat.', 'error');
+            resetButton();
+            return;
           }
 
           if (loginSuccess && userData) {

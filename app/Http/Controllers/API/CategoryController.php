@@ -8,6 +8,7 @@ use App\Models\Category;
 
 class CategoryController extends Controller
 {
+
     public function index()
     {
         return response()->json([
@@ -18,8 +19,11 @@ class CategoryController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate(['name' => 'required|string']);
-        $category = Category::create($request->all());
+        $data = $request->validate([
+            'name' => 'required|string|max:100',
+            'description' => 'nullable|string|max:500',
+        ]);
+        $category = Category::create($data);
         return response()->json(['status' => 'success', 'data' => $category], 201);
     }
 
@@ -27,7 +31,11 @@ class CategoryController extends Controller
     {
         $category = Category::find($id);
         if (!$category) return response()->json(['status' => 'error', 'message' => 'Not found'], 404);
-        $category->update($request->all());
+        $data = $request->validate([
+            'name' => 'sometimes|required|string|max:100',
+            'description' => 'sometimes|nullable|string|max:500',
+        ]);
+        $category->update($data);
         return response()->json(['status' => 'success', 'data' => $category]);
     }
 
@@ -39,4 +47,3 @@ class CategoryController extends Controller
         return response()->json(['status' => 'success', 'message' => 'Kategori dihapus']);
     }
 }
-

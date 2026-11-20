@@ -3,68 +3,48 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
-use App\Models\User;
+use Laravel\Sanctum\PersonalAccessToken;
 
 class AuthController extends Controller
 {
-    /**
-     * Simple login that checks against users table or fallback admin.
-     */
     public function login(Request $request)
     {
-        $email = strtolower(trim($request->input('email')));
-        $password = $request->input('password');
+        $data = $request->validate([
+            'email' => ['required', 'string', 'max:255'],
+            'password' => ['required', 'string', 'max:255'],
+        ]);
 
-        // Try to find user
-        $user = User::whereRaw('LOWER(email) = ?', [$email])->first();
+        $user = User::whereRaw('LOWER(email) = ?', [strtolower(trim($data['email']))])->first();
 
-        if ($user && Hash::check($password, $user->password)) {
-            $token = $user->createToken('api-token')->plainTextToken;
+        if (! $user || ! Hash::check($data['password'], $user->password)) {
             return response()->json([
-                'status' => 'success',
-                'message' => 'Login berhasil',
-                'data' => [
-                    'token' => $token,
-                    'user' => $user,
-                ],
-            ]);
-        }
-
-        // Fallback default admin (hardcoded as in original Node.js)
-        $default = [
-            'id' => 1,
-            'name' => 'Administrator Desa',
-            'email' => 'admin@pelemwatu.desa.id',
-            'role' => 'Admin Desa',
-            'password' => 'admin123',
-        ];
-        if ($email === strtolower($default['email']) && $password === $default['password']) {
-            $token = 'ep-session-'.$default['id'].'-'.time();
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Login admin berhasil',
-                'data' => [
-                    'token' => $token,
-                    'user' => $default,
-                ],
-            ]);
+                'status' => 'error',
+                'message' => 'Email atau password salah',
+            ], 401);
         }
 
         return response()->json([
-            'status' => 'error',
-            'message' => 'Email atau password salah',
-        ], 401);
+            'status' => 'success',
+            'message' => 'Login berhasil',
+            'data' => [
+                'token' => $user->createToken('api-token')->plainTextToken,
+                'user' => $user,
+            ],
+        ]);
     }
 
     public function logout(Request $request)
     {
-        // If token based, revoke all tokens for user
-        if ($request->user()) {
-            $request->user()->tokens()->delete();
+        // Hanya cabut token yang dipakai sekarang (perangkat lain tetap login).
+        // Sesi non-token (TransientToken) tidak punya delete(), jadi dicek dulu.
+        $token = $request->user()->currentAccessToken();
+        if ($token instanceof PersonalAccessToken) {
+            $token->delete();
         }
+
         return response()->json([
             'status' => 'success',
             'message' => 'Logout berhasil',
@@ -73,18 +53,11 @@ class AuthController extends Controller
 
     public function verify(Request $request)
     {
-        // Simple verification: check Authorization header format
-        $auth = $request->header('Authorization');
-        if ($auth && Str::startsWith($auth, 'Bearer ')) {
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Sesi aktif',
-            ]);
-        }
+        // Sampai di sini berarti token sudah divalidasi middleware auth:sanctum.
         return response()->json([
-            'status' => 'error',
-            'message' => 'Sesi tidak valid',
-        ], 401);
+            'status' => 'success',
+            'message' => 'Sesi aktif',
+            'data' => ['user' => $request->user()],
+        ]);
     }
 }
-

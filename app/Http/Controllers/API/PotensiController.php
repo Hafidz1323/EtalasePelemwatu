@@ -13,6 +13,12 @@ class PotensiController extends Controller
     {
         $query = Potensi::with('category', 'images');
 
+        // Pengunjung publik hanya melihat yang sudah disetujui; admin (token valid) melihat semua.
+        $isAdmin = (bool) $request->user('sanctum');
+        if (! $isAdmin) {
+            $query->whereIn('status', Potensi::STATUS_PUBLIK);
+        }
+
         if ($request->has('category') && $request->category !== 'all') {
             $cat = $request->category;
             $query->whereHas('category', function ($q) use ($cat) {
@@ -20,7 +26,7 @@ class PotensiController extends Controller
             });
         }
 
-        if ($request->has('status')) {
+        if ($isAdmin && $request->filled('status')) {
             $query->where('status', $request->status);
         }
 
@@ -94,8 +100,8 @@ class PotensiController extends Controller
             'email.email'            => 'Format email tidak valid. Contoh: nama@gmail.com.',
         ]);
 
-        // d. Paksa status (tidak diubah)
-        $validated['status'] = 'aktif';
+        // d. Pendaftaran warga selalu menunggu verifikasi admin
+        $validated['status'] = 'pending';
 
         $potensi = Potensi::create($validated);
 
@@ -106,11 +112,11 @@ class PotensiController extends Controller
         ], 201);
     }
 
-    public function show($id)
+    public function show(Request $request, $id)
     {
         $potensi = Potensi::with('category', 'images')->find($id);
 
-        if (!$potensi) {
+        if (! $potensi || (! $request->user('sanctum') && ! in_array($potensi->status, Potensi::STATUS_PUBLIK, true))) {
             return response()->json(['status' => 'error', 'message' => 'Potensi tidak ditemukan'], 404);
         }
 
@@ -125,12 +131,34 @@ class PotensiController extends Controller
             return response()->json(['status' => 'error', 'message' => 'Potensi tidak ditemukan'], 404);
         }
 
-        $potensi->update($request->all());
+        $data = $request->validate([
+            'name'            => 'sometimes|required|string|min:3|max:100',
+            'owner_name'      => ['sometimes', 'required', 'string', 'min:3', 'max:100'],
+            'category_id'     => 'sometimes|nullable|integer|exists:categories,id',
+            'whatsapp'        => ['sometimes', 'required', 'regex:/^08[1-9][0-9]{7,10}$/'],
+            'address'         => 'sometimes|required|string|min:10|max:255',
+            'description'     => 'sometimes|required|string|min:20|max:1000',
+            'location'        => 'sometimes|nullable|string|max:255',
+            'email'           => 'sometimes|nullable|email:rfc|max:100',
+            'jenis'           => 'sometimes|nullable|string|max:100',
+            'jam_operasional' => 'sometimes|nullable|string|max:100',
+            'latitude'        => 'sometimes|nullable|numeric|between:-90,90',
+            'longitude'       => 'sometimes|nullable|numeric|between:-180,180',
+            'status'          => 'sometimes|required|in:aktif,approved,pending,rejected',
+        ]);
+
+        // Perubahan status oleh admin dicatat sebagai hasil review.
+        if (isset($data['status']) && $data['status'] !== $potensi->status) {
+            $data['reviewed_by'] = $request->user()->id;
+            $data['reviewed_at'] = now();
+        }
+
+        $potensi->update($data);
 
         return response()->json([
             'status' => 'success',
             'message' => 'Potensi berhasil diperbarui',
-            'data' => $potensi,
+            'data' => $potensi->fresh(['category', 'images']),
         ]);
     }
 

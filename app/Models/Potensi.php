@@ -9,6 +9,9 @@ class Potensi extends Model
 {
     use HasFactory;
 
+    /** Status yang tampil di halaman publik. */
+    public const STATUS_PUBLIK = ['aktif', 'approved'];
+
     protected $table = 'potensi';
 
     protected $fillable = [

@@ -64,13 +64,24 @@
   function handleLogout(e) {
     if (e) e.preventDefault();
     if (confirm('Apakah Anda yakin ingin keluar dari panel admin?')) {
+      // Ambil token SEBELUM sesi dihapus, lalu kirim agar server mencabut token ini.
+      var logoutToken = null;
+      try {
+        var rawSession = localStorage.getItem('ep_admin_session') || sessionStorage.getItem('ep_admin_session');
+        if (rawSession) logoutToken = JSON.parse(rawSession).token || null;
+      } catch (err) {}
       localStorage.removeItem('adminLoggedIn');
       localStorage.removeItem('adminUser');
       localStorage.removeItem('ep_admin_session');
       sessionStorage.removeItem('ep_admin_session');
-      try {
-        fetch((typeof API_BASE !== 'undefined' ? API_BASE : '/api') + '/auth/logout', { method: 'POST' }).catch(() => {});
-      } catch (err) {}
+      if (logoutToken) {
+        try {
+          fetch((typeof API_BASE !== 'undefined' ? API_BASE : '/api') + '/auth/logout', {
+            method: 'POST',
+            headers: { 'Accept': 'application/json', 'Authorization': 'Bearer ' + logoutToken }
+          }).catch(() => {});
+        } catch (err) {}
+      }
       
       // If currently on admin page, redirect to index
       if (window.location.pathname.endsWith('admin.html')) {
@@ -133,6 +144,7 @@
       submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status"></span>Memverifikasi...';
 
       let loginSuccess = false;
+      let authToken = null;
       let userData = { name: 'Administrator', role: 'admin' };
 
       // 1. Try backend API with timeout
@@ -143,38 +155,28 @@
         const response = await fetch(API_LOGIN_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username, password }),
+          body: JSON.stringify({ email: username, password }),
           signal: controller.signal
         });
         clearTimeout(timeoutId);
 
         if (response.ok) {
           const resData = await response.json();
-          if (resData.status === 'success') {
+          if (resData.status === 'success' && resData.data && resData.data.token) {
             loginSuccess = true;
-            if (resData.user) userData = resData.user;
+            authToken = resData.data.token;
+            if (resData.data.user) userData = resData.data.user;
           }
         }
       } catch (err) {
         // Backend not reachable or timed out - continue to fallback check
       }
 
-      // 2. Client-side fallback check (for static frontend / demo)
-      if (!loginSuccess) {
-        if (
-          (username === 'admin' || username === 'admin@pelemwatu.desa.id') &&
-          password === 'admin123'
-        ) {
-          loginSuccess = true;
-          userData = { name: 'Administrator Desa', role: 'admin' };
-        }
-      }
-
       // Handle Result
       if (loginSuccess) {
         localStorage.setItem('adminLoggedIn', 'true');
         localStorage.setItem('adminUser', JSON.stringify(userData));
-        localStorage.setItem('ep_admin_session', JSON.stringify({ isLoggedIn: true, user: userData, token: 'session-' + Date.now() }));
+        localStorage.setItem('ep_admin_session', JSON.stringify({ isLoggedIn: true, user: userData, token: authToken }));
 
         submitBtn.innerHTML = '<i class="bi bi-check-circle me-1"></i> Login Berhasil!';
         submitBtn.classList.remove('btn-primary-custom');

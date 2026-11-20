@@ -10,9 +10,23 @@
   <link rel="stylesheet" href="assets/css/admin.css">
   <link rel="stylesheet" href="assets/css/galeri.css">
   <script>
-    if (localStorage.getItem('adminLoggedIn') !== 'true') {
-      window.location.replace('index.html?action=login');
-    }
+    (function () {
+      function toLogin() {
+        ['adminLoggedIn', 'adminUser', 'ep_admin_session'].forEach(function (k) { localStorage.removeItem(k); });
+        sessionStorage.removeItem('ep_admin_session');
+        window.location.replace('login.html?unauthorized=true');
+      }
+      var token = null;
+      try {
+        var raw = localStorage.getItem('ep_admin_session') || sessionStorage.getItem('ep_admin_session');
+        if (raw) token = JSON.parse(raw).token || null;
+      } catch (e) {}
+      if (localStorage.getItem('adminLoggedIn') !== 'true' || !token) { toLogin(); return; }
+      // Flag di localStorage bisa dipalsukan; sesi sebenarnya harus disahkan server.
+      fetch('/api/auth/verify', { headers: { 'Accept': 'application/json', 'Authorization': 'Bearer ' + token } })
+        .then(function (r) { if (r.status === 401) toLogin(); })
+        .catch(function () { /* server tidak terjangkau: biarkan, tiap aksi tetap dicek server */ });
+    })();
   </script>
   <style>
     /* â”€â”€ Pengaturan Menu Rows â”€â”€ */
@@ -1301,7 +1315,12 @@ document.getElementById('btnExport').addEventListener('click',function(){showAdm
 
     clearTimeout(_loadTimer);
     _loadTimer = setTimeout(function () {
-      fetch(API_BASE + '/potensi')
+      var _tok = null;
+      try {
+        var _s = localStorage.getItem('ep_admin_session') || sessionStorage.getItem('ep_admin_session');
+        if (_s) _tok = JSON.parse(_s).token || null;
+      } catch (e) {}
+      fetch(API_BASE + '/potensi', { headers: _tok ? { 'Accept': 'application/json', 'Authorization': 'Bearer ' + _tok } : { 'Accept': 'application/json' } })
         .then(function (r) { return r.json(); })
         .then(function (res) {
           if (res && Array.isArray(res.data)) {

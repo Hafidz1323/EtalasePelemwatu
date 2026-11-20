@@ -5,21 +5,35 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        // 1. Admin Default
+        // 1. Admin awal: kredensial dari .env (ADMIN_EMAIL / ADMIN_PASSWORD)
+        $password = config('admin.password');
+        $generated = false;
+        if (empty($password)) {
+            $password = Str::password(16, symbols: false);
+            $generated = true;
+        }
+
         DB::table('users')->updateOrInsert(
-            ['email' => 'admin@pelemwatu.desa.id'],
+            ['email' => strtolower(config('admin.email'))],
             [
-                'name' => 'Administrator Desa',
-                'password' => Hash::make('admin123'),
+                'name' => config('admin.name'),
+                'password' => Hash::make($password),
                 'created_at' => now(),
                 'updated_at' => now(),
             ]
         );
+
+        if ($generated && $this->command) {
+            $this->command->warn('ADMIN_PASSWORD belum diatur di .env. Password sementara dibuat acak:');
+            $this->command->warn('  ' . config('admin.email') . ' / ' . $password);
+            $this->command->warn('Catat sekarang lalu ganti lewat menu profil admin (tidak akan ditampilkan lagi).');
+        }
 
         // 2. Kategori Default
         $categories = [

@@ -11,7 +11,11 @@ use App\Http\Controllers\API\UploadController;
 use App\Http\Controllers\API\ProfileController;
 use App\Http\Controllers\API\SettingController;
 
-// Status
+/*
+|--------------------------------------------------------------------------
+| Rute publik (tanpa login)
+|--------------------------------------------------------------------------
+*/
 Route::get('/status', function () {
     return response()->json([
         'status' => 'success',
@@ -20,45 +24,46 @@ Route::get('/status', function () {
     ]);
 });
 
-// Auth
-Route::post('/login', [AuthController::class, 'login']);
-Route::post('/auth/login', [AuthController::class, 'login']);
-Route::post('/auth/logout', [AuthController::class, 'logout']);
-Route::get('/auth/verify', [AuthController::class, 'verify']);
+// Login dibatasi 5 percobaan per menit per IP
+Route::middleware('throttle:5,1')->group(function () {
+    Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/auth/login', [AuthController::class, 'login']);
+});
 
-// Potensi
+// Data publik: GET /potensi hanya menampilkan yang disetujui bagi pengunjung biasa
 Route::get('/potensi', [PotensiController::class, 'index']);
-Route::post('/potensi', [PotensiController::class, 'store']);
 Route::get('/potensi/{id}', [PotensiController::class, 'show']);
-Route::put('/potensi/{id}', [PotensiController::class, 'update']);
-Route::delete('/potensi/{id}', [PotensiController::class, 'destroy']);
-
-// Categories
 Route::get('/categories', [CategoryController::class, 'index']);
-Route::post('/categories', [CategoryController::class, 'store']);
-Route::put('/categories/{id}', [CategoryController::class, 'update']);
-Route::delete('/categories/{id}', [CategoryController::class, 'destroy']);
+Route::get('/settings/logo', [SettingController::class, 'getLogo']);
 
-// Messages
-Route::get('/messages', [MessageController::class, 'index']);
-Route::post('/messages', [MessageController::class, 'store']);
+// Formulir publik (dibatasi agar tidak bisa dipakai spam)
+Route::post('/potensi', [PotensiController::class, 'store'])->middleware('throttle:10,1');
+Route::post('/messages', [MessageController::class, 'store'])->middleware('throttle:5,1');
 
-// Stats & Review
-Route::get('/stats', [StatsController::class, 'index']);
-Route::post('/potensi/{id}/review', [PotensiReviewController::class, 'review']);
-Route::post('/potensi-review/{id}', [PotensiReviewController::class, 'review']);
-
-// Upload
-Route::post('/upload', [UploadController::class, 'upload']);
-
-// Admin Profile (protected by Sanctum)
+/*
+|--------------------------------------------------------------------------
+| Rute admin (wajib token Sanctum)
+|--------------------------------------------------------------------------
+*/
 Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/auth/logout', [AuthController::class, 'logout']);
+    Route::get('/auth/verify', [AuthController::class, 'verify']);
+
+    Route::put('/potensi/{id}', [PotensiController::class, 'update']);
+    Route::delete('/potensi/{id}', [PotensiController::class, 'destroy']);
+    Route::post('/potensi/{id}/review', [PotensiReviewController::class, 'review']);
+    Route::post('/potensi-review/{id}', [PotensiReviewController::class, 'review']);
+
+    Route::post('/categories', [CategoryController::class, 'store']);
+    Route::put('/categories/{id}', [CategoryController::class, 'update']);
+    Route::delete('/categories/{id}', [CategoryController::class, 'destroy']);
+
+    Route::get('/messages', [MessageController::class, 'index']);
+    Route::get('/stats', [StatsController::class, 'index']);
+    Route::post('/upload', [UploadController::class, 'upload']);
+
     Route::get('/admin/profile', [ProfileController::class, 'show']);
     Route::post('/admin/profile', [ProfileController::class, 'update']);
     Route::put('/admin/password', [ProfileController::class, 'changePassword']);
     Route::post('/settings/logo', [SettingController::class, 'uploadLogo']);
 });
-
-// Settings (public)
-Route::get('/settings/logo', [SettingController::class, 'getLogo']);
-
