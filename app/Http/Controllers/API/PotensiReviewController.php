@@ -11,7 +11,8 @@ class PotensiReviewController extends Controller
     /** POST /api/potensi/{id}/review — setujui / tolak pendaftaran */
     public function review(Request $request, $id)
     {
-        if ($request->user() && $request->user()->role !== 'admin') {
+        $user = $request->user();
+        if (! $user || $user->role !== 'admin') {
             return response()->json(['status' => 'error', 'message' => 'Akses ditolak.'], 403);
         }
 
@@ -42,7 +43,8 @@ class PotensiReviewController extends Controller
      */
     public function deletionRequests(Request $request)
     {
-        if ($request->user() && $request->user()->role !== 'admin') {
+        $user = $request->user();
+        if (! $user || $user->role !== 'admin') {
             return response()->json(['status' => 'error', 'message' => 'Akses ditolak.'], 403);
         }
 
@@ -72,7 +74,8 @@ class PotensiReviewController extends Controller
      */
     public function approveDeletion(Request $request, $id)
     {
-        if ($request->user() && $request->user()->role !== 'admin') {
+        $user = $request->user();
+        if (! $user || $user->role !== 'admin') {
             return response()->json(['status' => 'error', 'message' => 'Akses ditolak.'], 403);
         }
 
@@ -96,7 +99,8 @@ class PotensiReviewController extends Controller
      */
     public function rejectDeletion(Request $request, $id)
     {
-        if ($request->user() && $request->user()->role !== 'admin') {
+        $user = $request->user();
+        if (! $user || $user->role !== 'admin') {
             return response()->json(['status' => 'error', 'message' => 'Akses ditolak.'], 403);
         }
 

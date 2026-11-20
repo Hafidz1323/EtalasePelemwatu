@@ -10,7 +10,8 @@ class UploadController extends Controller
 {
     public function upload(Request $request)
     {
-        if ($request->user() && $request->user()->role !== 'admin') {
+        $user = $request->user();
+        if (! $user || $user->role !== 'admin') {
             return response()->json(['status' => 'error', 'message' => 'Akses ditolak.'], 403);
         }
 

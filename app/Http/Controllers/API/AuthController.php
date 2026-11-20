@@ -19,7 +19,9 @@ class AuthController extends Controller
 
         $user = User::whereRaw('LOWER(email) = ?', [strtolower(trim($data['email']))])->first();
 
-        if (! $user || ! Hash::check($data['password'], $user->password)) {
+        // Hanya akun dengan role 'admin' yang boleh login via endpoint admin ini.
+        // Warga menggunakan POST /api/warga/login.
+        if (! $user || $user->role !== 'admin' || ! Hash::check($data['password'], $user->password)) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Email atau password salah',

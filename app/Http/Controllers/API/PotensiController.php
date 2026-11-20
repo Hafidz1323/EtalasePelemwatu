@@ -99,8 +99,8 @@ class PotensiController extends Controller
             'email'           => 'nullable|email:rfc|max:100',
             'jenis'           => 'nullable|string|max:100',
             'jam_operasional' => 'nullable|string|max:100',
-            'latitude'        => 'nullable|numeric',
-            'longitude'       => 'nullable|numeric',
+            'latitude'        => 'nullable|numeric|between:-90,90',
+            'longitude'       => 'nullable|numeric|between:-180,180',
             'images'          => 'nullable|array|max:3',
             'images.*'        => 'image|mimes:jpg,jpeg,png,webp|max:2048',
         ], [

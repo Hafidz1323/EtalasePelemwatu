@@ -17,7 +17,7 @@ class ProfileController extends Controller
     public function show(Request $request)
     {
         $user = $request->user();
-        if ($user && $user->role !== 'admin') {
+        if (! $user || $user->role !== 'admin') {
             return response()->json(['status' => 'error', 'message' => 'Akses ditolak.'], 403);
         }
 
@@ -38,7 +38,7 @@ class ProfileController extends Controller
     public function update(Request $request)
     {
         $user = $request->user();
-        if ($user && $user->role !== 'admin') {
+        if (! $user || $user->role !== 'admin') {
             return response()->json(['status' => 'error', 'message' => 'Akses ditolak.'], 403);
         }
 
@@ -88,7 +88,7 @@ class ProfileController extends Controller
     public function changePassword(Request $request)
     {
         $user = $request->user();
-        if ($user && $user->role !== 'admin') {
+        if (! $user || $user->role !== 'admin') {
             return response()->json(['status' => 'error', 'message' => 'Akses ditolak.'], 403);
         }
 
