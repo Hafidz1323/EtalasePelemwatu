@@ -660,3 +660,28 @@ body.admin-page {
   }
   .kat-dropdown-toggle { min-width: 0; flex: 1; }
 }
+
+/* ============================================================
+   ADMIN — Pill Buttons + Rounded Cards (selaras style.css)
+   ============================================================ */
+.btn,
+.btn-primary, .btn-secondary, .btn-success, .btn-danger,
+.btn-warning, .btn-info, .btn-light, .btn-dark,
+.btn-outline-primary, .btn-outline-secondary, .btn-outline-success,
+.btn-outline-danger, .btn-outline-warning, .btn-outline-info,
+.btn-outline-light, .btn-outline-dark,
+.btn-orange {
+  border-radius: 50px !important;
+}
+.input-group .btn {
+  border-radius: 0 50px 50px 0 !important;
+}
+.input-group .form-control { border-radius: 50px 0 0 50px !important; }
+.form-control, .form-select { border-radius: 12px !important; }
+.card { border-radius: 16px !important; overflow: hidden; }
+.card-header { border-radius: 16px 16px 0 0 !important; }
+.card-footer { border-radius: 0 0 16px 16px !important; }
+.modal-content { border-radius: 20px !important; }
+.alert  { border-radius: 12px !important; }
+.badge  { border-radius: 50px !important; }
+.dropdown-menu { border-radius: 14px !important; }

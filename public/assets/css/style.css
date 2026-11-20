@@ -3156,3 +3156,110 @@ a.btn-nav-daftar,
 .btn-nav-admin[aria-expanded="true"] {
   border-radius: 50px !important;
 }
+
+/* ============================================================
+   GLOBAL DESIGN SYSTEM — Pill Buttons + Rounded Cards
+   Override semua button & card di seluruh halaman jadi konsisten
+   ============================================================ */
+
+/* -- 1. SEMUA BUTTON — pill shape, tinggi & font seragam -- */
+
+/* Custom button classes */
+.btn-primary-custom,
+.btn-outline-custom,
+.btn-riviera-custom,
+.btn-secondary-custom,
+.btn-orange,
+.btn-action,
+.btn-detail,
+.btn-hero-primary,
+.btn-hero-outline,
+.btn-link-reset,
+.btn-logout-sidebar,
+.tentang-btn,
+.tentang-v2-btn,
+.ks-btn-all,
+.ks-nav-btn,
+.ks-card-detail-btn,
+.ks-search-clear {
+  border-radius: 50px !important;
+}
+
+/* Bootstrap button classes (dipakai di profil-warga, daftar-potensi, admin, register, login) */
+.btn {
+  border-radius: 50px !important;
+}
+.btn-primary,
+.btn-secondary,
+.btn-success,
+.btn-danger,
+.btn-warning,
+.btn-info,
+.btn-light,
+.btn-dark,
+.btn-outline-primary,
+.btn-outline-secondary,
+.btn-outline-success,
+.btn-outline-danger,
+.btn-outline-warning,
+.btn-outline-info,
+.btn-outline-light,
+.btn-outline-dark {
+  border-radius: 50px !important;
+}
+
+/* Input group buttons tetap selaras dengan input */
+.input-group .btn {
+  border-radius: 0 50px 50px 0 !important;
+}
+.input-group .form-control:first-child,
+.input-group .ks-search-input {
+  border-radius: 50px 0 0 50px !important;
+}
+/* Standalone search input (bukan dalam input-group) */
+.ks-search-input,
+.katalog-search-box input {
+  border-radius: 50px !important;
+}
+
+/* form-control standalone (login, register, daftar-potensi) */
+.form-control,
+.form-select {
+  border-radius: 12px !important;
+}
+
+/* -- 2. CARD — radius seragam 16px -- */
+
+/* Semua card Bootstrap */
+.card {
+  border-radius: 16px !important;
+  overflow: hidden;
+}
+.card-header { border-radius: 16px 16px 0 0 !important; }
+.card-footer { border-radius: 0 0 16px 16px !important; }
+
+/* Custom cards */
+.potensi-card,
+.form-card,
+.ks-card,
+.galeri-card,
+.ks-skeleton {
+  border-radius: 16px !important;
+}
+.potensi-card-img { border-radius: 16px 16px 0 0 !important; }
+
+/* Modal */
+.modal-content { border-radius: 20px !important; }
+.dm-foto-wrap  { border-radius: 14px !important; }
+
+/* Profil & stat boxes */
+.profil-stat-box,
+.stat-box,
+.tentang-v2-img-wrap { border-radius: 16px !important; }
+
+/* Alert & badge pill */
+.alert { border-radius: 12px !important; }
+.badge { border-radius: 50px !important; }
+
+/* dropdown menu */
+.dropdown-menu { border-radius: 14px !important; }
