@@ -5,10 +5,26 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Daftar / Masuk Warga — EtalasePelemwatu</title>
   <meta name="description" content="Daftar akun atau masuk sebagai warga Desa Pelemwatu untuk mengelola potensi lokal Anda.">
+  <link rel="canonical" href="{{ url()->current() }}">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="{{ url()->current() }}">
+  <meta property="og:title" content="Daftar / Masuk Warga — EtalasePelemwatu">
+  <meta property="og:description" content="Daftar akun atau masuk sebagai warga Desa Pelemwatu untuk mengelola potensi lokal Anda.">
+  <meta property="og:image" content="{{ asset('assets/img/foto-kantor-desa.jpg') }}">
+  <meta property="og:locale" content="id_ID">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="{{ url()->current() }}">
+  <meta name="twitter:title" content="Daftar / Masuk Warga — EtalasePelemwatu">
+  <meta name="twitter:description" content="Daftar akun atau masuk sebagai warga Desa Pelemwatu untuk mengelola potensi lokal Anda.">
+  <meta name="twitter:image" content="{{ asset('assets/img/foto-kantor-desa.jpg') }}">
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  @vite(['resources/css/app.css', 'resources/js/app.js'])
   <link rel="stylesheet" href="assets/css/style.css">
   <style>
     /* ── Halaman: putih ── */
@@ -524,7 +540,6 @@
     </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="assets/js/warga-auth.js"></script>
   <script src="assets/js/auth.js"></script>
   <script>

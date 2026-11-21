@@ -5,8 +5,24 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Login Admin — EtalasePelemwatu</title>
   <meta name="description" content="Halaman login administrator portal potensi lokal Desa Pelemwatu.">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="canonical" href="{{ url()->current() }}">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="{{ url()->current() }}">
+  <meta property="og:title" content="Login Admin — EtalasePelemwatu">
+  <meta property="og:description" content="Halaman login administrator portal potensi lokal Desa Pelemwatu.">
+  <meta property="og:image" content="{{ asset('assets/img/foto-kantor-desa.jpg') }}">
+  <meta property="og:locale" content="id_ID">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="{{ url()->current() }}">
+  <meta name="twitter:title" content="Login Admin — EtalasePelemwatu">
+  <meta name="twitter:description" content="Halaman login administrator portal potensi lokal Desa Pelemwatu.">
+  <meta name="twitter:image" content="{{ asset('assets/img/foto-kantor-desa.jpg') }}">
+
+  @vite(['resources/css/app.css', 'resources/js/app.js'])
   <link rel="stylesheet" href="assets/css/style.css">
   <style>
     body.login-page {

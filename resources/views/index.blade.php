@@ -5,10 +5,26 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>EtalasePelemwatu — Portal Potensi Lokal Desa Pelemwatu</title>
   <meta name="description" content="Portal digital potensi lokal Desa Pelemwatu, Kecamatan Menganti, Kabupaten Gresik, Jawa Timur.">
+  <link rel="canonical" href="{{ url()->current() }}">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="{{ url()->current() }}">
+  <meta property="og:title" content="EtalasePelemwatu — Portal Potensi Lokal Desa Pelemwatu">
+  <meta property="og:description" content="Portal digital potensi lokal Desa Pelemwatu, Kecamatan Menganti, Kabupaten Gresik, Jawa Timur.">
+  <meta property="og:image" content="{{ asset('assets/img/foto-kantor-desa.jpg') }}">
+  <meta property="og:locale" content="id_ID">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="{{ url()->current() }}">
+  <meta name="twitter:title" content="EtalasePelemwatu — Portal Potensi Lokal Desa Pelemwatu">
+  <meta name="twitter:description" content="Portal digital potensi lokal Desa Pelemwatu, Kecamatan Menganti, Kabupaten Gresik, Jawa Timur.">
+  <meta name="twitter:image" content="{{ asset('assets/img/foto-kantor-desa.jpg') }}">
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  @vite(['resources/css/app.css', 'resources/js/app.js'])
   <link rel="stylesheet" href="assets/css/style.css">
   <link rel="stylesheet" href="assets/css/galeri.css">
   <script>document.documentElement.classList.add('js-anim');</script>
@@ -628,7 +644,6 @@
   </button>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="assets/js/main.js"></script>
 <script src="assets/js/auth.js"></script>
 <script>window.APP_URL = "{{ rtrim(config('app.url'), '/') }}";</script>

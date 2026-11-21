@@ -5,8 +5,8 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Models\Potensi;
 use App\Models\PotensiImage;
+use App\Services\ImageOptimizer;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 
 class WargaPotensiController extends Controller
 {
@@ -127,9 +127,7 @@ class WargaPotensiController extends Controller
                 $img->delete();
             }
             foreach ($request->file('images') as $image) {
-                $ext = $image->extension();
-                $filename = Str::lower(Str::random(24)).'.'.$ext;
-                $image->move($uploadsDir, $filename);
+                $filename = ImageOptimizer::processAndSave($image);
                 PotensiImage::create(['potensi_id' => $potensi->id, 'image_path' => '/uploads/'.$filename]);
             }
         }

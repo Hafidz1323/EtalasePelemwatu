@@ -7,8 +7,8 @@ use App\Http\Resources\PotensiAdminResource;
 use App\Http\Resources\PotensiPublicResource;
 use App\Models\Potensi;
 use App\Models\PotensiImage;
+use App\Services\ImageOptimizer;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 
 class PotensiController extends Controller
 {
@@ -141,16 +141,10 @@ class PotensiController extends Controller
 
         $potensi = Potensi::create($potensiData);
 
-        // e. Simpan foto jika ada (ekstensi dari isi file, nama acak)
+        // e. Simpan foto jika ada (resize max 1600px, konversi webp kualitas 80)
         if ($request->hasFile('images')) {
-            $uploadsDir = public_path('uploads');
-            if (! is_dir($uploadsDir)) {
-                mkdir($uploadsDir, 0755, true);
-            }
             foreach ($request->file('images') as $image) {
-                $ext = $image->extension(); // dari isi file, bukan nama klien
-                $filename = Str::lower(Str::random(24)).'.'.$ext;
-                $image->move($uploadsDir, $filename);
+                $filename = ImageOptimizer::processAndSave($image);
                 PotensiImage::create([
                     'potensi_id' => $potensi->id,
                     'image_path' => '/uploads/'.$filename,

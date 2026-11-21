@@ -4,8 +4,8 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use App\Models\Galeri;
+use App\Services\ImageOptimizer;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 
 class GaleriController extends Controller
 {
@@ -50,14 +50,7 @@ class GaleriController extends Controller
         ]);
 
         $file = $request->file('image');
-        // Ekstensi ditentukan dari isi file (MIME type sniffing)
-        $filename = 'galeri-'.Str::lower(Str::random(24)).'.'.$file->extension();
-
-        $destinationPath = public_path('uploads');
-        if (! is_dir($destinationPath)) {
-            mkdir($destinationPath, 0755, true);
-        }
-        $file->move($destinationPath, $filename);
+        $filename = ImageOptimizer::processAndSave($file, 'galeri');
 
         $maxSort = Galeri::max('sort_order') ?? 0;
         $sortOrder = $request->filled('sort_order')

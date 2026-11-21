@@ -10,3 +10,6 @@ Artisan::command('inspire', function () {
 
 // Bersihkan token Sanctum yang kedaluwarsa secara berkala
 Schedule::command('sanctum:prune-expired --hours=24')->daily();
+
+// Backup harian database dan uploads (simpan 7 arsip terakhir)
+Schedule::command('backup:run')->daily();
