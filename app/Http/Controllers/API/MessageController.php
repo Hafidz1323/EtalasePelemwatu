@@ -3,15 +3,15 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\Message;
+use Illuminate\Http\Request;
 
 class MessageController extends Controller
 {
     public function index(Request $request)
     {
         $user = $request->user();
-        if (!$user || $user->role !== 'admin') {
+        if (! $user || $user->role !== 'admin') {
             return response()->json(['status' => 'error', 'message' => 'Akses ditolak.'], 403);
         }
 
@@ -31,7 +31,7 @@ class MessageController extends Controller
         ]);
 
         $msg = Message::create($validated);
+
         return response()->json(['status' => 'success', 'data' => $msg], 201);
     }
 }
-

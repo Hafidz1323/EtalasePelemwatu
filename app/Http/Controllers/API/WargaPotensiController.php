@@ -16,16 +16,21 @@ class WargaPotensiController extends Controller
         if (! $user || $user->role !== 'warga') {
             return response()->json(['status' => 'error', 'message' => 'Akses ditolak.'], 403);
         }
+
         return null;
     }
 
     /** GET /api/warga/potensi */
     public function index(Request $request)
     {
-        if ($err = $this->requireWarga($request)) return $err;
+        if ($err = $this->requireWarga($request)) {
+            return $err;
+        }
 
         $perPage = min((int) $request->input('per_page', 12), 50);
-        if ($perPage < 1) $perPage = 12;
+        if ($perPage < 1) {
+            $perPage = 12;
+        }
 
         $potensi = Potensi::with('category', 'images')
             ->where('user_id', $request->user()->id)
@@ -34,12 +39,12 @@ class WargaPotensiController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'data'   => $potensi->items(),
-            'meta'   => [
+            'data' => $potensi->items(),
+            'meta' => [
                 'current_page' => $potensi->currentPage(),
-                'last_page'    => $potensi->lastPage(),
-                'total'        => $potensi->total(),
-                'per_page'     => $potensi->perPage(),
+                'last_page' => $potensi->lastPage(),
+                'total' => $potensi->total(),
+                'per_page' => $potensi->perPage(),
             ],
         ]);
     }
@@ -47,7 +52,9 @@ class WargaPotensiController extends Controller
     /** GET /api/warga/potensi/{id} */
     public function show(Request $request, $id)
     {
-        if ($err = $this->requireWarga($request)) return $err;
+        if ($err = $this->requireWarga($request)) {
+            return $err;
+        }
 
         $potensi = Potensi::with('category', 'images')->find($id);
         if (! $potensi || $potensi->user_id !== $request->user()->id) {
@@ -60,7 +67,9 @@ class WargaPotensiController extends Controller
     /** POST /api/warga/potensi/{id} — edit (hanya pending/rejected) */
     public function update(Request $request, $id)
     {
-        if ($err = $this->requireWarga($request)) return $err;
+        if ($err = $this->requireWarga($request)) {
+            return $err;
+        }
 
         $potensi = Potensi::with('images')->find($id);
         if (! $potensi || $potensi->user_id !== $request->user()->id) {
@@ -69,37 +78,37 @@ class WargaPotensiController extends Controller
 
         if (! in_array($potensi->status, ['pending', 'rejected'])) {
             return response()->json([
-                'status'  => 'error',
+                'status' => 'error',
                 'message' => 'Potensi yang sudah disetujui tidak dapat diedit. Hubungi admin jika perlu perubahan.',
             ], 422);
         }
 
         $data = $request->validate([
-            'name'            => ['sometimes', 'required', 'string', 'min:3', 'max:100'],
-            'owner_name'      => ['sometimes', 'required', 'string', 'min:3', 'max:100', 'regex:/^[\p{L}\s.\'\-]+$/u'],
-            'category_id'     => ['sometimes', 'nullable', 'integer', 'exists:categories,id'],
-            'whatsapp'        => ['sometimes', 'required', 'regex:/^08[1-9][0-9]{7,10}$/'],
-            'address'         => ['sometimes', 'required', 'string', 'min:10', 'max:255'],
-            'description'     => ['sometimes', 'required', 'string', 'min:20', 'max:1000', 'not_regex:/(\p{L})\1{7,}/u'],
-            'location'        => ['sometimes', 'nullable', 'string', 'max:255'],
-            'email'           => ['sometimes', 'nullable', 'email:rfc', 'max:100'],
-            'jenis'           => ['sometimes', 'nullable', 'string', 'max:100'],
+            'name' => ['sometimes', 'required', 'string', 'min:3', 'max:100'],
+            'owner_name' => ['sometimes', 'required', 'string', 'min:3', 'max:100', 'regex:/^[\p{L}\s.\'\-]+$/u'],
+            'category_id' => ['sometimes', 'nullable', 'integer', 'exists:categories,id'],
+            'whatsapp' => ['sometimes', 'required', 'regex:/^08[1-9][0-9]{7,10}$/'],
+            'address' => ['sometimes', 'required', 'string', 'min:10', 'max:255'],
+            'description' => ['sometimes', 'required', 'string', 'min:20', 'max:1000', 'not_regex:/(\p{L})\1{7,}/u'],
+            'location' => ['sometimes', 'nullable', 'string', 'max:255'],
+            'email' => ['sometimes', 'nullable', 'email:rfc', 'max:100'],
+            'jenis' => ['sometimes', 'nullable', 'string', 'max:100'],
             'jam_operasional' => ['sometimes', 'nullable', 'string', 'max:100'],
-            'images'          => ['sometimes', 'nullable', 'array', 'max:3'],
-            'images.*'        => ['image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'images' => ['sometimes', 'nullable', 'array', 'max:3'],
+            'images.*' => ['image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
         ], [
-            'whatsapp.regex'        => 'Nomor telepon tidak valid. Contoh: 08123456789.',
+            'whatsapp.regex' => 'Nomor telepon tidak valid. Contoh: 08123456789.',
             'description.not_regex' => 'Deskripsi mengandung huruf yang diulang-ulang.',
-            'images.max'            => 'Maksimal 3 foto.',
-            'images.*.mimes'        => 'Format foto tidak didukung. Gunakan JPG, PNG, atau WebP.',
-            'images.*.max'          => 'Ukuran foto maksimal 2 MB.',
+            'images.max' => 'Maksimal 3 foto.',
+            'images.*.mimes' => 'Format foto tidak didukung. Gunakan JPG, PNG, atau WebP.',
+            'images.*.max' => 'Ukuran foto maksimal 2 MB.',
         ]);
 
         if ($potensi->status === 'rejected') {
-            $data['status']           = 'pending';
+            $data['status'] = 'pending';
             $data['rejection_reason'] = null;
-            $data['reviewed_by']      = null;
-            $data['reviewed_at']      = null;
+            $data['reviewed_by'] = null;
+            $data['reviewed_at'] = null;
         }
 
         $potensiData = collect($data)->except('images')->toArray();
@@ -107,24 +116,28 @@ class WargaPotensiController extends Controller
 
         if ($request->hasFile('images')) {
             $uploadsDir = public_path('uploads');
-            if (! is_dir($uploadsDir)) mkdir($uploadsDir, 0755, true);
+            if (! is_dir($uploadsDir)) {
+                mkdir($uploadsDir, 0755, true);
+            }
             foreach ($potensi->images as $img) {
                 $filePath = public_path(ltrim($img->image_path, '/'));
-                if (file_exists($filePath)) @unlink($filePath);
+                if (file_exists($filePath)) {
+                    @unlink($filePath);
+                }
                 $img->delete();
             }
             foreach ($request->file('images') as $image) {
-                $ext      = $image->extension();
-                $filename = Str::lower(Str::random(24)) . '.' . $ext;
+                $ext = $image->extension();
+                $filename = Str::lower(Str::random(24)).'.'.$ext;
                 $image->move($uploadsDir, $filename);
-                PotensiImage::create(['potensi_id' => $potensi->id, 'image_path' => '/uploads/' . $filename]);
+                PotensiImage::create(['potensi_id' => $potensi->id, 'image_path' => '/uploads/'.$filename]);
             }
         }
 
         return response()->json([
-            'status'  => 'success',
+            'status' => 'success',
             'message' => 'Potensi berhasil diperbarui.',
-            'data'    => $potensi->fresh(['category', 'images']),
+            'data' => $potensi->fresh(['category', 'images']),
         ]);
     }
 
@@ -135,7 +148,9 @@ class WargaPotensiController extends Controller
      */
     public function destroy(Request $request, $id)
     {
-        if ($err = $this->requireWarga($request)) return $err;
+        if ($err = $this->requireWarga($request)) {
+            return $err;
+        }
 
         $potensi = Potensi::with('images')->find($id);
         if (! $potensi || $potensi->user_id !== $request->user()->id) {
@@ -144,14 +159,16 @@ class WargaPotensiController extends Controller
 
         if (! in_array($potensi->status, ['pending', 'rejected'])) {
             return response()->json([
-                'status'  => 'error',
+                'status' => 'error',
                 'message' => 'Potensi yang sudah disetujui tidak dapat langsung dihapus. Gunakan fitur "Ajukan Hapus" untuk meminta persetujuan admin.',
             ], 422);
         }
 
         foreach ($potensi->images as $img) {
             $filePath = public_path(ltrim($img->image_path, '/'));
-            if (file_exists($filePath)) @unlink($filePath);
+            if (file_exists($filePath)) {
+                @unlink($filePath);
+            }
         }
         $potensi->delete();
 
@@ -166,7 +183,9 @@ class WargaPotensiController extends Controller
      */
     public function requestDeletion(Request $request, $id)
     {
-        if ($err = $this->requireWarga($request)) return $err;
+        if ($err = $this->requireWarga($request)) {
+            return $err;
+        }
 
         $potensi = Potensi::with('images')->find($id);
         if (! $potensi || $potensi->user_id !== $request->user()->id) {
@@ -176,7 +195,7 @@ class WargaPotensiController extends Controller
         // Sudah ada permintaan sebelumnya
         if ($potensi->deletion_requested_at) {
             return response()->json([
-                'status'  => 'error',
+                'status' => 'error',
                 'message' => 'Permintaan penghapusan sudah diajukan. Tunggu persetujuan admin.',
             ], 422);
         }
@@ -185,9 +204,12 @@ class WargaPotensiController extends Controller
         if (in_array($potensi->status, ['pending', 'rejected'])) {
             foreach ($potensi->images as $img) {
                 $filePath = public_path(ltrim($img->image_path, '/'));
-                if (file_exists($filePath)) @unlink($filePath);
+                if (file_exists($filePath)) {
+                    @unlink($filePath);
+                }
             }
             $potensi->delete();
+
             return response()->json(['status' => 'success', 'message' => 'Potensi berhasil dihapus.']);
         }
 
@@ -196,7 +218,7 @@ class WargaPotensiController extends Controller
         $potensi->save();
 
         return response()->json([
-            'status'  => 'success',
+            'status' => 'success',
             'message' => 'Permintaan penghapusan berhasil diajukan. Admin akan meninjau dalam 1×24 jam.',
         ]);
     }
@@ -207,7 +229,9 @@ class WargaPotensiController extends Controller
      */
     public function cancelDeletion(Request $request, $id)
     {
-        if ($err = $this->requireWarga($request)) return $err;
+        if ($err = $this->requireWarga($request)) {
+            return $err;
+        }
 
         $potensi = Potensi::find($id);
         if (! $potensi || $potensi->user_id !== $request->user()->id) {
@@ -227,7 +251,9 @@ class WargaPotensiController extends Controller
     /** DELETE /api/warga/potensi/{id}/images/{imageId} */
     public function destroyImage(Request $request, $id, $imageId)
     {
-        if ($err = $this->requireWarga($request)) return $err;
+        if ($err = $this->requireWarga($request)) {
+            return $err;
+        }
 
         $potensi = Potensi::find($id);
         if (! $potensi || $potensi->user_id !== $request->user()->id) {
@@ -240,7 +266,9 @@ class WargaPotensiController extends Controller
         }
 
         $filePath = public_path(ltrim($image->image_path, '/'));
-        if (file_exists($filePath)) @unlink($filePath);
+        if (file_exists($filePath)) {
+            @unlink($filePath);
+        }
         $image->delete();
 
         return response()->json(['status' => 'success', 'message' => 'Foto berhasil dihapus.']);

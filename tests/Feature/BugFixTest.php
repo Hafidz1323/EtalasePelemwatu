@@ -20,13 +20,13 @@ class BugFixTest extends TestCase
     public function test_foto_path_muncul_di_respons_publik(): void
     {
         $cat = Category::create(['name' => 'Usaha']);
-        $p   = Potensi::create([
-            'name'        => 'Warung Pak Budi',
-            'owner_name'  => 'Budi Santoso',
-            'whatsapp'    => '081234567890',
-            'address'     => 'Jl. Desa No. 1 Pelemwatu',
+        $p = Potensi::create([
+            'name' => 'Warung Pak Budi',
+            'owner_name' => 'Budi Santoso',
+            'whatsapp' => '081234567890',
+            'address' => 'Jl. Desa No. 1 Pelemwatu',
             'description' => 'Warung makan enak dan murah di desa',
-            'status'      => 'approved',
+            'status' => 'approved',
             'category_id' => $cat->id,
         ]);
         PotensiImage::create([
@@ -42,15 +42,15 @@ class BugFixTest extends TestCase
 
     public function test_foto_path_muncul_di_respons_admin(): void
     {
-        $admin = User::factory()->create();
-        $cat   = Category::create(['name' => 'Jasa']);
-        $p     = Potensi::create([
-            'name'        => 'Jasa Jahit Bu Ani',
-            'owner_name'  => 'Ani Wulandari',
-            'whatsapp'    => '081234567891',
-            'address'     => 'Jl. Desa No. 2 Pelemwatu',
+        $admin = User::factory()->admin()->create();
+        $cat = Category::create(['name' => 'Jasa']);
+        $p = Potensi::create([
+            'name' => 'Jasa Jahit Bu Ani',
+            'owner_name' => 'Ani Wulandari',
+            'whatsapp' => '081234567891',
+            'address' => 'Jl. Desa No. 2 Pelemwatu',
             'description' => 'Jasa jahit baju dengan harga terjangkau',
-            'status'      => 'pending',
+            'status' => 'pending',
             'category_id' => $cat->id,
         ]);
         PotensiImage::create([
@@ -69,13 +69,13 @@ class BugFixTest extends TestCase
     public function test_foto_path_muncul_di_show_publik(): void
     {
         $cat = Category::create(['name' => 'Barang']);
-        $p   = Potensi::create([
-            'name'        => 'Kerajinan Anyaman',
-            'owner_name'  => 'Sari Dewi',
-            'whatsapp'    => '081234567892',
-            'address'     => 'Jl. Desa No. 3 Pelemwatu',
+        $p = Potensi::create([
+            'name' => 'Kerajinan Anyaman',
+            'owner_name' => 'Sari Dewi',
+            'whatsapp' => '081234567892',
+            'address' => 'Jl. Desa No. 3 Pelemwatu',
             'description' => 'Kerajinan anyaman bambu khas Desa Pelemwatu',
-            'status'      => 'approved',
+            'status' => 'approved',
             'category_id' => $cat->id,
         ]);
         PotensiImage::create([
@@ -83,7 +83,7 @@ class BugFixTest extends TestCase
             'image_path' => '/uploads/foto-anyaman-def456.webp',
         ]);
 
-        $res = $this->getJson('/api/potensi/' . $p->id);
+        $res = $this->getJson('/api/potensi/'.$p->id);
 
         $res->assertOk()
             ->assertJsonPath('data.images.0.path', '/uploads/foto-anyaman-def456.webp');
@@ -97,17 +97,17 @@ class BugFixTest extends TestCase
     {
         // Insert langsung tanpa field status untuk membuktikan default DB = 'pending'
         \DB::table('potensi')->insert([
-            'name'        => 'Usaha Baru Tanpa Status',
-            'owner_name'  => 'Test Owner',
-            'whatsapp'    => '081234567893',
-            'address'     => 'Jl. Desa No. 4',
+            'name' => 'Usaha Baru Tanpa Status',
+            'owner_name' => 'Test Owner',
+            'whatsapp' => '081234567893',
+            'address' => 'Jl. Desa No. 4',
             'description' => 'Deskripsi potensi usaha yang belum punya status',
-            'created_at'  => now(),
-            'updated_at'  => now(),
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
 
         $this->assertDatabaseHas('potensi', [
-            'name'   => 'Usaha Baru Tanpa Status',
+            'name' => 'Usaha Baru Tanpa Status',
             'status' => 'pending',
         ]);
     }
@@ -115,12 +115,12 @@ class BugFixTest extends TestCase
     public function test_potensi_pending_tidak_muncul_di_publik(): void
     {
         Potensi::create([
-            'name'        => 'Potensi Belum Disetujui',
-            'owner_name'  => 'Owner Pending',
-            'whatsapp'    => '081234567894',
-            'address'     => 'Jl. Desa No. 5 Pelemwatu',
+            'name' => 'Potensi Belum Disetujui',
+            'owner_name' => 'Owner Pending',
+            'whatsapp' => '081234567894',
+            'address' => 'Jl. Desa No. 5 Pelemwatu',
             'description' => 'Ini potensi yang masih pending verifikasi admin',
-            'status'      => 'pending',
+            'status' => 'pending',
         ]);
 
         $res = $this->getJson('/api/potensi');
@@ -138,12 +138,12 @@ class BugFixTest extends TestCase
         config(['potensi.show_contact' => false]);
 
         Potensi::create([
-            'name'        => 'Usaha Rahasia WA',
-            'owner_name'  => 'Owner Privat',
-            'whatsapp'    => '081999888777',
-            'address'     => 'Jl. Privat No. 1 Pelemwatu',
+            'name' => 'Usaha Rahasia WA',
+            'owner_name' => 'Owner Privat',
+            'whatsapp' => '081999888777',
+            'address' => 'Jl. Privat No. 1 Pelemwatu',
             'description' => 'Usaha yang nomor WA-nya tidak tampil ke publik',
-            'status'      => 'approved',
+            'status' => 'approved',
         ]);
 
         $res = $this->getJson('/api/potensi');
@@ -159,12 +159,12 @@ class BugFixTest extends TestCase
         config(['potensi.show_contact' => true]);
 
         Potensi::create([
-            'name'        => 'Usaha Tampil WA',
-            'owner_name'  => 'Owner Publik',
-            'whatsapp'    => '082111222333',
-            'address'     => 'Jl. Publik No. 2 Pelemwatu',
+            'name' => 'Usaha Tampil WA',
+            'owner_name' => 'Owner Publik',
+            'whatsapp' => '082111222333',
+            'address' => 'Jl. Publik No. 2 Pelemwatu',
             'description' => 'Usaha yang nomor WA-nya boleh tampil ke publik',
-            'status'      => 'approved',
+            'status' => 'approved',
         ]);
 
         $res = $this->getJson('/api/potensi');

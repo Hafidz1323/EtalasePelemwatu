@@ -28,6 +28,7 @@ Thumbs.db
 
 /public/uploads/
 !/public/uploads/.htaccess
+!/public/uploads/.gitkeep
 /frontend/
 *.zip
 .env.*

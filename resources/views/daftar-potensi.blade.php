@@ -400,13 +400,13 @@
               </p>
               <div style="background:var(--clr-bg);border-radius:8px;padding:.85rem;font-size:.84rem;color:var(--clr-blue);margin-bottom:.6rem;">
                 <i class="bi bi-geo-alt me-1" style="color:var(--clr-orange);"></i>
-                Jl. Raya Pelemwatu No. 128, Kec. Menganti, Kab. Gresik
+                {{ $desa['alamat'] }}
               </div>
               <div style="background:var(--clr-bg);border-radius:8px;padding:.85rem;font-size:.84rem;color:var(--clr-blue);margin-bottom:.6rem;">
                 <i class="bi bi-clock me-1" style="color:var(--clr-orange);"></i>
-                Senin – Jumat, 08.00 – 16.00 WIB
+                {{ $desa['jam_operasional'] }}
               </div>
-              <a href="https://wa.me/6282245730256?text=Halo%2C%20saya%20butuh%20bantuan%20pengisian%20formulir%20EtalasePelemwatu."
+              <a href="https://wa.me/{{ $desa['whatsapp'] }}?text=Halo%2C%20saya%20butuh%20bantuan%20pengisian%20formulir%20EtalasePelemwatu."
                  target="_blank" rel="noopener noreferrer"
                  class="w-100 justify-content-center mt-3"
                  style="display:flex;align-items:center;gap:.5rem;background:#25D366;color:#fff;
@@ -414,7 +414,7 @@
                         text-decoration:none;border:none;">
                 <i class="bi bi-whatsapp"></i> Chat WhatsApp
               </a>
-              <a href="index.html#kontak-section" class="btn-outline-custom w-100 justify-content-center mt-2" style="font-size:.85rem;">
+              <a href="{{ url('/#kontak-section') }}" class="btn-outline-custom w-100 justify-content-center mt-2" style="font-size:.85rem;">
                 <i class="bi bi-envelope"></i> Lihat Info Kontak
               </a>
             </div>

@@ -37,7 +37,7 @@ class Potensi extends Model
 
     public function owner()
     {
-        return $this->belongsTo(\App\Models\User::class, 'user_id');
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     public function category()
@@ -50,4 +50,3 @@ class Potensi extends Model
         return $this->hasMany(PotensiImage::class, 'potensi_id');
     }
 }
-

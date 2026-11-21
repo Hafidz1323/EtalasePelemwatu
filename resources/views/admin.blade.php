@@ -479,108 +479,13 @@
           </label>
         </div>
         <div class="admin-card-body">
-                    <div class="galeri-admin-grid" id="galeriAdminGrid">
-
-            <!-- Item 1 -->
-            <div class="galeri-admin-item" data-galeri-id="1" data-galeri-desc="Kegiatan rapat koordinasi rutin yang dihadiri oleh perangkat desa dan perwakilan warga untuk membahas program dan kebijakan desa.">
-              <div class="galeri-admin-thumb">
-                <img src="assets/img/kegiatan-kantor-desa.jpg" alt="Rapat Koordinasi Desa">
-                <div class="galeri-admin-actions">
-                  <button class="btn btn-sm btn-warning btn-galeri-edit" data-id="1" style="font-size:.78rem;padding:.3rem .75rem;">
-                    <i class="bi bi-pencil me-1"></i>Edit
-                  </button>
-                  <button class="btn btn-sm btn-danger btn-galeri-hapus" data-id="1" style="font-size:.78rem;padding:.3rem .75rem;">
-                    <i class="bi bi-trash me-1"></i>Hapus
-                  </button>
-                </div>
-              </div>
-              <div class="galeri-admin-info">
-                <div class="galeri-caption">Rapat Koordinasi Desa</div>
-                <p class="galeri-admin-desc">Kegiatan rapat koordinasi rutin yang dihadiri oleh perangkat desa dan perwakilan warga untuk membahas program dan kebijakan desa.</p>
-              </div>
-            </div>
-
-            <!-- Item 2 -->
-            <div class="galeri-admin-item" data-galeri-id="2" data-galeri-desc="Kegiatan gotong royong membersihkan lingkungan desa yang diikuti oleh seluruh lapisan masyarakat Desa Pelemwatu secara sukarela.">
-              <div class="galeri-admin-thumb">
-                <img src="assets/img/kegiatan-kerja-bakti.jpg" alt="Kerja Bakti Warga">
-                <div class="galeri-admin-actions">
-                  <button class="btn btn-sm btn-warning btn-galeri-edit" data-id="2" style="font-size:.78rem;padding:.3rem .75rem;">
-                    <i class="bi bi-pencil me-1"></i>Edit
-                  </button>
-                  <button class="btn btn-sm btn-danger btn-galeri-hapus" data-id="2" style="font-size:.78rem;padding:.3rem .75rem;">
-                    <i class="bi bi-trash me-1"></i>Hapus
-                  </button>
-                </div>
-              </div>
-              <div class="galeri-admin-info">
-                <div class="galeri-caption">Kerja Bakti Warga</div>
-                <p class="galeri-admin-desc">Kegiatan gotong royong membersihkan lingkungan desa yang diikuti oleh seluruh lapisan masyarakat Desa Pelemwatu secara sukarela.</p>
-              </div>
-            </div>
-
-            <!-- Item 3 -->
-            <div class="galeri-admin-item" data-galeri-id="3" data-galeri-desc="Program penanaman pohon dan tanaman di area desa sebagai upaya menjaga lingkungan hijau dan asri di Desa Pelemwatu.">
-              <div class="galeri-admin-thumb">
-                <img src="assets/img/kegiatan-penghijauan.jpg" alt="Program Penghijauan">
-                <div class="galeri-admin-actions">
-                  <button class="btn btn-sm btn-warning btn-galeri-edit" data-id="3" style="font-size:.78rem;padding:.3rem .75rem;">
-                    <i class="bi bi-pencil me-1"></i>Edit
-                  </button>
-                  <button class="btn btn-sm btn-danger btn-galeri-hapus" data-id="3" style="font-size:.78rem;padding:.3rem .75rem;">
-                    <i class="bi bi-trash me-1"></i>Hapus
-                  </button>
-                </div>
-              </div>
-              <div class="galeri-admin-info">
-                <div class="galeri-caption">Program Penghijauan</div>
-                <p class="galeri-admin-desc">Program penanaman pohon dan tanaman di area desa sebagai upaya menjaga lingkungan hijau dan asri di Desa Pelemwatu.</p>
-              </div>
-            </div>
-
-            <!-- Item 4 -->
-            <div class="galeri-admin-item" data-galeri-id="4" data-galeri-desc="Kantor Desa Pelemwatu sebagai pusat pelayanan administrasi dan pemerintahan desa yang melayani kebutuhan warga setiap hari kerja.">
-              <div class="galeri-admin-thumb">
-                <img src="assets/img/foto-kantor-desa.jpg" alt="Kantor Desa Pelemwatu">
-                <div class="galeri-admin-actions">
-                  <button class="btn btn-sm btn-warning btn-galeri-edit" data-id="4" style="font-size:.78rem;padding:.3rem .75rem;">
-                    <i class="bi bi-pencil me-1"></i>Edit
-                  </button>
-                  <button class="btn btn-sm btn-danger btn-galeri-hapus" data-id="4" style="font-size:.78rem;padding:.3rem .75rem;">
-                    <i class="bi bi-trash me-1"></i>Hapus
-                  </button>
-                </div>
-              </div>
-              <div class="galeri-admin-info">
-                <div class="galeri-caption">Kantor Desa Pelemwatu</div>
-                <p class="galeri-admin-desc">Kantor Desa Pelemwatu sebagai pusat pelayanan administrasi dan pemerintahan desa yang melayani kebutuhan warga setiap hari kerja.</p>
-              </div>
-            </div>
-
-            <!-- Item 5 -->
-            <div class="galeri-admin-item" data-galeri-id="5" data-galeri-desc="Salah satu contoh usaha kuliner milik warga Desa Pelemwatu yang berhasil berkembang dan menjadi bagian dari potensi ekonomi lokal desa.">
-              <div class="galeri-admin-thumb">
-                <img src="assets/img/foto-warung-desa.jpg" alt="Warung Usaha Warga">
-                <div class="galeri-admin-actions">
-                  <button class="btn btn-sm btn-warning btn-galeri-edit" data-id="5" style="font-size:.78rem;padding:.3rem .75rem;">
-                    <i class="bi bi-pencil me-1"></i>Edit
-                  </button>
-                  <button class="btn btn-sm btn-danger btn-galeri-hapus" data-id="5" style="font-size:.78rem;padding:.3rem .75rem;">
-                    <i class="bi bi-trash me-1"></i>Hapus
-                  </button>
-                </div>
-              </div>
-              <div class="galeri-admin-info">
-                <div class="galeri-caption">Warung Usaha Warga</div>
-                <p class="galeri-admin-desc">Salah satu contoh usaha kuliner milik warga Desa Pelemwatu yang berhasil berkembang dan menjadi bagian dari potensi ekonomi lokal desa.</p>
-              </div>
-            </div>
-
+          <div class="galeri-admin-grid" id="galeriAdminGrid">
             <!-- Tombol tambah foto -->
             <label class="galeri-add-btn" for="galeriFileInput">
               <i class="bi bi-plus-circle"></i>
               <span>Tambah Foto</span>
             </label>
+          </div>
 
           </div>
         </div>
@@ -824,56 +729,79 @@
     <div class="admin-section" id="section-profil-desa-admin">
       <div class="admin-page-header"><h2>Profil Desa</h2><p>Kelola informasi profil Desa Pelemwatu yang ditampilkan di website.</p></div>
       <div class="admin-card">
-        <div class="admin-card-header">
+        <div class="admin-card-header d-flex justify-content-between align-items-center">
           <h5><i class="bi bi-building me-2" style="color:var(--clr-orange);"></i>Data Profil Desa</h5>
-          <span class="status-badge status-aktif">Data Tersimpan</span>
+          <div class="d-flex align-items-center gap-2">
+            <a href="{{ url('/#kontak-section') }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1" style="font-size:.8rem;">
+              <i class="bi bi-box-arrow-up-right"></i> Lihat di website
+            </a>
+            <span class="status-badge status-aktif" id="badgeStatusProfil">Data Tersimpan</span>
+          </div>
         </div>
         <div class="admin-card-body">
-          <div class="row g-3">
-            <div class="col-md-6">
-              <label class="form-label fw-semibold" style="color:var(--clr-blue);">Nama Desa</label>
-              <input type="text" class="form-control" value="Pelemwatu" readonly style="background:var(--clr-bg);">
+          <form id="formProfilDesa" onsubmit="return false;">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label fw-semibold" style="color:var(--clr-blue);">Nama Desa</label>
+                <input type="text" class="form-control" value="Pelemwatu" readonly style="background:var(--clr-bg);">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold" style="color:var(--clr-blue);">Kecamatan</label>
+                <input type="text" class="form-control" value="Menganti" readonly style="background:var(--clr-bg);">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold" style="color:var(--clr-blue);">Kabupaten</label>
+                <input type="text" class="form-control" value="Gresik" readonly style="background:var(--clr-bg);">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold" style="color:var(--clr-blue);">Provinsi</label>
+                <input type="text" class="form-control" value="Jawa Timur" readonly style="background:var(--clr-bg);">
+              </div>
+              <div class="col-12">
+                <label class="form-label fw-semibold" style="color:var(--clr-blue);">Alamat Lengkap</label>
+                <input type="text" class="form-control" id="admDesaAlamat" name="desa_alamat"
+                       placeholder="Jl. Raya Pelemwatu No. 128, Kecamatan Menganti, Kabupaten Gresik, Jawa Timur">
+              </div>
+              <div class="col-md-4">
+                <label class="form-label fw-semibold" style="color:var(--clr-blue);">Kode Pos</label>
+                <input type="text" class="form-control" id="admDesaKodePos" name="desa_kode_pos" placeholder="Contoh: 61174" maxlength="5">
+              </div>
+              <div class="col-md-4">
+                <label class="form-label fw-semibold" style="color:var(--clr-blue);">Telepon Kantor</label>
+                <input type="tel" class="form-control" id="admDesaTelepon" name="desa_telepon" placeholder="Nomor telepon kantor">
+              </div>
+              <div class="col-md-4">
+                <label class="form-label fw-semibold" style="color:var(--clr-blue);">Email Resmi</label>
+                <input type="email" class="form-control" id="admDesaEmail" name="desa_email" placeholder="info@etalasepelemwatu.id">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold" style="color:var(--clr-blue);">Jam Operasional</label>
+                <input type="text" class="form-control" id="admDesaJam" name="desa_jam_operasional" placeholder="Contoh: Senin – Jumat, 08.00 – 16.00 WIB">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold" style="color:var(--clr-blue);">WhatsApp Resmi</label>
+                <input type="tel" class="form-control" id="admDesaWa" name="desa_whatsapp" placeholder="Contoh: 0822-4573-0256">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold" style="color:var(--clr-blue);">Instagram Resmi</label>
+                <input type="text" class="form-control" id="admDesaIg" name="desa_instagram" placeholder="Contoh: official_pelemwatu atau @official_pelemwatu">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold" style="color:var(--clr-blue);">Nama Kepala Desa</label>
+                <input type="text" class="form-control" id="admDesaKepala" name="desa_kepala" placeholder="Nama kepala desa">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold" style="color:var(--clr-blue);">Jumlah KK</label>
+                <input type="number" class="form-control" id="admDesaJmlKK" name="desa_jumlah_kk" min="0" placeholder="Contoh: 850">
+              </div>
+              <div class="col-12 mt-2">
+                <button type="button" class="btn-primary-custom" id="saveProfileBtn">
+                  <i class="bi bi-save me-1"></i> Simpan Perubahan
+                </button>
+                <button type="button" class="btn-outline-custom ms-2" id="btnBatalProfil">Batal</button>
+              </div>
             </div>
-            <div class="col-md-6">
-              <label class="form-label fw-semibold" style="color:var(--clr-blue);">Kecamatan</label>
-              <input type="text" class="form-control" value="Menganti" readonly style="background:var(--clr-bg);">
-            </div>
-            <div class="col-md-6">
-              <label class="form-label fw-semibold" style="color:var(--clr-blue);">Kabupaten</label>
-              <input type="text" class="form-control" value="Gresik" readonly style="background:var(--clr-bg);">
-            </div>
-            <div class="col-md-6">
-              <label class="form-label fw-semibold" style="color:var(--clr-blue);">Provinsi</label>
-              <input type="text" class="form-control" value="Jawa Timur" readonly style="background:var(--clr-bg);">
-            </div>
-            <div class="col-12">
-              <label class="form-label fw-semibold" style="color:var(--clr-blue);">Alamat Lengkap</label>
-              <input type="text" class="form-control"
-                     value="Jl. Raya Pelemwatu No. 128, Kecamatan Menganti, Kabupaten Gresik, Jawa Timur">
-            </div>
-            <div class="col-md-4">
-              <label class="form-label fw-semibold" style="color:var(--clr-blue);">Kode Pos</label>
-              <input type="text" class="form-control" placeholder="Kode pos">
-            </div>
-            <div class="col-md-4">
-              <label class="form-label fw-semibold" style="color:var(--clr-blue);">Telepon Kantor</label>
-              <input type="tel" class="form-control" placeholder="Nomor telepon kantor">
-            </div>
-            <div class="col-md-4">
-              <label class="form-label fw-semibold" style="color:var(--clr-blue);">Email Resmi</label>
-              <input type="email" class="form-control" placeholder="Alamat email resmi">
-            </div>
-            <div class="col-md-6">
-              <label class="form-label fw-semibold" style="color:var(--clr-blue);">Nama Kepala Desa</label>
-              <input type="text" class="form-control" placeholder="Nama kepala desa">
-            </div>
-            <div class="col-12 mt-2">
-              <button type="button" class="btn-primary-custom" id="saveProfileBtn">
-                <i class="bi bi-save"></i> Simpan Perubahan
-              </button>
-              <button type="button" class="btn-outline-custom ms-2" id="btnBatalProfil">Batal</button>
-            </div>
-          </div>
+          </form>
         </div>
       </div>
     </div><!-- /profil-desa-admin -->
@@ -1243,7 +1171,16 @@ function switchSection(name) {
     document.getElementById('adminSidebar').classList.remove('open');
     document.getElementById('sidebarOverlay').classList.remove('show');
   }
+  var contentEl = document.querySelector('.admin-content');
+  if (contentEl) {
+    contentEl.scrollTop = 0;
+  }
   window.scrollTo({top:0,behavior:'smooth'});
+  try {
+    if (history.replaceState) {
+      history.replaceState(null, '', '#' + name);
+    }
+  } catch (e) {}
 }
 
 /* ── Nav items ── */
@@ -1330,7 +1267,7 @@ document.getElementById('sidebarOverlay').addEventListener('click', function(){
 
 /* ── Hash-based section routing ── */
 (function () {
-  var VALID_SECTIONS = ['dashboard','kelola-potensi','verifikasi','galeri','perangkat','profil-desa-admin','pengaturan'];
+  var VALID_SECTIONS = ['dashboard','kelola-potensi','verifikasi','permintaan-hapus','galeri','perangkat','profil-desa-admin','pengaturan'];
   function routeFromHash() {
     var hash = window.location.hash.replace('#', '');
     if (hash && VALID_SECTIONS.indexOf(hash) !== -1) {
@@ -1341,10 +1278,16 @@ document.getElementById('sidebarOverlay').addEventListener('click', function(){
   window.addEventListener('hashchange', routeFromHash);
 })();
 
-/* â”€â”€ Dashboard shortcuts â”€â”€ */
+/* ── Dashboard shortcuts ── */
 document.getElementById('btnLihatSemua').addEventListener('click',function(){switchSection('verifikasi');});
 document.getElementById('btnGoSettings').addEventListener('click',function(){switchSection('pengaturan');});
 document.getElementById('btnExport').addEventListener('click',function(){showAdminToast('Fitur export data belum tersedia.','info');});
+var btnHubungiPengelola = document.getElementById('btnHubungiPengelola');
+if (btnHubungiPengelola) {
+  btnHubungiPengelola.addEventListener('click', function () {
+    switchSection('profil-desa-admin');
+  });
+}
 
 /* \u2500\u2500 Notifikasi Bell \u2500\u2500 */
 (function () {
@@ -2626,16 +2569,20 @@ document.querySelectorAll('.btn-go-verifikasi').forEach(function(b){
     pengTitle.textContent = title;
     pengBody.innerHTML = '';
     pengBody.appendChild(tmpl.cloneNode(true));
-    // Clone tidak perlu display:none â€” ubah tampilan
+    // Clone tidak perlu display:none — ubah tampilan
     pengBody.firstChild.style.display = '';
     pengHome.style.display  = 'none';
     pengPanel.style.display = '';
+    var contentEl = document.querySelector('.admin-content');
+    if (contentEl) contentEl.scrollTop = 0;
     if (typeof onOpen === 'function') onOpen();
   }
 
   function goBack() {
     pengPanel.style.display = 'none';
     pengHome.style.display  = '';
+    var contentEl = document.querySelector('.admin-content');
+    if (contentEl) contentEl.scrollTop = 0;
   }
 
   pengBack.addEventListener('click', goBack);
@@ -3078,120 +3025,383 @@ document.querySelectorAll('.btn-go-verifikasi').forEach(function(b){
 
 })(); /* end Pengaturan IIFE */
 
-/* â”€â”€ Galeri Admin â”€â”€ */
-var galeriIdCounter = 6;
+/* ── Galeri Admin Dinamis ── */
+(function () {
+  'use strict';
+  var API = (window.location.protocol === 'file:' || window.location.port === '5500')
+    ? 'http://localhost:8000/api'
+    : (window.location.port === '3000' ? 'http://localhost:3000/api' : '/api');
 
-/* Tambah foto via file input */
-document.getElementById('galeriFileInput').addEventListener('change', function(){
-  Array.from(this.files).forEach(function(file){
-    if (!file.type.startsWith('image/')) return;
-    var reader = new FileReader();
-    reader.onload = function(e){
-      var id = galeriIdCounter++;
-      var caption = file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ');
-      caption = caption.charAt(0).toUpperCase() + caption.slice(1);
-      addGaleriAdminItem(id, e.target.result, caption, '');
-      showAdminToast('Foto "' + caption + '" berhasil ditambahkan. Silakan isi deskripsi kegiatan.', 'success');
-      // Langsung buka modal edit agar admin bisa mengisi deskripsi
-      setTimeout(function() {
-        var item = document.querySelector('[data-galeri-id="' + id + '"]');
-        if (item) {
-          document.getElementById('editGaleriId').value = id;
-          document.getElementById('editGaleriCaption').value = caption;
-          document.getElementById('editGaleriDesc').value = '';
-          new bootstrap.Modal(document.getElementById('modalEditGaleri')).show();
-        }
-      }, 400);
-    };
-    reader.readAsDataURL(file);
-  });
-  this.value = '';
-});
-
-function addGaleriAdminItem(id, src, caption, desc) {
-  desc = desc || '';
   var grid = document.getElementById('galeriAdminGrid');
-  var addBtn = grid.querySelector('.galeri-add-btn');
-  var div = document.createElement('div');
-  div.className = 'galeri-admin-item';
-  div.dataset.galeriId = id;
-  div.dataset.galeriDesc = desc;
-  div.innerHTML =
-    '<div class="galeri-admin-thumb">' +
-      '<img src="' + src + '" alt="' + caption + '">' +
-      '<div class="galeri-admin-actions">' +
-        '<button class="btn btn-sm btn-warning btn-galeri-edit" data-id="' + id + '" style="font-size:.78rem;padding:.3rem .75rem;">' +
-          '<i class="bi bi-pencil me-1"></i>Edit' +
-        '</button>' +
-        '<button class="btn btn-sm btn-danger btn-galeri-hapus" data-id="' + id + '" style="font-size:.78rem;padding:.3rem .75rem;">' +
-          '<i class="bi bi-trash me-1"></i>Hapus' +
-        '</button>' +
-      '</div>' +
-    '</div>' +
-    '<div class="galeri-admin-info">' +
-      '<div class="galeri-caption">' + caption + '</div>' +
-      '<p class="galeri-admin-desc">' + (desc || 'Belum ada deskripsi kegiatan.') + '</p>' +
-    '</div>';
-  grid.insertBefore(div, addBtn);
-  bindGaleriButtons(div);
-}
+  var fileInput = document.getElementById('galeriFileInput');
+  var editModalEl = document.getElementById('modalEditGaleri');
+  var btnSimpan = document.getElementById('btnSimpanJudulGaleri');
+  if (!grid) return;
 
-/* Bind edit & hapus buttons */
-function bindGaleriButtons(scope) {
-  var root = scope || document;
-  root.querySelectorAll ? null : root = document;
-
-  (scope ? [scope] : Array.from(document.querySelectorAll('.galeri-admin-item'))).forEach(function(item){
-    item.querySelectorAll('.btn-galeri-edit').forEach(function(btn){
-      btn.addEventListener('click', function(){
-        var id = this.dataset.id;
-        var cap = item.querySelector('.galeri-caption').textContent;
-        document.getElementById('editGaleriId').value = id;
-        document.getElementById('editGaleriCaption').value = cap;
-        document.getElementById('editGaleriDesc').value = item.dataset.galeriDesc || '';
-        new bootstrap.Modal(document.getElementById('modalEditGaleri')).show();
-      });
-    });
-    item.querySelectorAll('.btn-galeri-hapus').forEach(function(btn){
-      btn.addEventListener('click', function(){
-        if (confirm('Hapus foto ini dari galeri?')) {
-          item.style.transition = 'opacity .3s, transform .3s';
-          item.style.opacity = '0';
-          item.style.transform = 'scale(.9)';
-          setTimeout(function(){ item.remove(); }, 300);
-          showAdminToast('Foto dihapus dari galeri.', 'error');
-        }
-      });
-    });
-  });
-}
-
-/* Init existing items */
-bindGaleriButtons();
-
-/* Simpan judul galeri */
-document.getElementById('btnSimpanJudulGaleri').addEventListener('click', function(){
-  var id   = document.getElementById('editGaleriId').value;
-  var cap  = document.getElementById('editGaleriCaption').value.trim();
-  var desc = document.getElementById('editGaleriDesc').value.trim();
-  if (!cap) { return; }
-  var item = document.querySelector('[data-galeri-id="' + id + '"]');
-  if (item) {
-    item.querySelector('.galeri-caption').textContent = cap;
-    item.querySelector('img').alt = cap;
-    item.dataset.galeriDesc = desc;
-    var descEl = item.querySelector('.galeri-admin-desc');
-    if (!descEl) {
-      descEl = document.createElement('p');
-      descEl.className = 'galeri-admin-desc';
-      descEl.style.cssText = 'font-size:.75rem;color:#666;margin:.3rem .6rem .5rem;line-height:1.4;';
-      item.appendChild(descEl);
-    }
-    descEl.textContent = desc;
+  function getToken() {
+    try {
+      var s = localStorage.getItem('ep_admin_session') || sessionStorage.getItem('ep_admin_session');
+      if (s) return JSON.parse(s).token || null;
+    } catch (e) {}
+    return null;
   }
-  bootstrap.Modal.getInstance(document.getElementById('modalEditGaleri')).hide();
-  showAdminToast('Judul dan deskripsi foto berhasil diperbarui.', 'success');
-});
+
+  function getHeaders(isJson) {
+    var h = { 'Accept': 'application/json' };
+    if (isJson) h['Content-Type'] = 'application/json';
+    var t = getToken();
+    if (t) h['Authorization'] = 'Bearer ' + t;
+    return h;
+  }
+
+  function escapeHtml(s) {
+    if (s == null) return '';
+    return String(s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function loadGaleriAdmin(onLoaded) {
+    fetch(API + '/galeri', { headers: getHeaders(false) })
+      .then(function(r) { return r.json(); })
+      .then(function(res) {
+        var items = (res && Array.isArray(res.data)) ? res.data : [];
+        renderGaleriGrid(items);
+        if (typeof onLoaded === 'function') onLoaded(items);
+      })
+      .catch(function() {
+        showAdminToast('Gagal memuat data galeri.', 'error');
+      });
+  }
+
+  function renderGaleriGrid(items) {
+    grid.innerHTML = '';
+
+    if (items.length === 0) {
+      var emptyDiv = document.createElement('div');
+      emptyDiv.className = 'col-12 py-5 text-center text-muted';
+      emptyDiv.style.gridColumn = '1 / -1';
+      emptyDiv.id = 'galeriEmptyMsg';
+      emptyDiv.innerHTML = '<i class="bi bi-images me-2"></i>Belum ada foto kegiatan.';
+      grid.appendChild(emptyDiv);
+    } else {
+      items.forEach(function(g) {
+        var div = document.createElement('div');
+        div.className = 'galeri-admin-item';
+        div.dataset.galeriId = g.id;
+        div.dataset.galeriDesc = g.description || '';
+        div.innerHTML =
+          '<div class="galeri-admin-thumb">' +
+            '<img src="' + escapeHtml(g.image_path) + '" alt="' + escapeHtml(g.caption) + '">' +
+            '<div class="galeri-admin-actions">' +
+              '<button type="button" class="btn btn-sm btn-warning btn-galeri-edit" data-id="' + g.id + '" style="font-size:.78rem;padding:.3rem .75rem;">' +
+                '<i class="bi bi-pencil me-1"></i>Edit' +
+              '</button>' +
+              '<button type="button" class="btn btn-sm btn-danger btn-galeri-hapus" data-id="' + g.id + '" style="font-size:.78rem;padding:.3rem .75rem;">' +
+                '<i class="bi bi-trash me-1"></i>Hapus' +
+              '</button>' +
+            '</div>' +
+          '</div>' +
+          '<div class="galeri-admin-info">' +
+            '<div class="galeri-caption">' + escapeHtml(g.caption) + '</div>' +
+            '<p class="galeri-admin-desc">' + escapeHtml(g.description || 'Belum ada deskripsi kegiatan.') + '</p>' +
+          '</div>';
+
+        // Bind Edit
+        div.querySelector('.btn-galeri-edit').addEventListener('click', function() {
+          document.getElementById('editGaleriId').value = g.id;
+          document.getElementById('editGaleriCaption').value = g.caption || '';
+          document.getElementById('editGaleriDesc').value = g.description || '';
+          bootstrap.Modal.getOrCreateInstance(editModalEl).show();
+        });
+
+        // Bind Hapus
+        div.querySelector('.btn-galeri-hapus').addEventListener('click', function() {
+          if (!confirm('Hapus foto ini dari galeri?')) return;
+          var btn = this;
+          btn.disabled = true;
+          fetch(API + '/galeri/' + g.id, {
+            method: 'DELETE',
+            headers: getHeaders(false)
+          })
+            .then(function(r) { return r.json().then(function(data){ return { ok: r.ok, data: data }; }); })
+            .then(function(res) {
+              if (res.ok && res.data.status === 'success') {
+                showAdminToast(res.data.message || 'Foto galeri berhasil dihapus.', 'success');
+                loadGaleriAdmin();
+              } else {
+                btn.disabled = false;
+                showAdminToast((res.data && res.data.message) ? res.data.message : 'Gagal menghapus foto.', 'error');
+              }
+            })
+            .catch(function() {
+              btn.disabled = false;
+              showAdminToast('Server tidak dapat dihubungi.', 'error');
+            });
+        });
+
+        grid.appendChild(div);
+      });
+    }
+
+    // Tombol tambah foto
+    var addBtn = document.createElement('label');
+    addBtn.className = 'galeri-add-btn';
+    addBtn.htmlFor = 'galeriFileInput';
+    addBtn.id = 'galeriAddBtn';
+    addBtn.innerHTML = '<i class="bi bi-plus-circle"></i><span>Tambah Foto</span>';
+    grid.appendChild(addBtn);
+  }
+
+  // Upload handler
+  if (fileInput) {
+    fileInput.addEventListener('change', function() {
+      var files = Array.from(this.files);
+      if (!files.length) return;
+
+      var uploads = files.map(function(file) {
+        if (!file.type.startsWith('image/')) {
+          showAdminToast('File "' + file.name + '" bukan gambar yang valid.', 'error');
+          return Promise.resolve();
+        }
+
+        var caption = file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ');
+        caption = caption.charAt(0).toUpperCase() + caption.slice(1);
+
+        var fd = new FormData();
+        fd.append('image', file);
+        fd.append('caption', caption);
+        fd.append('description', '');
+
+        return fetch(API + '/galeri', {
+          method: 'POST',
+          headers: getHeaders(false),
+          body: fd
+        })
+          .then(function(r) { return r.json().then(function(data){ return { ok: r.ok, data: data }; }); })
+          .then(function(res) {
+            if (res.ok && res.data.status === 'success') {
+              showAdminToast(res.data.message || 'Foto "' + caption + '" berhasil ditambahkan.', 'success');
+              return res.data.data;
+            } else {
+              showAdminToast((res.data && res.data.message) ? res.data.message : 'Gagal menambahkan foto.', 'error');
+              return null;
+            }
+          })
+          .catch(function() {
+            showAdminToast('Server tidak dapat dihubungi.', 'error');
+            return null;
+          });
+      });
+
+      Promise.all(uploads).then(function(results) {
+        var added = results.filter(Boolean);
+        loadGaleriAdmin(function() {
+          if (added.length === 1 && added[0]) {
+            var item = added[0];
+            document.getElementById('editGaleriId').value = item.id;
+            document.getElementById('editGaleriCaption').value = item.caption;
+            document.getElementById('editGaleriDesc').value = item.description || '';
+            bootstrap.Modal.getOrCreateInstance(editModalEl).show();
+          }
+        });
+      });
+
+      this.value = '';
+    });
+  }
+
+  // Simpan edit galeri
+  if (btnSimpan) {
+    btnSimpan.addEventListener('click', function() {
+      var id   = document.getElementById('editGaleriId').value;
+      var cap  = document.getElementById('editGaleriCaption').value.trim();
+      var desc = document.getElementById('editGaleriDesc').value.trim();
+
+      if (!cap) {
+        showAdminToast('Judul kegiatan wajib diisi.', 'error');
+        return;
+      }
+
+      btnSimpan.disabled = true;
+      fetch(API + '/galeri/' + id, {
+        method: 'PUT',
+        headers: getHeaders(true),
+        body: JSON.stringify({ caption: cap, description: desc })
+      })
+        .then(function(r) { return r.json().then(function(data){ return { ok: r.ok, data: data }; }); })
+        .then(function(res) {
+          btnSimpan.disabled = false;
+          if (res.ok && res.data.status === 'success') {
+            var modalInst = bootstrap.Modal.getInstance(editModalEl);
+            if (modalInst) modalInst.hide();
+            showAdminToast(res.data.message || 'Judul dan deskripsi foto berhasil diperbarui.', 'success');
+            loadGaleriAdmin();
+          } else {
+            showAdminToast((res.data && res.data.message) ? res.data.message : 'Gagal memperbarui kegiatan.', 'error');
+          }
+        })
+        .catch(function() {
+          btnSimpan.disabled = false;
+          showAdminToast('Server tidak dapat dihubungi.', 'error');
+        });
+    });
+  }
+
+  window.loadGaleriAdmin = loadGaleriAdmin;
+  var navGaleri = document.querySelector('[data-section="galeri"]');
+  if (navGaleri) {
+    navGaleri.addEventListener('click', function() {
+      loadGaleriAdmin();
+    });
+  }
+
+  loadGaleriAdmin();
+})();
+
+/* ─── PROFIL DESA ADMIN ─── */
+(function() {
+  var API = (window.location.protocol === 'file:' || window.location.port === '5500')
+    ? 'http://localhost:8000/api'
+    : (window.location.port === '3000' ? 'http://localhost:3000/api' : '/api');
+
+  function getHeaders(json) {
+    var h = { 'Accept': 'application/json' };
+    if (json) h['Content-Type'] = 'application/json';
+    var tok = null;
+    try {
+      var raw = localStorage.getItem('ep_admin_session') || sessionStorage.getItem('ep_admin_session');
+      if (raw) tok = JSON.parse(raw).token || null;
+      if (!tok) tok = localStorage.getItem('token');
+    } catch(e) {}
+    if (tok) h['Authorization'] = 'Bearer ' + tok;
+    return h;
+  }
+
+  var _serverData = {};
+
+  function populateForm(data) {
+    if (!data) return;
+    var elAlamat = document.getElementById('admDesaAlamat');
+    var elKodePos = document.getElementById('admDesaKodePos');
+    var elTelepon = document.getElementById('admDesaTelepon');
+    var elEmail = document.getElementById('admDesaEmail');
+    var elKepala = document.getElementById('admDesaKepala');
+    var elJam = document.getElementById('admDesaJam');
+    var elWa = document.getElementById('admDesaWa');
+    var elIg = document.getElementById('admDesaIg');
+    var elJmlKK = document.getElementById('admDesaJmlKK');
+
+    if (elAlamat) elAlamat.value = data.desa_alamat || '';
+    if (elKodePos) elKodePos.value = data.desa_kode_pos || '';
+    if (elTelepon) elTelepon.value = data.desa_telepon || '';
+    if (elEmail) elEmail.value = data.desa_email || '';
+    if (elKepala) elKepala.value = data.desa_kepala || '';
+    if (elJam) elJam.value = data.desa_jam_operasional || '';
+    if (elWa) elWa.value = data.desa_whatsapp || '';
+    if (elIg) elIg.value = data.desa_instagram || '';
+    if (elJmlKK) elJmlKK.value = (data.desa_jumlah_kk !== undefined && data.desa_jumlah_kk !== null) ? data.desa_jumlah_kk : '';
+  }
+
+  function loadProfilDesa() {
+    fetch(API + '/admin/profil-desa', {
+      headers: getHeaders(false)
+    })
+      .then(function(r) { return r.json(); })
+      .then(function(res) {
+        if (res.status === 'success' && res.data) {
+          _serverData = Object.assign({}, res.data);
+          populateForm(_serverData);
+          var badge = document.getElementById('badgeStatusProfil');
+          if (badge) {
+            badge.textContent = 'Data Tersimpan';
+          }
+        }
+      })
+      .catch(function() {
+        // Abaikan kegagalan jaringan saat load awal
+      });
+  }
+
+  var btnSimpan = document.getElementById('saveProfileBtn');
+  var btnBatal = document.getElementById('btnBatalProfil');
+
+  if (btnSimpan) {
+    btnSimpan.addEventListener('click', function() {
+      var payload = {
+        desa_alamat: (document.getElementById('admDesaAlamat') ? document.getElementById('admDesaAlamat').value : '').trim(),
+        desa_kode_pos: (document.getElementById('admDesaKodePos') ? document.getElementById('admDesaKodePos').value : '').trim(),
+        desa_telepon: (document.getElementById('admDesaTelepon') ? document.getElementById('admDesaTelepon').value : '').trim(),
+        desa_email: (document.getElementById('admDesaEmail') ? document.getElementById('admDesaEmail').value : '').trim(),
+        desa_jam_operasional: (document.getElementById('admDesaJam') ? document.getElementById('admDesaJam').value : '').trim(),
+        desa_whatsapp: (document.getElementById('admDesaWa') ? document.getElementById('admDesaWa').value : '').trim(),
+        desa_instagram: (document.getElementById('admDesaIg') ? document.getElementById('admDesaIg').value : '').trim(),
+        desa_kepala: (document.getElementById('admDesaKepala') ? document.getElementById('admDesaKepala').value : '').trim(),
+        desa_jumlah_kk: (document.getElementById('admDesaJmlKK') ? document.getElementById('admDesaJmlKK').value : '').trim()
+      };
+
+      btnSimpan.disabled = true;
+      var originalHtml = btnSimpan.innerHTML;
+      btnSimpan.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> Menyimpan...';
+
+      fetch(API + '/admin/profil-desa', {
+        method: 'PUT',
+        headers: getHeaders(true),
+        body: JSON.stringify(payload)
+      })
+        .then(function(r) { return r.json().then(function(data) { return { ok: r.ok, status: r.status, data: data }; }); })
+        .then(function(res) {
+          btnSimpan.disabled = false;
+          btnSimpan.innerHTML = originalHtml;
+
+          if (res.ok && res.data.status === 'success') {
+            _serverData = Object.assign({}, res.data.data);
+            populateForm(_serverData);
+            showAdminToast(res.data.message || 'Profil desa berhasil diperbarui.', 'success');
+            var badge = document.getElementById('badgeStatusProfil');
+            if (badge) badge.textContent = 'Baru saja disimpan';
+          } else {
+            var errMsg = 'Gagal menyimpan profil desa.';
+            if (res.data && res.data.errors) {
+              var firstKey = Object.keys(res.data.errors)[0];
+              if (firstKey && res.data.errors[firstKey].length) {
+                errMsg = res.data.errors[firstKey][0];
+              }
+            } else if (res.data && res.data.message) {
+              errMsg = res.data.message;
+            }
+            showAdminToast(errMsg, 'error');
+          }
+        })
+        .catch(function() {
+          btnSimpan.disabled = false;
+          btnSimpan.innerHTML = originalHtml;
+          showAdminToast('Server tidak dapat dihubungi.', 'error');
+        });
+    });
+  }
+
+  if (btnBatal) {
+    btnBatal.addEventListener('click', function() {
+      populateForm(_serverData);
+      showAdminToast('Perubahan dibatalkan.', 'info');
+    });
+  }
+
+  window.loadProfilDesa = loadProfilDesa;
+
+  var navProfil = document.querySelector('[data-section="profil-desa-admin"]');
+  if (navProfil) {
+    navProfil.addEventListener('click', function() {
+      loadProfilDesa();
+    });
+  }
+
+  loadProfilDesa();
+})();
 </script>
 <script src="assets/js/auth.js"></script>
 </body>

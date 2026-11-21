@@ -3,19 +3,14 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use App\Models\Potensi;
 use App\Models\Category;
+use App\Models\Potensi;
+use Illuminate\Http\Request;
 
 class StatsController extends Controller
 {
     public function index(Request $request)
     {
-        $user = $request->user();
-        if (!$user || $user->role !== 'admin') {
-            return response()->json(['status' => 'error', 'message' => 'Akses ditolak.'], 403);
-        }
-
         $total = Potensi::count();
         $categories = Category::withCount('potensi')->get()->map(function ($c) {
             return [
@@ -35,5 +30,30 @@ class StatsController extends Controller
             ],
         ]);
     }
-}
 
+    /**
+     * GET /api/stats/public (publik)
+     * Mengembalikan jumlah potensi berstatus publik (approved) berkategori usaha/jasa/hunian.
+     * Tidak mengekspos data internal lainnya.
+     */
+    public function publicStats()
+    {
+        $umkm = Potensi::whereIn('status', Potensi::STATUS_PUBLIK)
+            ->whereHas('category', function ($q) {
+                $q->where(function ($sub) {
+                    $sub->where('name', 'like', 'usaha%')
+                        ->orWhere('name', 'like', 'jasa%')
+                        ->orWhere('name', 'like', 'hunian%');
+                });
+            })
+            ->count();
+
+        return response()->json([
+            'status' => 'success',
+            'data' => [
+                'umkm' => $umkm,
+            ],
+            'umkm' => $umkm,
+        ]);
+    }
+}

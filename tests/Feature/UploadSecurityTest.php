@@ -4,7 +4,6 @@ namespace Tests\Feature;
 
 use App\Models\Category;
 use App\Models\PotensiImage;
-use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -40,7 +39,7 @@ class UploadSecurityTest extends TestCase
 
     private function admin(): User
     {
-        return User::factory()->create(['email' => 'admin@test.id', 'password' => 'Rahasia123']);
+        return User::factory()->admin()->create(['email' => 'admin@test.id', 'password' => 'Rahasia123']);
     }
 
     /** Catat file yang perlu dibersihkan berdasarkan path response JSON */
@@ -68,8 +67,8 @@ class UploadSecurityTest extends TestCase
         // File PNG nyata dengan nama evil.php → ditolak validator (mimes)
         $evilFile = UploadedFile::fake()->image('evil.php', 20, 20);
         $this->postJson('/api/admin/profile', [
-            'name'   => $admin->name,
-            'email'  => $admin->email,
+            'name' => $admin->name,
+            'email' => $admin->email,
             'avatar' => $evilFile,
         ])->assertStatus(422); // ← file .php DITOLAK, tidak pernah tersimpan
 
@@ -77,8 +76,8 @@ class UploadSecurityTest extends TestCase
         // dengan ekstensi dari ISI file (via $file->extension()), bukan nama klien.
         $pngFile = UploadedFile::fake()->image('foto.png', 20, 20);
         $this->postJson('/api/admin/profile', [
-            'name'   => $admin->name,
-            'email'  => $admin->email,
+            'name' => $admin->name,
+            'email' => $admin->email,
             'avatar' => $pngFile,
         ])->assertOk();
 
@@ -107,8 +106,8 @@ class UploadSecurityTest extends TestCase
         Sanctum::actingAs($admin);
 
         $this->postJson('/api/admin/profile', [
-            'name'   => $admin->name,
-            'email'  => $admin->email,
+            'name' => $admin->name,
+            'email' => $admin->email,
             'avatar' => UploadedFile::fake()->create('dokumen.pdf', 100, 'application/pdf'),
         ])->assertStatus(422);
     }
@@ -122,8 +121,8 @@ class UploadSecurityTest extends TestCase
         Sanctum::actingAs($admin);
 
         $this->postJson('/api/admin/profile', [
-            'name'   => $admin->name,
-            'email'  => $admin->email,
+            'name' => $admin->name,
+            'email' => $admin->email,
             'avatar' => UploadedFile::fake()->create('shell.php', 10, 'application/x-php'),
         ])->assertStatus(422);
     }
@@ -202,8 +201,8 @@ class UploadSecurityTest extends TestCase
         $file = UploadedFile::fake()->image('fotosaya.png', 20, 20);
 
         $this->postJson('/api/admin/profile', [
-            'name'   => $admin->name,
-            'email'  => $admin->email,
+            'name' => $admin->name,
+            'email' => $admin->email,
             'avatar' => $file,
         ])->assertOk();
 
@@ -226,11 +225,12 @@ class UploadSecurityTest extends TestCase
     private function potensiPayload(array $override = []): array
     {
         $cat = Category::first() ?? Category::create(['name' => 'Usaha & Produk']);
+
         return array_merge([
-            'name'        => 'Usaha Test Upload',
-            'owner_name'  => 'Budi Santoso',
-            'whatsapp'    => '081234567890',
-            'address'     => 'Jl. Raya Pelemwatu No. 1 Desa Pelemwatu',
+            'name' => 'Usaha Test Upload',
+            'owner_name' => 'Budi Santoso',
+            'whatsapp' => '081234567890',
+            'address' => 'Jl. Raya Pelemwatu No. 1 Desa Pelemwatu',
             'description' => 'Deskripsi potensi yang cukup panjang dan jelas untuk memenuhi validasi.',
             'category_id' => $cat->id,
         ], $override);
@@ -248,8 +248,8 @@ class UploadSecurityTest extends TestCase
         $response = $this->post('/api/potensi', $payload);
 
         $response->assertStatus(201)
-                 ->assertJsonPath('status', 'success')
-                 ->assertJsonStructure(['data' => ['id']]);
+            ->assertJsonPath('status', 'success')
+            ->assertJsonStructure(['data' => ['id']]);
 
         $potensiId = $response->json('data.id');
 
@@ -313,7 +313,7 @@ class UploadSecurityTest extends TestCase
     public function test_potensi_store_tanpa_foto_berhasil(): void
     {
         $this->postJson('/api/potensi', $this->potensiPayload())
-             ->assertStatus(201)
-             ->assertJsonPath('status', 'success');
+            ->assertStatus(201)
+            ->assertJsonPath('status', 'success');
     }
 }

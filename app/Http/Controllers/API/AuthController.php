@@ -28,6 +28,13 @@ class AuthController extends Controller
             ], 401);
         }
 
+        // Batasi maksimal 5 token aktif per user: hapus token terlama jika sudah mencapai atau melebihi 5
+        $excess = $user->tokens()->count() - 4;
+        if ($excess > 0) {
+            $ids = $user->tokens()->oldest()->limit($excess)->pluck('id');
+            $user->tokens()->whereIn('id', $ids)->delete();
+        }
+
         return response()->json([
             'status' => 'success',
             'message' => 'Login berhasil',

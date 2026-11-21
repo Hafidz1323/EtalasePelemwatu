@@ -6,6 +6,7 @@ use App\Models\Category;
 use App\Models\Message;
 use App\Models\Potensi;
 use App\Models\User;
+use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
@@ -18,7 +19,7 @@ class ApiSecurityTest extends TestCase
 
     private function admin(): User
     {
-        return User::factory()->create(['email' => 'admin@test.id', 'password' => 'Rahasia123']);
+        return User::factory()->admin()->create(['email' => 'admin@test.id', 'password' => 'Rahasia123']);
     }
 
     private function potensi(string $status = 'aktif', array $extra = []): Potensi
@@ -258,7 +259,7 @@ class ApiSecurityTest extends TestCase
 
         $this->assertCount(3, $this->getJson('/api/potensi', $h)->json('data'));
         $this->assertCount(1, $this->getJson('/api/potensi?status=pending', $h)->json('data'));
-        $this->getJson('/api/potensi/' . Potensi::where('status', 'pending')->value('id'), $h)->assertOk();
+        $this->getJson('/api/potensi/'.Potensi::where('status', 'pending')->value('id'), $h)->assertOk();
     }
 
     // ---------- Review & stats ----------
@@ -389,7 +390,7 @@ class ApiSecurityTest extends TestCase
 
         // Jalankan seeder secara langsung (tanpa artisan command runner)
         // agar tidak memunculkan dialog interaktif dari Mockery
-        $seeder = new \Database\Seeders\DatabaseSeeder();
+        $seeder = new DatabaseSeeder;
         $seeder->run();
 
         // Tabel potensi harus tetap kosong di production
@@ -408,12 +409,12 @@ class ApiSecurityTest extends TestCase
     private function potensiPayload(array $override = []): array
     {
         return array_merge([
-            'name'        => 'Usaha Test Privasi',
-            'owner_name'  => 'Budi Santoso',
-            'whatsapp'    => '081234567890',
-            'address'     => 'Jl. Melati No. 12 Pelemwatu',
+            'name' => 'Usaha Test Privasi',
+            'owner_name' => 'Budi Santoso',
+            'whatsapp' => '081234567890',
+            'address' => 'Jl. Melati No. 12 Pelemwatu',
             'description' => 'Deskripsi usaha cukup panjang untuk pengujian privasi data warga.',
-            'status'      => 'approved',
+            'status' => 'approved',
         ], $override);
     }
 
@@ -422,7 +423,7 @@ class ApiSecurityTest extends TestCase
         $p = Potensi::create($this->potensiPayload());
 
         $response = $this->getJson('/api/potensi')->assertOk();
-        $data     = collect($response->json('data'));
+        $data = collect($response->json('data'));
 
         $this->assertNotEmpty($data, 'Harus ada data potensi yang dikembalikan');
 
@@ -430,18 +431,18 @@ class ApiSecurityTest extends TestCase
         $this->assertNotNull($item, 'Potensi yang baru dibuat harus ada di response');
 
         // Field yang HARUS ada di respons publik
-        $this->assertArrayHasKey('id',          $item);
-        $this->assertArrayHasKey('name',        $item);
+        $this->assertArrayHasKey('id', $item);
+        $this->assertArrayHasKey('name', $item);
         $this->assertArrayHasKey('description', $item);
 
         // Field sensitif yang TIDAK BOLEH ada
-        $this->assertArrayNotHasKey('owner_name',       $item, 'owner_name tidak boleh bocor ke publik');
-        $this->assertArrayNotHasKey('email',             $item, 'email tidak boleh bocor ke publik');
-        $this->assertArrayNotHasKey('address',           $item, 'address tidak boleh bocor ke publik');
-        $this->assertArrayNotHasKey('reviewed_by',       $item, 'reviewed_by tidak boleh bocor ke publik');
-        $this->assertArrayNotHasKey('reviewed_at',       $item, 'reviewed_at tidak boleh bocor ke publik');
-        $this->assertArrayNotHasKey('rejection_reason',  $item, 'rejection_reason tidak boleh bocor ke publik');
-        $this->assertArrayNotHasKey('status',            $item, 'status tidak boleh bocor ke publik');
+        $this->assertArrayNotHasKey('owner_name', $item, 'owner_name tidak boleh bocor ke publik');
+        $this->assertArrayNotHasKey('email', $item, 'email tidak boleh bocor ke publik');
+        $this->assertArrayNotHasKey('address', $item, 'address tidak boleh bocor ke publik');
+        $this->assertArrayNotHasKey('reviewed_by', $item, 'reviewed_by tidak boleh bocor ke publik');
+        $this->assertArrayNotHasKey('reviewed_at', $item, 'reviewed_at tidak boleh bocor ke publik');
+        $this->assertArrayNotHasKey('rejection_reason', $item, 'rejection_reason tidak boleh bocor ke publik');
+        $this->assertArrayNotHasKey('status', $item, 'status tidak boleh bocor ke publik');
     }
 
     public function test_tamu_tidak_melihat_field_sensitif_pada_detail_potensi(): void
@@ -449,18 +450,18 @@ class ApiSecurityTest extends TestCase
         $p = Potensi::create($this->potensiPayload());
 
         $response = $this->getJson("/api/potensi/{$p->id}")->assertOk();
-        $item     = $response->json('data');
+        $item = $response->json('data');
 
         $this->assertNotNull($item);
         $this->assertSame($p->id, $item['id']);
 
-        $this->assertArrayNotHasKey('owner_name',      $item, 'owner_name tidak boleh bocor ke publik');
-        $this->assertArrayNotHasKey('email',            $item, 'email tidak boleh bocor ke publik');
-        $this->assertArrayNotHasKey('address',          $item, 'address tidak boleh bocor ke publik');
-        $this->assertArrayNotHasKey('reviewed_by',      $item, 'reviewed_by tidak boleh bocor ke publik');
-        $this->assertArrayNotHasKey('reviewed_at',      $item, 'reviewed_at tidak boleh bocor ke publik');
+        $this->assertArrayNotHasKey('owner_name', $item, 'owner_name tidak boleh bocor ke publik');
+        $this->assertArrayNotHasKey('email', $item, 'email tidak boleh bocor ke publik');
+        $this->assertArrayNotHasKey('address', $item, 'address tidak boleh bocor ke publik');
+        $this->assertArrayNotHasKey('reviewed_by', $item, 'reviewed_by tidak boleh bocor ke publik');
+        $this->assertArrayNotHasKey('reviewed_at', $item, 'reviewed_at tidak boleh bocor ke publik');
         $this->assertArrayNotHasKey('rejection_reason', $item, 'rejection_reason tidak boleh bocor ke publik');
-        $this->assertArrayNotHasKey('status',           $item, 'status tidak boleh bocor ke publik');
+        $this->assertArrayNotHasKey('status', $item, 'status tidak boleh bocor ke publik');
     }
 
     public function test_admin_melihat_semua_field_termasuk_sensitif(): void
@@ -470,20 +471,20 @@ class ApiSecurityTest extends TestCase
 
         // Index
         $response = $this->getJson('/api/potensi')->assertOk();
-        $item     = collect($response->json('data'))->firstWhere('id', $p->id);
+        $item = collect($response->json('data'))->firstWhere('id', $p->id);
         $this->assertNotNull($item);
-        $this->assertArrayHasKey('owner_name',      $item);
-        $this->assertArrayHasKey('email',           $item);
-        $this->assertArrayHasKey('address',         $item);
-        $this->assertArrayHasKey('reviewed_by',     $item);
+        $this->assertArrayHasKey('owner_name', $item);
+        $this->assertArrayHasKey('email', $item);
+        $this->assertArrayHasKey('address', $item);
+        $this->assertArrayHasKey('reviewed_by', $item);
         $this->assertArrayHasKey('rejection_reason', $item);
-        $this->assertArrayHasKey('status',          $item);
+        $this->assertArrayHasKey('status', $item);
 
         // Detail
         $detail = $this->getJson("/api/potensi/{$p->id}")->assertOk()->json('data');
-        $this->assertArrayHasKey('owner_name',  $detail);
-        $this->assertArrayHasKey('address',     $detail);
-        $this->assertArrayHasKey('status',      $detail);
+        $this->assertArrayHasKey('owner_name', $detail);
+        $this->assertArrayHasKey('address', $detail);
+        $this->assertArrayHasKey('status', $detail);
         $this->assertArrayHasKey('reviewed_by', $detail);
     }
 
@@ -499,9 +500,9 @@ class ApiSecurityTest extends TestCase
 
         // Tidak boleh ada field pribadi
         $this->assertArrayNotHasKey('owner_name', $data, 'owner_name tidak boleh ada di respons store()');
-        $this->assertArrayNotHasKey('whatsapp',   $data, 'whatsapp tidak boleh ada di respons store()');
-        $this->assertArrayNotHasKey('address',    $data, 'address tidak boleh ada di respons store()');
-        $this->assertArrayNotHasKey('email',      $data, 'email tidak boleh ada di respons store()');
+        $this->assertArrayNotHasKey('whatsapp', $data, 'whatsapp tidak boleh ada di respons store()');
+        $this->assertArrayNotHasKey('address', $data, 'address tidak boleh ada di respons store()');
+        $this->assertArrayNotHasKey('email', $data, 'email tidak boleh ada di respons store()');
     }
 
     // ---------- Autentikasi lanjutan ----------
@@ -511,7 +512,7 @@ class ApiSecurityTest extends TestCase
         // Aktifkan expiration 1 menit agar mudah disimulasikan
         config(['sanctum.expiration' => 1]);
 
-        $user  = $this->admin();
+        $user = $this->admin();
         $token = $user->createToken('expired-test');
 
         // Mundurkan created_at token lebih dari 1 menit agar dianggap kadaluwarsa
@@ -520,25 +521,25 @@ class ApiSecurityTest extends TestCase
             ->update(['created_at' => now()->subMinutes(2)]);
 
         $this->getJson('/api/auth/verify', [
-            'Authorization' => 'Bearer ' . $token->plainTextToken,
+            'Authorization' => 'Bearer '.$token->plainTextToken,
         ])->assertStatus(401);
     }
 
     public function test_ganti_password_mencabut_token_lain(): void
     {
-        $u      = $this->admin();
-        $tok1   = $u->createToken('sesi-1');
-        $tok2   = $u->createToken('sesi-2');
+        $u = $this->admin();
+        $tok1 = $u->createToken('sesi-1');
+        $tok2 = $u->createToken('sesi-2');
         $token1 = $tok1->plainTextToken;
-        $t1Id   = $tok1->accessToken->id;
-        $t2Id   = $tok2->accessToken->id;
+        $t1Id = $tok1->accessToken->id;
+        $t2Id = $tok2->accessToken->id;
 
         $this->assertSame(2, $u->tokens()->count(), 'Harus ada 2 token sebelum ganti password');
 
         // Ganti password menggunakan token1
         $this->putJson('/api/admin/password', [
-            'current_password'      => 'Rahasia123',
-            'password'              => 'BaruBanget99',
+            'current_password' => 'Rahasia123',
+            'password' => 'BaruBanget99',
             'password_confirmation' => 'BaruBanget99',
         ], ['Authorization' => "Bearer $token1"])->assertOk();
 
@@ -559,20 +560,20 @@ class ApiSecurityTest extends TestCase
         // Habiskan throttle untuk email1 (5 percobaan)
         for ($i = 0; $i < 5; $i++) {
             $this->postJson('/api/auth/login', [
-                'email'    => 'emailsatu@test.id',
+                'email' => 'emailsatu@test.id',
                 'password' => 'salah',
             ]);
         }
 
         // Percobaan ke-6 dengan email1 harus kena throttle (429)
         $this->postJson('/api/auth/login', [
-            'email'    => 'emailsatu@test.id',
+            'email' => 'emailsatu@test.id',
             'password' => 'salah',
         ])->assertStatus(429);
 
         // email2 dari IP yang sama TIDAK kena throttle (kunci berbeda karena email berbeda)
         $this->postJson('/api/auth/login', [
-            'email'    => 'emaildua@test.id',
+            'email' => 'emaildua@test.id',
             'password' => 'salah',
         ])->assertStatus(401); // 401 bukan 429
     }

@@ -20,4 +20,3 @@ class Message extends Model
 
     public $timestamps = false; // only created_at is managed manually
 }
-

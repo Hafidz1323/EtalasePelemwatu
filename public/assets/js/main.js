@@ -422,48 +422,6 @@ function buatKartuPotensi(p) {
   return card;
 }
 
-async function loadKatalog() {
-  const grid = document.querySelector('.katalog-grid');
-  if (!grid) return;
-  const API_BASE = (window.location.protocol === 'file:' || window.location.port === '5500')
-    ? 'http://localhost:8000/api'
-    : (window.location.port === '3000' ? 'http://localhost:3000/api' : '/api');
-
-  let list;
-  try {
-    // Muat semua halaman (per_page maks 50); untuk katalog publik biasanya cukup 1-2 halaman
-    let page = 1, lastPage = 1;
-    list = [];
-    do {
-      const res = await fetch(API_BASE + '/potensi?per_page=50&page=' + page, { headers: { 'Accept': 'application/json' } });
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-      const json = await res.json();
-      if (!json || !Array.isArray(json.data)) throw new Error('format tidak dikenal');
-      list = list.concat(json.data);
-      lastPage = (json.meta && json.meta.last_page) ? json.meta.last_page : 1;
-      page++;
-    } while (page <= lastPage);
-  } catch (err) {
-    // Server tidak terjangkau: biarkan kartu statis bawaan tetap tampil.
-    console.warn('Katalog dinamis gagal dimuat, memakai data bawaan:', err.message);
-    return;
-  }
-
-  window.__katalogDinamis = {};
-  grid.querySelectorAll('.potensi-card').forEach(c => c.remove());
-  const emptyState = document.getElementById('katalogEmptyState');
-  list.forEach(p => grid.insertBefore(buatKartuPotensi(p), emptyState));
-
-  // Statistik UMKM: usaha + jasa + hunian (barang warga tidak dihitung)
-  const statUmkm = document.getElementById('statUMKM');
-  if (statUmkm) {
-    const n = list.filter(p => ['usaha', 'jasa', 'hunian'].includes(slugKategori(p.category))).length;
-    statUmkm.textContent = n;
-  }
-
-  if (typeof window.applyKatalogFilters === 'function') window.applyKatalogFilters();
-}
-
 // ── Smooth Scroll for Anchor Links ───────────────────────────
 function initSmoothScroll() {
   $$('a[href^="#"]').forEach(link => {
@@ -506,7 +464,6 @@ document.addEventListener('DOMContentLoaded', () => {
   initProfilTabs();
   initKatalogFilter();
   initDetailModal();
-  loadKatalog();
   initSmoothScroll();
   initGallery();
   initMapPlaceholder();

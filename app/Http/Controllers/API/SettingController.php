@@ -5,7 +5,6 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Models\Setting;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class SettingController extends Controller
@@ -22,15 +21,15 @@ class SettingController extends Controller
 
         // Tambahkan query ?v= agar browser tidak memakai cache logo lama
         if ($path !== self::DEFAULT_LOGO) {
-            $row = \App\Models\Setting::where('key', 'site_logo')->first();
+            $row = Setting::where('key', 'site_logo')->first();
             if ($row) {
-                $path .= '?v=' . $row->updated_at->timestamp;
+                $path .= '?v='.$row->updated_at->timestamp;
             }
         }
 
         return response()->json([
             'status' => 'success',
-            'data'   => ['path' => $path],
+            'data' => ['path' => $path],
         ]);
     }
 
@@ -45,18 +44,18 @@ class SettingController extends Controller
 
         // Simpan file baru ke public/uploads/
         // Gunakan ekstensi dari ISI file (bukan nama klien) + nama acak
-        $file     = $request->file('logo');
-        $filename = 'logo-' . Str::lower(Str::random(24)) . '.' . $file->extension();
+        $file = $request->file('logo');
+        $filename = 'logo-'.Str::lower(Str::random(24)).'.'.$file->extension();
         $file->move(public_path('uploads'), $filename);
-        $newPath  = '/uploads/' . $filename;
+        $newPath = '/uploads/'.$filename;
 
         // Hapus file logo lama (hanya jika bukan logo bawaan); validasi path berada di dalam public/uploads
         $oldPath = Setting::get('site_logo');
         if ($oldPath && $oldPath !== self::DEFAULT_LOGO) {
             $oldAbsolute = public_path(ltrim($oldPath, '/'));
-            $uploadsDir  = realpath(public_path('uploads'));
-            $realOld     = file_exists($oldAbsolute) ? realpath($oldAbsolute) : null;
-            if ($realOld && $uploadsDir && str_starts_with($realOld, $uploadsDir . DIRECTORY_SEPARATOR)) {
+            $uploadsDir = realpath(public_path('uploads'));
+            $realOld = file_exists($oldAbsolute) ? realpath($oldAbsolute) : null;
+            if ($realOld && $uploadsDir && str_starts_with($realOld, $uploadsDir.DIRECTORY_SEPARATOR)) {
                 @unlink($realOld);
             }
         }
@@ -65,10 +64,9 @@ class SettingController extends Controller
         Setting::set('site_logo', $newPath);
 
         return response()->json([
-            'status'  => 'success',
+            'status' => 'success',
             'message' => 'Logo berhasil diperbarui.',
-            'data'    => ['path' => $newPath],
+            'data' => ['path' => $newPath],
         ]);
     }
 }
-

@@ -20,24 +20,23 @@ class PotensiPublicResource extends JsonResource
     public function toArray(Request $request): array
     {
         $data = [
-            'id'              => $this->id,
-            'name'            => $this->name,
-            'description'     => $this->description,
-            'location'        => $this->location,
-            'jenis'           => $this->jenis,
+            'id' => $this->id,
+            'name' => $this->name,
+            'description' => $this->description,
+            'location' => $this->location,
+            'jenis' => $this->jenis,
             'jam_operasional' => $this->jam_operasional,
-            'latitude'        => $this->latitude,
-            'longitude'       => $this->longitude,
-            'created_at'      => $this->created_at,
-            'category'        => $this->whenLoaded('category', fn () => [
-                'id'   => $this->category?->id,
+            'latitude' => $this->latitude,
+            'longitude' => $this->longitude,
+            'created_at' => $this->created_at,
+            'category' => $this->whenLoaded('category', fn () => [
+                'id' => $this->category?->id,
                 'name' => $this->category?->name,
             ]),
-            'images'          => $this->whenLoaded('images', fn () =>
-                $this->images->map(fn ($img) => [
-                    'id'   => $img->id,
-                    'path' => $img->image_path,
-                ])
+            'images' => $this->whenLoaded('images', fn () => $this->images->map(fn ($img) => [
+                'id' => $img->id,
+                'path' => $img->image_path,
+            ])
             ),
         ];
 

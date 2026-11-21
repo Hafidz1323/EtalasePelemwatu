@@ -153,11 +153,11 @@
           <div class="desa-stat-row">
             <div class="desa-stat-card">
               <!-- GANTI angka di bawah dengan jumlah KK resmi dari data desa -->
-              <div class="desa-stat-num" id="statKK">&mdash;</div>
+              <div class="desa-stat-num" id="statKK">{{ !empty($desa['jumlah_kk']) ? $desa['jumlah_kk'] : '—' }}</div>
               <div class="desa-stat-label">Jumlah KK</div>
             </div>
             <div class="desa-stat-card">
-              <div class="desa-stat-num" id="statUMKM">7</div>
+              <div class="desa-stat-num" id="statUMKM">&mdash;</div>
               <div class="desa-stat-label">UMKM Terdaftar</div>
             </div>
           </div>
@@ -172,7 +172,7 @@
           <div class="desa-info-card lokasi-card h-100">
             <h4>Lokasi Desa Pelemwatu</h4>
             <h6 class="lokasi-label">Alamat Resmi</h6>
-            <p class="lokasi-alamat">Jl. Raya Pelemwatu No. 128,<br>Kecamatan Menganti,<br>Kabupaten Gresik, Jawa Timur</p>
+            <p class="lokasi-alamat">{{ $desa['alamat'] }}</p>
             <a class="btn-outline-custom lokasi-btn" href="https://www.google.com/maps/search/?api=1&query=Desa+Pelemwatu+Menganti+Gresik" target="_blank" rel="noopener">Buka di Google Maps</a>
           </div>
         </div>
@@ -194,77 +194,28 @@
         <p class="mb-0">Dokumentasi kegiatan masyarakat dan aktivitas yang berlangsung di Desa Pelemwatu.</p>
       </div>
       <div class="galeri-card-grid" id="galeriGrid">
-
+        @php
+          $galeriItems = \App\Models\Galeri::orderBy('sort_order', 'asc')->orderBy('id', 'asc')->get();
+        @endphp
+        @forelse($galeriItems as $g)
         <div class="galeri-card"
-             data-src="assets/img/kegiatan-kantor-desa.jpg"
-             data-caption="Rapat Koordinasi Desa"
-             data-desc="Kegiatan rapat koordinasi rutin yang dihadiri oleh perangkat desa dan perwakilan warga untuk membahas program dan kebijakan desa.">
+             data-src="{{ $g->image_path }}"
+             data-caption="{{ $g->caption }}"
+             data-desc="{{ $g->description ?? '' }}">
           <div class="galeri-card-img">
-            <img src="assets/img/kegiatan-kantor-desa.jpg" alt="Rapat Koordinasi Desa" loading="lazy">
+            <img src="{{ $g->image_path }}" alt="{{ $g->caption }}" loading="lazy">
             <div class="galeri-card-zoom"><i class="bi bi-zoom-in"></i></div>
           </div>
           <div class="galeri-card-info">
-            <h6 class="galeri-card-title">Rapat Koordinasi Desa</h6>
-            <p class="galeri-card-desc">Kegiatan rapat koordinasi rutin yang dihadiri oleh perangkat desa dan perwakilan warga untuk membahas program dan kebijakan desa.</p>
+            <h6 class="galeri-card-title">{{ $g->caption }}</h6>
+            <p class="galeri-card-desc">{{ $g->description }}</p>
           </div>
         </div>
-
-        <div class="galeri-card"
-             data-src="assets/img/kegiatan-kerja-bakti.jpg"
-             data-caption="Kerja Bakti Warga"
-             data-desc="Kegiatan gotong royong membersihkan lingkungan desa yang diikuti oleh seluruh lapisan masyarakat Desa Pelemwatu secara sukarela.">
-          <div class="galeri-card-img">
-            <img src="assets/img/kegiatan-kerja-bakti.jpg" alt="Kerja Bakti Warga" loading="lazy">
-            <div class="galeri-card-zoom"><i class="bi bi-zoom-in"></i></div>
-          </div>
-          <div class="galeri-card-info">
-            <h6 class="galeri-card-title">Kerja Bakti Warga</h6>
-            <p class="galeri-card-desc">Kegiatan gotong royong membersihkan lingkungan desa yang diikuti oleh seluruh lapisan masyarakat Desa Pelemwatu secara sukarela.</p>
-          </div>
+        @empty
+        <div class="col-12 py-5 text-center text-muted" style="grid-column: 1 / -1;">
+          <i class="bi bi-images me-2"></i>Belum ada foto kegiatan.
         </div>
-
-        <div class="galeri-card"
-             data-src="assets/img/kegiatan-penghijauan.jpg"
-             data-caption="Program Penghijauan"
-             data-desc="Program penanaman pohon dan tanaman di area desa sebagai upaya menjaga lingkungan hijau dan asri di Desa Pelemwatu.">
-          <div class="galeri-card-img">
-            <img src="assets/img/kegiatan-penghijauan.jpg" alt="Program Penghijauan" loading="lazy">
-            <div class="galeri-card-zoom"><i class="bi bi-zoom-in"></i></div>
-          </div>
-          <div class="galeri-card-info">
-            <h6 class="galeri-card-title">Program Penghijauan</h6>
-            <p class="galeri-card-desc">Program penanaman pohon dan tanaman di area desa sebagai upaya menjaga lingkungan hijau dan asri di Desa Pelemwatu.</p>
-          </div>
-        </div>
-
-        <div class="galeri-card"
-             data-src="assets/img/foto-kantor-desa.jpg"
-             data-caption="Kantor Desa Pelemwatu"
-             data-desc="Kantor Desa Pelemwatu sebagai pusat pelayanan administrasi dan pemerintahan desa yang melayani kebutuhan warga setiap hari kerja.">
-          <div class="galeri-card-img">
-            <img src="assets/img/foto-kantor-desa.jpg" alt="Kantor Desa Pelemwatu" loading="lazy">
-            <div class="galeri-card-zoom"><i class="bi bi-zoom-in"></i></div>
-          </div>
-          <div class="galeri-card-info">
-            <h6 class="galeri-card-title">Kantor Desa Pelemwatu</h6>
-            <p class="galeri-card-desc">Kantor Desa Pelemwatu sebagai pusat pelayanan administrasi dan pemerintahan desa yang melayani kebutuhan warga setiap hari kerja.</p>
-          </div>
-        </div>
-
-        <div class="galeri-card"
-             data-src="assets/img/foto-warung-desa.jpg"
-             data-caption="Warung Usaha Warga"
-             data-desc="Salah satu contoh usaha kuliner milik warga Desa Pelemwatu yang berhasil berkembang dan menjadi bagian dari potensi ekonomi lokal desa.">
-          <div class="galeri-card-img">
-            <img src="assets/img/foto-warung-desa.jpg" alt="Warung Usaha Warga" loading="lazy">
-            <div class="galeri-card-zoom"><i class="bi bi-zoom-in"></i></div>
-          </div>
-          <div class="galeri-card-info">
-            <h6 class="galeri-card-title">Warung Usaha Warga</h6>
-            <p class="galeri-card-desc">Salah satu contoh usaha kuliner milik warga Desa Pelemwatu yang berhasil berkembang dan menjadi bagian dari potensi ekonomi lokal desa.</p>
-          </div>
-        </div>
-
+        @endforelse
       </div>
     </div>
 
@@ -436,28 +387,35 @@
       <div class="kontak-item">
         <i class="bi bi-geo-alt kontak-ikon" aria-hidden="true"></i>
         <h6>Alamat</h6>
-        <p>Jl. Raya Pelemwatu No. 128, Kecamatan Menganti, Kabupaten Gresik, Jawa Timur</p>
+        <p>{{ $desa['alamat'] }}</p>
       </div>
       <div class="kontak-item">
         <i class="bi bi-clock kontak-ikon" aria-hidden="true"></i>
         <h6>Jam Operasional</h6>
-        <p>Senin – Jumat, 08.00 – 16.00 WIB</p>
+        <p>{{ $desa['jam_operasional'] }}</p>
       </div>
       <div class="kontak-item">
         <i class="bi bi-whatsapp kontak-ikon" aria-hidden="true"></i>
         <h6>WhatsApp</h6>
-        <p><a href="https://wa.me/6282245730256?text=Halo%2C%20saya%20ingin%20bertanya%20tentang%20EtalasePelemwatu." target="_blank" rel="noopener noreferrer">0822-4573-0256</a></p>
+        <p><a href="https://wa.me/{{ $desa['whatsapp'] }}?text=Halo%2C%20saya%20ingin%20bertanya%20tentang%20EtalasePelemwatu." target="_blank" rel="noopener noreferrer">{{ $desa['whatsapp_display'] }}</a></p>
       </div>
       <div class="kontak-item">
         <i class="bi bi-envelope kontak-ikon" aria-hidden="true"></i>
         <h6>Email</h6>
-        <p><a href="mailto:info@etalasepelemwatu.id">info@etalasepelemwatu.id</a></p>
+        <p><a href="mailto:{{ $desa['email'] }}">{{ $desa['email'] }}</a></p>
       </div>
       <div class="kontak-item">
         <i class="bi bi-instagram kontak-ikon" aria-hidden="true"></i>
         <h6>Instagram</h6>
-        <p><a href="https://www.instagram.com/official_pelemwatu" target="_blank" rel="noopener noreferrer">@official_pelemwatu</a></p>
+        <p><a href="https://www.instagram.com/{{ $desa['instagram'] }}" target="_blank" rel="noopener noreferrer">{{ '@' . $desa['instagram'] }}</a></p>
       </div>
+      @if(!empty($desa['telepon']))
+      <div class="kontak-item">
+        <i class="bi bi-telephone kontak-ikon" aria-hidden="true"></i>
+        <h6>Telepon</h6>
+        <p><a href="tel:{{ $desa['telepon'] }}">{{ $desa['telepon'] }}</a></p>
+      </div>
+      @endif
     </div>
   </div>
 </section>
@@ -507,7 +465,7 @@
         </ul>
         <div class="footer-heading mt-4">Alamat</div>
         <p style="font-size:.82rem;color:rgba(255,255,255,.6);line-height:1.6;">
-          Jl. Raya Pelemwatu No. 128<br>Kec. Menganti, Kab. Gresik<br>Jawa Timur
+          {{ $desa['alamat'] }}
         </p>
       </div>
     </div>
@@ -711,16 +669,21 @@
     onScroll();
   })();
 
-  // UMKM terdaftar: dihitung dari katalog (usaha, jasa, hunian; barang warga tidak dihitung)
+  // Statistik UMKM terdaftar dari endpoint publik /api/stats/public
   (function () {
     var el = document.getElementById('statUMKM');
     if (!el) return;
-    var n = document.querySelectorAll(
-      '.katalog-grid .potensi-card[data-category="usaha"],' +
-      '.katalog-grid .potensi-card[data-category="jasa"],' +
-      '.katalog-grid .potensi-card[data-category="hunian"]'
-    ).length;
-    if (n) el.textContent = n;
+    fetch('/api/stats/public')
+      .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .then(function (res) {
+        var count = (res && res.data && typeof res.data.umkm !== 'undefined')
+          ? res.data.umkm
+          : (res && typeof res.umkm !== 'undefined' ? res.umkm : null);
+        el.textContent = (count !== null) ? count : '—';
+      })
+      .catch(function () {
+        el.textContent = '—';
+      });
   })();
 
   /* ── Lightbox Galeri ── */
@@ -743,12 +706,22 @@
     lbIndex = (lbIndex + dir + lbItems.length) % lbItems.length;
     renderLightbox();
   }
+  function escapeHtml(s) {
+    if (s == null) return '';
+    return String(s)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  }
+
   function renderLightbox() {
-    document.getElementById('lbImg').src       = lbItems[lbIndex].src;
-    document.getElementById('lbImg').alt       = lbItems[lbIndex].caption;
+    var cur = lbItems[lbIndex] || {};
+    var cap = escapeHtml(cur.caption || '');
+    var desc = cur.desc ? escapeHtml(cur.desc) : '';
+    document.getElementById('lbImg').src       = cur.src || '';
+    document.getElementById('lbImg').alt       = cur.caption || '';
     document.getElementById('lbCaption').innerHTML =
-      '<strong style="font-size:1rem;">' + lbItems[lbIndex].caption + '</strong>' +
-      (lbItems[lbIndex].desc ? '<br><span style="font-size:.85rem;opacity:.75;">' + lbItems[lbIndex].desc + '</span>' : '');
+      '<strong style="font-size:1rem;">' + cap + '</strong>' +
+      (desc ? '<br><span style="font-size:.85rem;opacity:.75;">' + desc + '</span>' : '');
     document.getElementById('lbPrev').style.display = lbItems.length > 1 ? '' : 'none';
     document.getElementById('lbNext').style.display = lbItems.length > 1 ? '' : 'none';
   }
@@ -764,12 +737,54 @@
       };
     });
     items.forEach(function(el, i) {
-      el.querySelector('.galeri-card-img').addEventListener('click', function() {
-        openLightbox(data, i);
-      });
+      var imgWrap = el.querySelector('.galeri-card-img');
+      if (imgWrap && !imgWrap.__boundLb) {
+        imgWrap.__boundLb = true;
+        imgWrap.addEventListener('click', function() {
+          openLightbox(data, i);
+        });
+      }
     });
   }
   bindGaleri();
+
+  /* Render dinamis dari GET /api/galeri */
+  function fetchAndRenderGaleri() {
+    fetch('/api/galeri')
+      .then(function(r){ return r.json(); })
+      .then(function(res){
+        if (!res || !Array.isArray(res.data)) return;
+        var grid = document.getElementById('galeriGrid');
+        if (!grid) return;
+        if (res.data.length === 0) {
+          grid.innerHTML = '<div class="col-12 py-5 text-center text-muted" style="grid-column: 1 / -1;"><i class="bi bi-images me-2"></i>Belum ada foto kegiatan.</div>';
+          return;
+        }
+        grid.innerHTML = '';
+        res.data.forEach(function(g){
+          var card = document.createElement('div');
+          card.className = 'galeri-card';
+          card.dataset.src = g.image_path;
+          card.dataset.caption = g.caption || '';
+          card.dataset.desc = g.description || '';
+          card.innerHTML =
+            '<div class="galeri-card-img">' +
+              '<img src="' + escapeHtml(g.image_path) + '" alt="' + escapeHtml(g.caption || '') + '" loading="lazy">' +
+              '<div class="galeri-card-zoom"><i class="bi bi-zoom-in"></i></div>' +
+            '</div>' +
+            '<div class="galeri-card-info">' +
+              '<h6 class="galeri-card-title">' + escapeHtml(g.caption || '') + '</h6>' +
+              '<p class="galeri-card-desc">' + escapeHtml(g.description || '') + '</p>' +
+            '</div>';
+          grid.appendChild(card);
+        });
+        bindGaleri();
+      })
+      .catch(function(){});
+  }
+
+  var tabGaleriBtn = document.querySelector('[data-tab="tab-galeri"]');
+  if (tabGaleriBtn) tabGaleriBtn.addEventListener('click', fetchAndRenderGaleri);
 
   /* Keyboard nav */
   document.addEventListener('keydown', function(e) {
