@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900&display=swap');
+﻿@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900&display=swap');
 
 /* =============================================================
    EtalasePelemwatu � Global Stylesheet
@@ -2005,7 +2005,7 @@ body.form-page .form-page-header p {
 .modal-login-admin .login-icon-badge {
   width: 44px;
   height: 44px;
-  border-radius: 8px;
+  border-radius: 12px;
   background: rgba(242, 99, 15, 0.12);
   color: var(--clr-orange);
   display: flex;
@@ -2014,56 +2014,99 @@ body.form-page .form-page-header p {
   font-size: 1.35rem;
   flex-shrink: 0;
 }
-.modal-login-admin .form-control {
-  border: 1.5px solid var(--clr-border);
-  padding: .65rem .9rem;
-  font-size: .9rem;
-  border-radius: 0;          /* radius diatur oleh input-group, bukan form-control */
-}
-.modal-login-admin .form-control:focus {
-  border-color: var(--clr-blue);
-  box-shadow: 0 0 0 3px rgba(30, 59, 44, 0.12);
-  z-index: 3;
+/* ── Input Group: Satu kesatuan pill utuh & selaras ── */
+.modal-login-admin .input-group {
+  border-radius: 50px !important;
+  position: relative;
+  transition: box-shadow .2s ease;
 }
 
-/* ── Kotak ikon (kiri) ── */
-.modal-login-admin .input-group-text {
-  width: 44px;               /* lebar tetap & seragam untuk dua field */
-  border: 1.5px solid var(--clr-border);
-  border-right: none;        /* hilangkan border ganda antara ikon & input */
-  border-radius: 0;          /* radius hanya di ujung luar (lihat bawah) */
-  background: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: .95rem;
-  color: var(--clr-text-mid);
+.modal-login-admin .input-group > .input-group-text {
+  width: 46px !important;
+  height: 46px !important;
+  border: 1.5px solid var(--clr-border) !important;
+  border-right: none !important;
+  border-radius: 50px 0 0 50px !important;
+  background: #fff !important;
+  color: var(--clr-text-light) !important;
+  font-size: 1rem !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: border-color .2s ease, color .2s ease;
 }
 
-/* ── Menyatukan grup: radius hanya di ujung luar ── */
-.modal-login-admin .input-group > .input-group-text:first-child {
-  border-radius: var(--radius) 0 0 var(--radius);
+.modal-login-admin .input-group > .form-control {
+  height: 46px !important;
+  border: 1.5px solid var(--clr-border) !important;
+  border-left: none !important;
+  border-right: none !important;
+  border-radius: 0 !important;
+  padding: .65rem .85rem !important;
+  font-size: .92rem !important;
+  background: #fff !important;
+  color: var(--clr-text) !important;
+  box-shadow: none !important;
+  transition: border-color .2s ease;
 }
+
+/* Field Username/Email: form-control sampai ujung kanan */
 .modal-login-admin .input-group > .form-control:last-child {
-  border-radius: 0 var(--radius) var(--radius) 0;
+  border-radius: 0 50px 50px 0 !important;
+  border-right: 1.5px solid var(--clr-border) !important;
+  padding-right: 1.25rem !important;
 }
-/* Untuk field Kata Sandi: form-control bukan elemen terakhir, tombol mata di kanan */
+
+/* Field Kata Sandi: tombol toggle password di ujung kanan */
 .modal-login-admin .input-group > .btn:last-child {
-  border: 1.5px solid var(--clr-border);
-  border-left: none;         /* tidak ada border ganda antara input & tombol mata */
-  border-radius: 0 var(--radius) var(--radius) 0;
-  background: #fff;
-  color: var(--clr-text-mid);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 44px;
-  padding: 0;
-  font-size: .95rem;
+  width: 46px !important;
+  height: 46px !important;
+  border: 1.5px solid var(--clr-border) !important;
+  border-left: none !important;
+  border-radius: 0 50px 50px 0 !important;
+  background: #fff !important;
+  color: var(--clr-text-light) !important;
+  font-size: 1rem !important;
+  padding: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-shadow: none !important;
+  transition: border-color .2s ease, color .2s ease;
 }
-.modal-login-admin .input-group > .btn:last-child:focus {
-  box-shadow: 0 0 0 3px rgba(30, 59, 44, 0.12);
-  z-index: 3;
+.modal-login-admin .input-group > .btn:last-child:hover {
+  color: var(--clr-orange) !important;
+  background: #fff !important;
+}
+
+/* ── Efek Fokus: Seluruh grup menyala oranye bersamaan sebagai satu pill utuh ── */
+.modal-login-admin .input-group:focus-within {
+  box-shadow: 0 0 0 3.5px rgba(242, 99, 15, 0.16) !important;
+  border-radius: 50px !important;
+}
+.modal-login-admin .input-group:focus-within > .input-group-text,
+.modal-login-admin .input-group:focus-within > .form-control,
+.modal-login-admin .input-group:focus-within > .btn {
+  border-color: var(--clr-orange) !important;
+}
+.modal-login-admin .input-group:focus-within > .input-group-text {
+  color: var(--clr-orange) !important;
+}
+.modal-login-admin .input-group .form-control:focus,
+.modal-login-admin .input-group .btn:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.modal-login-admin .btn-primary-custom {
+  height: 46px !important;
+  border-radius: 50px !important;
+  font-size: .95rem !important;
+  font-weight: 700 !important;
+  box-shadow: 0 4px 14px rgba(242, 99, 15, 0.35) !important;
+}
+.modal-login-admin .btn-primary-custom:hover {
+  box-shadow: 0 6px 18px rgba(242, 99, 15, 0.45) !important;
 }
 
 .btn-logout-sidebar {
@@ -3109,7 +3152,7 @@ body.form-page .form-page-header p {
 }
 
 /* ============================================================
-   NAVBAR BUTTONS � Konsistensi Pill Shape (border-radius: 50px)
+   NAVBAR BUTTONS � Konsistensi Pill Shape (border-radius: 50px)
    Semua button di navbar seragam: ep-nav-user, btn-nav-admin, btn-nav-daftar
    ============================================================ */
 
@@ -3134,7 +3177,7 @@ body.form-page .form-page-header p {
   align-items: center !important;
 }
 
-/* Tombol CTA Daftarkan Potensi � sudah pill, selaraskan tinggi */
+/* Tombol CTA Daftarkan Potensi � sudah pill, selaraskan tinggi */
 .btn-nav-daftar,
 a.btn-nav-daftar,
 .nav-link.btn-nav-daftar {
@@ -3158,11 +3201,11 @@ a.btn-nav-daftar,
 }
 
 /* ============================================================
-   GLOBAL DESIGN SYSTEM � Pill Buttons + Rounded Cards
+   GLOBAL DESIGN SYSTEM � Pill Buttons + Rounded Cards
    Override semua button & card di seluruh halaman jadi konsisten
    ============================================================ */
 
-/* -- 1. SEMUA BUTTON � pill shape, tinggi & font seragam -- */
+/* -- 1. SEMUA BUTTON � pill shape, tinggi & font seragam -- */
 
 /* Custom button classes */
 .btn-primary-custom,
@@ -3222,13 +3265,16 @@ a.btn-nav-daftar,
   border-radius: 50px !important;
 }
 
-/* form-control standalone (login, register, daftar-potensi) */
-.form-control,
+/* form-control standalone (login, register, daftar-potensi) - jangan timpa input-group */
+.form-control:not(.input-group > .form-control),
 .form-select {
   border-radius: 12px !important;
 }
+.input-group > .form-control:not(:first-child):not(:last-child) {
+  border-radius: 0 !important;
+}
 
-/* -- 2. CARD � radius seragam 16px -- */
+/* -- 2. CARD � radius seragam 16px -- */
 
 /* Semua card Bootstrap */
 .card {

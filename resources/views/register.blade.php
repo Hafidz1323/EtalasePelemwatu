@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Daftar / Masuk Warga — EtalasePelemwatu</title>
   <meta name="description" content="Daftar akun atau masuk sebagai warga Desa Pelemwatu untuk mengelola potensi lokal Anda.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   <link rel="stylesheet" href="assets/css/style.css">
@@ -16,10 +18,6 @@
       display: flex;
       flex-direction: column;
     }
-
-    /* ── Navbar ── */
-    #siteHeader { position: relative; z-index: 100; }
-    #mainNavbar { background: #fff; box-shadow: 0 2px 12px rgba(0,0,0,.07); }
 
     /* ── Wrapper split ── */
     .auth-wrap {
@@ -286,7 +284,7 @@
         </button>
         <div class="collapse navbar-collapse" id="navMenu">
           <ul class="navbar-nav mx-auto gap-1">
-            <li class="nav-item"><a class="nav-link" href="/">Beranda</a></li>
+            <li class="nav-item"><a class="nav-link" href="/#hero-desa">Beranda</a></li>
             <li class="nav-item"><a class="nav-link" href="/#profil-desa">Profil Desa</a></li>
             <li class="nav-item"><a class="nav-link" href="/#pengenalan-etalase">Tentang</a></li>
             <li class="nav-item"><a class="nav-link" href="/#katalog">Katalog</a></li>
@@ -467,7 +465,68 @@
 
   </div><!-- /auth-wrap -->
 
+  <!-- ============================================================
+       MODAL LOGIN ADMIN (sama dengan homepage)
+       ============================================================ -->
+  <div class="modal fade modal-login-admin" id="modalLoginAdmin" tabindex="-1" aria-labelledby="modalLoginAdminLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 420px;">
+      <div class="modal-content">
+        <div class="modal-header d-flex align-items-center justify-content-between">
+          <div class="d-flex align-items-center gap-2">
+            <div class="login-icon-badge">
+              <i class="bi bi-shield-lock-fill"></i>
+            </div>
+            <div>
+              <h5 class="modal-title fw-bold mb-0" id="modalLoginAdminLabel" style="color:var(--clr-blue);font-size:1.1rem;">Login Administrator</h5>
+              <small class="text-muted" style="font-size:.78rem;">Portal EtalasePelemwatu</small>
+            </div>
+          </div>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <form id="formLoginAdmin" novalidate>
+          <div class="modal-body p-4">
+            <div id="loginAlertBox" class="alert alert-danger py-2 px-3 mb-3 d-none" style="font-size:.84rem;">
+              <i class="bi bi-exclamation-triangle-fill me-1"></i> <span id="loginAlertMsg">Username atau kata sandi tidak sesuai.</span>
+            </div>
+
+            <div class="mb-3">
+              <label for="adminUsername" class="form-label fw-semibold" style="color:var(--clr-blue);font-size:.88rem;">Username / Email</label>
+              <div class="input-group">
+                <span class="input-group-text bg-white border-end-0" style="color:var(--clr-text-light);">
+                  <i class="bi bi-person"></i>
+                </span>
+                <input type="text" class="form-control border-start-0" id="adminUsername" placeholder="Masukkan username atau email" required autocomplete="username">
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="adminPassword" class="form-label fw-semibold" style="color:var(--clr-blue);font-size:.88rem;">Kata Sandi</label>
+              <div class="input-group">
+                <span class="input-group-text bg-white border-end-0" style="color:var(--clr-text-light);">
+                  <i class="bi bi-key"></i>
+                </span>
+                <input type="password" class="form-control border-start-0 border-end-0" id="adminPassword" placeholder="Masukkan kata sandi" required autocomplete="current-password">
+                <button class="btn btn-outline-secondary border-start-0" type="button" id="btnTogglePassword" style="background:#fff;border-color:var(--clr-border);">
+                  <i class="bi bi-eye" id="eyeIcon"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="modal-footer border-top-0 pt-0 px-4 pb-4">
+            <button type="submit" class="btn-primary-custom w-100 justify-content-center" id="btnSubmitLogin" style="height:44px;">
+              <i class="bi bi-box-arrow-in-right me-1"></i> Masuk ke Panel Admin
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="assets/js/warga-auth.js"></script>
+  <script src="assets/js/auth.js"></script>
   <script>
   'use strict';
   var API_BASE = (window.location.protocol === 'file:' || window.location.port === '5500')
@@ -620,17 +679,31 @@
     if (tab === 'masuk') switchTab('masuk');
   })();
 
-  /* Navbar state */
-  (function() {
-    try {
-      var s = JSON.parse(localStorage.getItem('ep_warga_session') || 'null');
-      if (s && s.token && s.user) {
-        var wrap = document.getElementById('navWargaWrap');
-        var adminWrap = document.getElementById('navAdminWrap');
-        if (wrap) wrap.innerHTML = '<a href="/profil-warga" style="display:inline-flex;align-items:center;gap:.35rem;color:#fff;text-decoration:none;font-size:.88rem;"><i class="bi bi-person-circle"></i>' + (s.user.name || 'Profil') + '</a>';
-        if (adminWrap) adminWrap.style.display = 'none';
-      }
-    } catch(e) {}
+  /* Navbar scroll behavior matching homepage */
+  (function () {
+    var nav = document.getElementById('mainNavbar');
+    var hdr = document.getElementById('siteHeader');
+    function onScroll() {
+      var s = window.scrollY > 40;
+      if (nav) nav.classList.toggle('scrolled', s);
+      if (hdr) hdr.classList.toggle('scrolled', s);
+    }
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+  })();
+
+  /* Dynamic logo matching homepage */
+  (function () {
+    fetch(API_BASE + '/settings/logo')
+      .then(function (r) { return r.json(); })
+      .then(function (res) {
+        if (res && res.status === 'success' && res.data && res.data.path) {
+          document.querySelectorAll('[data-site-logo]').forEach(function (img) {
+            img.src = res.data.path;
+          });
+        }
+      })
+      .catch(function () {});
   })();
   </script>
 </body>
