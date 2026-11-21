@@ -725,5 +725,6 @@ document.addEventListener('DOMContentLoaded', function() {
   loadCategories();
 });
 </script>
+<script src="assets/js/site-logo.js"></script>
 </body>
 </html>

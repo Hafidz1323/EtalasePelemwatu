@@ -250,7 +250,10 @@
   <div class="login-card-container">
     <!-- Header Brand -->
     <div class="login-brand-header">
-      <div class="logo-badge">EP</div>
+      <div class="logo-badge" style="overflow:hidden;position:relative;">
+        <img data-site-logo src="/assets/img/logo-desa.png" alt="Logo Desa" style="width:100%;height:100%;object-fit:contain;display:none;" onload="this.style.display='block';var fb=this.parentNode.querySelector('.logo-fallback');if(fb)fb.style.display='none';">
+        <span class="logo-fallback">EP</span>
+      </div>
       <h1>EtalasePelemwatu</h1>
       <p>Panel Akses Khusus Administrator Desa</p>
     </div>
@@ -512,6 +515,7 @@
       }
     })();
   </script>
+  <script src="assets/js/site-logo.js"></script>
 </body>
 </html>
 
