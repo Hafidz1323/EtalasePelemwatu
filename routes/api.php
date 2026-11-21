@@ -3,7 +3,6 @@
 use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\CategoryController;
 use App\Http\Controllers\API\GaleriController;
-use App\Http\Controllers\API\MessageController;
 use App\Http\Controllers\API\PotensiController;
 use App\Http\Controllers\API\PotensiReviewController;
 use App\Http\Controllers\API\ProfilDesaController;
@@ -45,7 +44,6 @@ Route::get('/settings/logo', [SettingController::class, 'getLogo']);
 
 // Formulir publik (dibatasi agar tidak bisa dipakai spam)
 Route::post('/potensi', [PotensiController::class, 'store'])->middleware('throttle:10,1');
-Route::post('/messages', [MessageController::class, 'store'])->middleware('throttle:5,1');
 
 /*
 |--------------------------------------------------------------------------
@@ -82,7 +80,6 @@ Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
     Route::put('/galeri/{id}', [GaleriController::class, 'update']);
     Route::delete('/galeri/{id}', [GaleriController::class, 'destroy']);
 
-    Route::get('/messages', [MessageController::class, 'index']);
     Route::get('/stats', [StatsController::class, 'index']);
     Route::post('/upload', [UploadController::class, 'upload']);
 

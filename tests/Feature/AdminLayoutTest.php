@@ -24,7 +24,7 @@ class AdminLayoutTest extends TestCase
         $clean = preg_replace('/@[a-zA-Z_]+\b[^\n]*/', '', $clean);
 
         libxml_use_internal_errors(true);
-        $doc = new DOMDocument();
+        $doc = new DOMDocument;
         $doc->loadHTML('<?xml encoding="utf-8" ?>'.$clean, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
         libxml_clear_errors();
 

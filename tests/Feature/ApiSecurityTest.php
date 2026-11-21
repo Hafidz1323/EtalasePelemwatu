@@ -3,7 +3,6 @@
 namespace Tests\Feature;
 
 use App\Models\Category;
-use App\Models\Message;
 use App\Models\Potensi;
 use App\Models\User;
 use Database\Seeders\DatabaseSeeder;
@@ -53,17 +52,16 @@ class ApiSecurityTest extends TestCase
         $this->deleteJson("/api/categories/{$c->id}")->assertStatus(401);
         $this->postJson("/api/potensi/{$p->id}/review", ['status' => 'approved'])->assertStatus(401);
         $this->postJson('/api/upload', [])->assertStatus(401);
-        $this->getJson('/api/messages')->assertStatus(401);
         $this->getJson('/api/stats')->assertStatus(401);
 
         $this->assertSame('Usaha Uji', $p->fresh()->name);
         $this->assertNotNull(Category::find($c->id));
     }
 
-    public function test_pesan_masuk_tidak_bocor_ke_publik(): void
+    public function test_endpoint_messages_telah_dihapus(): void
     {
-        Message::create(['name' => 'A', 'email' => 'a@b.id', 'message' => 'rahasia']);
-        $this->getJson('/api/messages')->assertStatus(401)->assertDontSee('rahasia');
+        $this->getJson('/api/messages')->assertNotFound();
+        $this->postJson('/api/messages', ['name' => 'A', 'email' => 'a@b.id', 'message' => 'Halo'])->assertNotFound();
     }
 
     public function test_rute_publik_tetap_bisa_diakses(): void
@@ -72,7 +70,6 @@ class ApiSecurityTest extends TestCase
         $this->getJson('/api/categories')->assertOk();
         $this->getJson('/api/potensi')->assertOk();
         $this->getJson('/api/settings/logo')->assertOk();
-        $this->postJson('/api/messages', ['name' => 'A', 'email' => 'a@b.id', 'message' => 'Halo'])->assertStatus(201);
     }
 
     // ---------- Login ----------
@@ -298,26 +295,15 @@ class ApiSecurityTest extends TestCase
         $this->assertSame(2, $d['pendingReviews']);
     }
 
-    // ---------- Throttle pendaftaran & pesan ----------
+    // ---------- Throttle pendaftaran ----------
 
-    public function test_pendaftaran_dan_pesan_dibatasi_throttle(): void
+    public function test_pendaftaran_dibatasi_throttle(): void
     {
         $s = null;
         for ($i = 0; $i < 15; $i++) {
             $s = $this->postJson('/api/potensi', $this->payload())->status();
         }
         $this->assertSame(429, $s);
-
-        for ($i = 0; $i < 15; $i++) {
-            $s = $this->postJson('/api/messages', ['name' => 'A', 'email' => 'a@b.id', 'message' => 'Halo'])->status();
-        }
-        $this->assertSame(429, $s);
-    }
-
-    public function test_pesan_divalidasi_panjangnya(): void
-    {
-        $this->postJson('/api/messages', ['name' => 'A', 'email' => 'bukan-email', 'message' => 'x'])->assertStatus(422);
-        $this->postJson('/api/messages', ['name' => 'A', 'email' => 'a@b.id', 'message' => str_repeat('x', 6000)])->assertStatus(422);
     }
 
     // ---------- Profil / password ----------
