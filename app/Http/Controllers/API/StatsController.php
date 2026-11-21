@@ -11,7 +11,8 @@ class StatsController extends Controller
 {
     public function index(Request $request)
     {
-        if ($request->user() && $request->user()->role !== 'admin') {
+        $user = $request->user();
+        if (!$user || $user->role !== 'admin') {
             return response()->json(['status' => 'error', 'message' => 'Akses ditolak.'], 403);
         }
 

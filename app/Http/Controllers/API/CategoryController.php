@@ -19,6 +19,11 @@ class CategoryController extends Controller
 
     public function store(Request $request)
     {
+        $user = $request->user();
+        if (!$user || $user->role !== 'admin') {
+            return response()->json(['status' => 'error', 'message' => 'Akses ditolak.'], 403);
+        }
+
         $data = $request->validate([
             'name' => 'required|string|max:100',
             'description' => 'nullable|string|max:500',
@@ -29,6 +34,11 @@ class CategoryController extends Controller
 
     public function update(Request $request, $id)
     {
+        $user = $request->user();
+        if (!$user || $user->role !== 'admin') {
+            return response()->json(['status' => 'error', 'message' => 'Akses ditolak.'], 403);
+        }
+
         $category = Category::find($id);
         if (!$category) return response()->json(['status' => 'error', 'message' => 'Not found'], 404);
         $data = $request->validate([
@@ -39,8 +49,13 @@ class CategoryController extends Controller
         return response()->json(['status' => 'success', 'data' => $category]);
     }
 
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
+        $user = $request->user();
+        if (!$user || $user->role !== 'admin') {
+            return response()->json(['status' => 'error', 'message' => 'Akses ditolak.'], 403);
+        }
+
         $category = Category::find($id);
         if (!$category) return response()->json(['status' => 'error', 'message' => 'Not found'], 404);
         $category->delete();

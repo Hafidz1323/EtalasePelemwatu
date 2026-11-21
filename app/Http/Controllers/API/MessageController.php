@@ -8,8 +8,13 @@ use App\Models\Message;
 
 class MessageController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        $user = $request->user();
+        if (!$user || $user->role !== 'admin') {
+            return response()->json(['status' => 'error', 'message' => 'Akses ditolak.'], 403);
+        }
+
         return response()->json([
             'status' => 'success',
             'data' => Message::orderBy('id', 'desc')->get(),
