@@ -486,8 +486,6 @@
               <span>Tambah Foto</span>
             </label>
           </div>
-
-          </div>
         </div>
         <div class="admin-card-body pt-0 pb-3">
           <small style="color:var(--text-light);">
