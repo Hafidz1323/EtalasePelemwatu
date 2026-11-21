@@ -62,15 +62,18 @@
     wraps.forEach(function(wrap) {
       if (loggedIn && user) {
         // Sudah login: icon + nama singkat, klik buka dropdown
-        var firstName = (user.name || 'Profil').split(' ')[0];
+        var rawName = user.name || 'Profil';
+        var escFn = window.escapeHtml || function(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;'); };
+        var safeName = escFn(rawName);
+        var firstName = escFn(rawName.split(' ')[0]);
         wrap.innerHTML =
           '<div class="dropdown">' +
-            '<button class="ep-nav-user dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="' + (user.name || 'Profil Saya') + '">' +
+            '<button class="ep-nav-user dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="' + safeName + '">' +
               '<i class="bi bi-person-circle"></i>' +
               '<span class="ep-nav-user-name">' + firstName + '</span>' +
             '</button>' +
             '<ul class="dropdown-menu dropdown-menu-end shadow-sm ep-user-menu">' +
-              '<li class="ep-user-menu-header"><i class="bi bi-person-fill me-2"></i>' + (user.name || '') + '</li>' +
+              '<li class="ep-user-menu-header"><i class="bi bi-person-fill me-2"></i>' + safeName + '</li>' +
               '<li><hr class="dropdown-divider my-1"></li>' +
               '<li><a class="dropdown-item py-2" href="/profil-warga"><i class="bi bi-person me-2 text-primary"></i>Profil Saya</a></li>' +
               '<li><a class="dropdown-item py-2" href="/profil-warga#potensi"><i class="bi bi-shop me-2 text-warning"></i>Potensi Saya</a></li>' +

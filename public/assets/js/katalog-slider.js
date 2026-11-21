@@ -82,10 +82,12 @@
       }
     }
 
+    var safeImg = (window.sanitizeSrc ? window.sanitizeSrc(imgSrc, 'assets/img/foto-warung-desa.jpg') : (imgSrc || 'assets/img/foto-warung-desa.jpg'));
+
     var div = document.createElement('div');
     div.className = 'ks-card';
     div.innerHTML =
-      '<img src="' + (imgSrc || 'assets/img/foto-warung-desa.jpg') + '" alt="' + esc(name) + '" loading="lazy" ' +
+      '<img src="' + safeImg + '" alt="' + esc(name) + '" loading="lazy" ' +
       'onerror="this.onerror=null;this.src=\'assets/img/foto-warung-desa.jpg\'">' +
       '<div class="ks-card-overlay">' +
         '<span class="ks-card-cat">' + esc(cat) + '</span>' +
@@ -257,7 +259,7 @@
     var placeholderEl = document.getElementById('dm-foto-placeholder');
     if (fotoEl && placeholderEl) {
       if (d.img) {
-        fotoEl.src          = d.img;
+        fotoEl.src          = (window.sanitizeSrc ? window.sanitizeSrc(d.img, '') : d.img);
         fotoEl.style.display = '';
         placeholderEl.style.display = 'none';
       } else {

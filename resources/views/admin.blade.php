@@ -17,7 +17,7 @@
       function toLogin() {
         ['adminLoggedIn', 'adminUser', 'ep_admin_session'].forEach(function (k) { localStorage.removeItem(k); });
         sessionStorage.removeItem('ep_admin_session');
-        window.location.replace('login.html?unauthorized=true');
+        window.location.replace('/login?unauthorized=true');
       }
       var token = null;
       try {
@@ -116,7 +116,7 @@
     <button class="sidebar-nav-item" data-section="pengaturan">
       <i class="bi bi-gear"></i><span>Pengaturan</span>
     </button>
-    <a href="index.html" class="sidebar-nav-item" style="text-decoration:none;">
+    <a href="/" class="sidebar-nav-item" style="text-decoration:none;">
       <i class="bi bi-house-door"></i><span>Kembali ke Website</span>
     </a>
     <button type="button" class="sidebar-nav-item text-danger border-0 bg-transparent w-100 text-start" id="sidebarNavLogout" style="cursor:pointer;">
@@ -222,7 +222,7 @@
             <li class="dropdown-header">Akun Administrator</li>
             <li><button type="button" class="dropdown-item" onclick="openProfilModal()"><i class="bi bi-person-gear me-2"></i>Profil Admin</button></li>
             <li><button type="button" class="dropdown-item" onclick="switchSection('pengaturan')"><i class="bi bi-shield-lock me-2"></i>Keamanan &amp; Sandi</button></li>
-            <li><a class="dropdown-item" href="index.html"><i class="bi bi-house me-2"></i>Lihat Website</a></li>
+            <li><a class="dropdown-item" href="/"><i class="bi bi-house me-2"></i>Lihat Website</a></li>
             <li><hr class="dropdown-divider my-1"></li>
             <li>
               <button type="button" class="dropdown-item text-danger" id="btnLogoutTopbar">
@@ -367,7 +367,7 @@
               <h5><i class="bi bi-lightning me-2" style="color:var(--clr-orange);"></i>Aksi Cepat</h5>
             </div>
             <div class="admin-card-body d-flex flex-column gap-2">
-              <a href="daftar-potensi.html" class="quick-action">
+              <a href="/daftar-potensi" class="quick-action">
                 <i class="bi bi-plus-circle"></i><span>Tambah Potensi</span>
               </a>
               <button class="quick-action" id="btnExport">
@@ -412,7 +412,7 @@
                     hidden></ul>
               </div>
             </div>
-            <a href="daftar-potensi.html" class="btn-tambah-potensi">
+            <a href="/daftar-potensi" class="btn-tambah-potensi">
               <i class="bi bi-plus-lg"></i> Tambah Potensi
             </a>
           </div>
@@ -1652,12 +1652,13 @@ document.querySelectorAll('.btn-go-verifikasi').forEach(function(b){
           var src = (p.path || p.image_path || p);
           if (typeof src === 'string') {
             var img = document.createElement('img');
-            img.src = src;
+            var safeSrc = window.sanitizeSrc ? window.sanitizeSrc(src) : src;
+            img.src = safeSrc;
             img.alt = item.name || 'Foto Potensi';
             img.style.cssText = 'width:90px;height:90px;object-fit:cover;border-radius:12px;border:1px solid var(--adm-card-border);cursor:pointer;transition:transform .2s;';
             img.addEventListener('mouseover', function () { this.style.transform = 'scale(1.05)'; });
             img.addEventListener('mouseout', function () { this.style.transform = 'scale(1)'; });
-            img.addEventListener('click', function () { window.open(src, '_blank'); });
+            img.addEventListener('click', function () { window.open(safeSrc, '_blank'); });
             photoWrap.appendChild(img);
           }
         });
@@ -1968,20 +1969,22 @@ document.querySelectorAll('.btn-go-verifikasi').forEach(function(b){
           if (p.images && p.images.length) {
             imgHtml = '<div class="d-flex gap-2 flex-wrap mt-2">';
             p.images.forEach(function(img) {
-              imgHtml += '<img src="' + (img.path||'') + '" style="width:60px;height:60px;object-fit:cover;border-radius:6px;border:1px solid #e5e9f0;" onerror="this.style.display=\'none\'">';
+              var safeImg = window.sanitizeSrc ? window.sanitizeSrc(img.path||'') : (img.path||'');
+              imgHtml += '<img src="' + safeImg + '" style="width:60px;height:60px;object-fit:cover;border-radius:6px;border:1px solid #e5e9f0;" onerror="this.style.display=\'none\'">';
             });
             imgHtml += '</div>';
           }
 
+          var safeName = escapeHtml(p.name || '');
           card.innerHTML =
             '<div class="admin-card-body">' +
               '<div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">' +
                 '<div class="flex-grow-1">' +
-                  '<div style="font-weight:700;color:var(--clr-blue);font-size:.95rem;">' + (p.name||'') + '</div>' +
+                  '<div style="font-weight:700;color:var(--clr-blue);font-size:.95rem;">' + safeName + '</div>' +
                   '<div style="font-size:.82rem;color:#9ca3af;margin-top:.2rem;">' +
-                    'Pemilik: <strong>' + (p.owner_name||'-') + '</strong>' +
-                    ' &middot; WA: ' + (p.owner_phone||'-') +
-                    ' &middot; Status: <span class="fw-semibold text-success">' + (p.status||'-') + '</span>' +
+                    'Pemilik: <strong>' + escapeHtml(p.owner_name || '-') + '</strong>' +
+                    ' &middot; WA: ' + escapeHtml(p.owner_phone || '-') +
+                    ' &middot; Status: <span class="fw-semibold text-success">' + escapeHtml(p.status || '-') + '</span>' +
                   '</div>' +
                   '<div style="font-size:.8rem;color:#9ca3af;margin-top:.15rem;">' +
                     'Diajukan: ' + fmtDate(p.deletion_requested_at) +
@@ -1989,7 +1992,7 @@ document.querySelectorAll('.btn-go-verifikasi').forEach(function(b){
                   imgHtml +
                 '</div>' +
                 '<div class="d-flex gap-2 flex-shrink-0 align-items-center">' +
-                  '<button class="btn btn-sm btn-danger btn-approve-del" data-id="' + p.id + '" data-name="' + (p.name||'').replace(/"/g,'') + '" style="font-size:.82rem;">' +
+                  '<button class="btn btn-sm btn-danger btn-approve-del" data-id="' + p.id + '" data-name="' + safeName + '" style="font-size:.82rem;">' +
                     '<i class="bi bi-trash-fill me-1"></i>Setujui Hapus' +
                   '</button>' +
                   '<button class="btn btn-sm btn-outline-secondary btn-reject-del" data-id="' + p.id + '" style="font-size:.82rem;">' +
@@ -2540,7 +2543,7 @@ document.querySelectorAll('.btn-go-verifikasi').forEach(function(b){
       } else {
         ['adminLoggedIn', 'adminUser', 'ep_admin_session'].forEach(function (k) { localStorage.removeItem(k); });
         sessionStorage.removeItem('ep_admin_session');
-        window.location.replace('login.html?unauthorized=true');
+        window.location.replace('/login?unauthorized=true');
       }
       return true;
     }
@@ -3091,9 +3094,10 @@ document.querySelectorAll('.btn-go-verifikasi').forEach(function(b){
         div.className = 'galeri-admin-item';
         div.dataset.galeriId = g.id;
         div.dataset.galeriDesc = g.description || '';
+        var safeSrc = window.sanitizeSrc ? window.sanitizeSrc(g.image_path) : escapeHtml(g.image_path);
         div.innerHTML =
           '<div class="galeri-admin-thumb">' +
-            '<img src="' + escapeHtml(g.image_path) + '" alt="' + escapeHtml(g.caption) + '">' +
+            '<img src="' + safeSrc + '" alt="' + escapeHtml(g.caption) + '">' +
             '<div class="galeri-admin-actions">' +
               '<button type="button" class="btn btn-sm btn-warning btn-galeri-edit" data-id="' + g.id + '" style="font-size:.78rem;padding:.3rem .75rem;">' +
                 '<i class="bi bi-pencil me-1"></i>Edit' +
@@ -3401,6 +3405,7 @@ document.querySelectorAll('.btn-go-verifikasi').forEach(function(b){
   loadProfilDesa();
 })();
 </script>
+<script src="assets/js/utils.js"></script>
 <script src="assets/js/auth.js"></script>
 </body>
 </html>

@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   <link rel="stylesheet" href="assets/css/style.css">
   <link rel="stylesheet" href="assets/css/profil-warga.css">
+  <script src="assets/js/utils.js"></script>
 </head>
 <body class="pw-page-body">
 
@@ -355,16 +356,16 @@ function renderProfileHeader() {
   var avatarWrap = document.getElementById('avatarWrap');
   if (avatarWrap) {
     if (currentUser.avatar || currentUser.photo) {
-      avatarWrap.innerHTML = '<img src="' + (currentUser.avatar || currentUser.photo) + '" alt="' + name + '" class="pw-avatar-img">';
+      avatarWrap.innerHTML = '<img src="' + sanitizeSrc(currentUser.avatar || currentUser.photo) + '" alt="' + escapeHtml(name) + '" class="pw-avatar-img">';
     } else {
-      avatarWrap.innerHTML = '<span class="pw-avatar-initial">' + initial + '</span>';
+      avatarWrap.innerHTML = '<span class="pw-avatar-initial">' + escapeHtml(initial) + '</span>';
     }
   }
 
   var pName = document.getElementById('profileName');
   if (pName) pName.textContent = name;
   var pPhone = document.getElementById('profilePhone');
-  if (pPhone) pPhone.innerHTML = '<i class="bi bi-telephone me-1"></i> ' + (currentUser.phone || '-');
+  if (pPhone) pPhone.innerHTML = '<i class="bi bi-telephone me-1"></i> ' + escapeHtml(currentUser.phone || '-');
 
   var sPhone = document.getElementById('statPhone');
   if (sPhone) sPhone.textContent = currentUser.phone || '-';
@@ -528,14 +529,14 @@ async function loadPotensi() {
     if (p.images && p.images.length) {
       photosHtml = '<div class="d-flex gap-2 flex-wrap mt-2">';
       p.images.forEach(function(img) {
-        photosHtml += '<img src="' + (img.path || '') + '" class="photo-thumb" onerror="this.style.display=\'none\'">';
+        photosHtml += '<img src="' + sanitizeSrc(img.path) + '" class="photo-thumb" onerror="this.style.display=\'none\'">';
       });
       photosHtml += '</div>';
     }
 
     var rejHtml = '';
     if (p.status === 'rejected' && p.rejection_reason) {
-      rejHtml = '<div class="rejection-box"><i class="bi bi-info-circle me-1"></i><strong>Alasan penolakan:</strong> ' + p.rejection_reason + '</div>';
+      rejHtml = '<div class="rejection-box"><i class="bi bi-info-circle me-1"></i><strong>Alasan penolakan:</strong> ' + escapeHtml(p.rejection_reason) + '</div>';
     }
 
     var isDeletionPending = !!p.deletion_requested_at;
@@ -553,9 +554,9 @@ async function loadPotensi() {
     card.innerHTML =
       '<div class="d-flex justify-content-between align-items-start gap-2 flex-wrap">' +
         '<div class="flex-grow-1">' +
-          '<div class="potensi-card-title">' + p.name + '</div>' +
+          '<div class="potensi-card-title">' + escapeHtml(p.name) + '</div>' +
           '<div class="potensi-card-meta">' +
-            (p.category ? p.category.name + ' &bull; ' : '') +
+            (p.category ? escapeHtml(p.category.name) + ' &bull; ' : '') +
             new Date(p.created_at).toLocaleDateString('id-ID', {day:'numeric',month:'long',year:'numeric'}) +
           '</div>' +
           statusHtml +
@@ -602,10 +603,10 @@ async function ajukanHapusPotensi(id, nama, status) {
   var res = await apiCall('POST', '/warga/potensi/' + id + '/request-deletion');
   if (!res) return;
   if (res.ok) {
-    alert(res.data.message || 'Berhasil.');
+    showToast('success', res.data.message || 'Berhasil.');
     loadPotensi();
   } else {
-    alert(res.data.message || 'Gagal menghapus potensi.');
+    showToast('error', res.data.message || 'Gagal menghapus potensi.');
   }
 }
 
@@ -615,9 +616,10 @@ async function batalkanPermintaanHapus(id, nama) {
   var res = await apiCall('POST', '/warga/potensi/' + id + '/cancel-deletion');
   if (!res) return;
   if (res.ok) {
+    showToast('success', 'Permintaan penghapusan dibatalkan.');
     loadPotensi();
   } else {
-    alert(res.data.message || 'Gagal membatalkan.');
+    showToast('error', res.data.message || 'Gagal membatalkan.');
   }
 }
 
@@ -644,14 +646,14 @@ function openEditModal(p) {
       var wrap = document.createElement('div');
       wrap.className = 'photo-thumb-wrap';
       wrap.innerHTML =
-        '<img src="' + (img.path || '') + '" class="photo-thumb" onerror="this.style.display=\'none\'">' +
+        '<img src="' + sanitizeSrc(img.path) + '" class="photo-thumb" onerror="this.style.display=\'none\'">' +
         '<button class="btn-del-photo" data-imgid="' + img.id + '" data-pid="' + p.id + '" title="Hapus foto">×</button>';
       wrap.querySelector('.btn-del-photo').addEventListener('click', async function() {
         var imgId = this.dataset.imgid;
         var pid   = this.dataset.pid;
         var r = await apiCall('DELETE', '/warga/potensi/' + pid + '/images/' + imgId);
         if (r && r.ok) { this.closest('.photo-thumb-wrap').remove(); }
-        else alert(r ? (r.data.message || 'Gagal.') : 'Gagal.');
+        else showToast('error', r ? (r.data.message || 'Gagal.') : 'Gagal.');
       });
       photoDiv.appendChild(wrap);
     });

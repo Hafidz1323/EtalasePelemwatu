@@ -83,10 +83,10 @@ class ApiSecurityTest extends TestCase
     public function test_login_user_db_berhasil_dan_salah_password_gagal(): void
     {
         $this->admin();
-        $this->postJson('/api/auth/login', ['email' => 'ADMIN@test.id', 'password' => 'Rahasia123'])
+        $this->postJson('/api/login', ['email' => 'ADMIN@test.id', 'password' => 'Rahasia123'])
             ->assertOk()->assertJsonStructure(['data' => ['token', 'user']])
             ->assertJsonMissing(['password']);
-        $this->postJson('/api/auth/login', ['email' => 'admin@test.id', 'password' => 'salah'])->assertStatus(401);
+        $this->postJson('/api/login', ['email' => 'admin@test.id', 'password' => 'salah'])->assertStatus(401);
     }
 
     public function test_login_tanpa_input_tidak_500(): void
@@ -545,20 +545,20 @@ class ApiSecurityTest extends TestCase
     {
         // Habiskan throttle untuk email1 (5 percobaan)
         for ($i = 0; $i < 5; $i++) {
-            $this->postJson('/api/auth/login', [
+            $this->postJson('/api/login', [
                 'email' => 'emailsatu@test.id',
                 'password' => 'salah',
             ]);
         }
 
         // Percobaan ke-6 dengan email1 harus kena throttle (429)
-        $this->postJson('/api/auth/login', [
+        $this->postJson('/api/login', [
             'email' => 'emailsatu@test.id',
             'password' => 'salah',
         ])->assertStatus(429);
 
         // email2 dari IP yang sama TIDAK kena throttle (kunci berbeda karena email berbeda)
-        $this->postJson('/api/auth/login', [
+        $this->postJson('/api/login', [
             'email' => 'emaildua@test.id',
             'password' => 'salah',
         ])->assertStatus(401); // 401 bukan 429

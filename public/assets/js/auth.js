@@ -106,9 +106,9 @@
         // Otherwise re-render navbar and show alert
         renderNavAdmin();
         if (typeof showToast === 'function') {
-          showToast('Anda telah berhasil keluar dari akun admin.', 'info');
-        } else {
-          alert('Anda telah berhasil keluar.');
+          showToast('info', 'Anda telah berhasil keluar dari akun admin.');
+        } else if (typeof showAdminToast === 'function') {
+          showAdminToast('Anda telah berhasil keluar dari akun admin.', 'info');
         }
       }
     }

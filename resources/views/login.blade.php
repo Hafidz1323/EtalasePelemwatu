@@ -333,7 +333,7 @@
 
     <!-- Footer link -->
     <div class="login-footer-links">
-      <a href="index.html">
+      <a href="/">
         <i class="bi bi-arrow-left"></i> Kembali ke Website EtalasePelemwatu
       </a>
     </div>
@@ -372,7 +372,7 @@
           if (parsed && parsed.isLoggedIn) {
             showAlert('Sesi aktif terdeteksi. Mengarahkan ke panel admin...', 'info');
             setTimeout(function () {
-              window.location.href = 'admin.html';
+              window.location.href = '/admin';
             }, 800);
           }
         } catch (e) {
@@ -442,7 +442,7 @@
           // 1. Coba hubungi backend API
           try {
             const API_BASE = (window.location.protocol === 'file:' || window.location.port === '5500') ? 'http://localhost:8000/api' : (window.location.port === '3000' ? 'http://localhost:3000/api' : '/api');
-            const response = await fetch(API_BASE + '/auth/login', {
+            const response = await fetch(API_BASE + '/login', {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json'
@@ -494,7 +494,7 @@
 
             showAlert('Login berhasil! Mengalihkan ke Panel Admin...', 'success');
             setTimeout(function () {
-              window.location.href = 'admin.html';
+              window.location.href = '/admin';
             }, 750);
           } else {
             showAlert('Email atau kata sandi tidak cocok. Silakan periksa kembali.', 'error');
@@ -515,6 +515,7 @@
       }
     })();
   </script>
+  <script src="assets/js/utils.js"></script>
   <script src="assets/js/site-logo.js"></script>
 </body>
 </html>

@@ -691,20 +691,8 @@
     window.addEventListener('scroll', onScroll, { passive: true });
     onScroll();
   })();
-
-  /* Dynamic logo matching homepage */
-  (function () {
-    fetch(API_BASE + '/settings/logo')
-      .then(function (r) { return r.json(); })
-      .then(function (res) {
-        if (res && res.status === 'success' && res.data && res.data.path) {
-          document.querySelectorAll('[data-site-logo]').forEach(function (img) {
-            img.src = res.data.path;
-          });
-        }
-      })
-      .catch(function () {});
-  })();
   </script>
+  <script src="assets/js/utils.js"></script>
+  <script src="assets/js/site-logo.js"></script>
 </body>
 </html>

@@ -31,7 +31,6 @@ Route::get('/status', function () {
 // Login dibatasi oleh RateLimiter 'login' (5x/menit per email+IP, didefinisikan di AppServiceProvider)
 Route::middleware('throttle:login')->group(function () {
     Route::post('/login', [AuthController::class, 'login']);
-    Route::post('/auth/login', [AuthController::class, 'login']);
 });
 
 // Data publik: GET /potensi hanya menampilkan yang disetujui bagi pengunjung biasa
@@ -70,7 +69,6 @@ Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
     Route::put('/potensi/{id}', [PotensiController::class, 'update']);
     Route::delete('/potensi/{id}', [PotensiController::class, 'destroy']);
     Route::post('/potensi/{id}/review', [PotensiReviewController::class, 'review']);
-    Route::post('/potensi-review/{id}', [PotensiReviewController::class, 'review']);
 
     Route::post('/categories', [CategoryController::class, 'store']);
     Route::put('/categories/{id}', [CategoryController::class, 'update']);

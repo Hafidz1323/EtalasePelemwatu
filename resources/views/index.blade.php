@@ -347,7 +347,7 @@
         <div class="layanan-card reveal">
           <h4>Pendaftaran Potensi Lokal</h4>
           <p>Daftarkan usaha, produk, jasa, hunian, atau barang milik Anda ke dalam katalog potensi Desa Pelemwatu secara mudah dan gratis.</p>
-          <a href="daftar-potensi.html" class="btn-primary-custom">
+          <a href="/daftar-potensi" class="btn-primary-custom">
             Daftarkan Sekarang
           </a>
         </div>
@@ -450,7 +450,7 @@
       <div class="col-sm-4 col-lg-3">
         <div class="footer-heading">Layanan</div>
         <ul class="footer-links">
-          <li><a href="daftar-potensi.html">Pendaftaran Potensi</a></li>
+          <li><a href="/daftar-potensi">Pendaftaran Potensi</a></li>
           <li><a href="#katalog">Katalog Potensi</a></li>
           <li><a href="#profil-desa">Informasi Desa</a></li>
           <li><a href="#kontak-section">Kontak Kami</a></li>
@@ -460,8 +460,8 @@
         <div class="footer-heading">Informasi</div>
         <ul class="footer-links">
           <li><a href="#pengenalan-etalase">Tentang EtalasePelemwatu</a></li>
-          <li><a href="daftar-potensi.html">Daftarkan Potensimu</a></li>
-          <li><a href="admin.html">Panel Admin</a></li>
+          <li><a href="/daftar-potensi">Daftarkan Potensimu</a></li>
+          <li><a href="/admin">Panel Admin</a></li>
         </ul>
         <div class="footer-heading mt-4">Alamat</div>
         <p style="font-size:.82rem;color:rgba(255,255,255,.6);line-height:1.6;">
@@ -717,7 +717,7 @@
     var cur = lbItems[lbIndex] || {};
     var cap = escapeHtml(cur.caption || '');
     var desc = cur.desc ? escapeHtml(cur.desc) : '';
-    document.getElementById('lbImg').src       = cur.src || '';
+    document.getElementById('lbImg').src       = (window.sanitizeSrc ? window.sanitizeSrc(cur.src) : (cur.src || ''));
     document.getElementById('lbImg').alt       = cur.caption || '';
     document.getElementById('lbCaption').innerHTML =
       '<strong style="font-size:1rem;">' + cap + '</strong>' +
@@ -762,14 +762,15 @@
         }
         grid.innerHTML = '';
         res.data.forEach(function(g){
+          var safeSrc = window.sanitizeSrc ? window.sanitizeSrc(g.image_path) : g.image_path;
           var card = document.createElement('div');
           card.className = 'galeri-card';
-          card.dataset.src = g.image_path;
+          card.dataset.src = safeSrc;
           card.dataset.caption = g.caption || '';
           card.dataset.desc = g.description || '';
           card.innerHTML =
             '<div class="galeri-card-img">' +
-              '<img src="' + escapeHtml(g.image_path) + '" alt="' + escapeHtml(g.caption || '') + '" loading="lazy">' +
+              '<img src="' + safeSrc + '" alt="' + escapeHtml(g.caption || '') + '" loading="lazy">' +
               '<div class="galeri-card-zoom"><i class="bi bi-zoom-in"></i></div>' +
             '</div>' +
             '<div class="galeri-card-info">' +
@@ -795,24 +796,8 @@
     if (e.key === 'ArrowRight') shiftLightbox(1);
   });
 </script>
+<script src="assets/js/utils.js"></script>
 <script src="assets/js/warga-auth.js"></script>
-<script>
-(function () {
-  var API_BASE = (window.location.protocol === 'file:' || window.location.port === '5500')
-    ? 'http://localhost:8000/api'
-    : (window.location.port === '3000' ? 'http://localhost:3000/api' : '/api');
-
-  fetch(API_BASE + '/settings/logo')
-    .then(function (r) { return r.json(); })
-    .then(function (res) {
-      if (res && res.status === 'success' && res.data && res.data.path) {
-        document.querySelectorAll('[data-site-logo]').forEach(function (img) {
-          img.src = res.data.path;
-        });
-      }
-    })
-    .catch(function () { /* biarkan logo bawaan jika request gagal */ });
-})();
-</script>
+<script src="assets/js/site-logo.js"></script>
 </body>
 </html>

@@ -12,7 +12,7 @@ class PageSmokeTest extends TestCase
     public function test_semua_halaman_web_terbuka(): void
     {
         foreach (['/', '/index.html', '/login', '/login.html', '/admin', '/admin.html', '/daftar-potensi', '/daftar-potensi.html'] as $url) {
-            $this->get($url)->assertOk();
+            $this->followingRedirects()->get($url)->assertOk();
         }
     }
 

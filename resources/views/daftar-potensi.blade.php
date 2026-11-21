@@ -341,7 +341,7 @@
                   Nomor referensi: <strong id="refNumber" style="color:var(--clr-orange);">#EP-0000</strong>
                 </p>
                 <div class="d-flex gap-3 justify-content-center flex-wrap">
-                  <a href="index.html" class="btn-riviera-custom">
+                  <a href="/" class="btn-riviera-custom">
                     <i class="bi bi-house"></i> Kembali ke Beranda
                   </a>
                   <button type="button" class="btn-outline-custom" id="btnDaftarLagi">
@@ -440,10 +440,10 @@
       </div>
       <div class="col-md-6 text-md-end">
         <ul class="footer-links d-flex gap-3 justify-content-md-end flex-wrap" style="margin:0;">
-          <li><a href="index.html">Beranda</a></li>
-          <li><a href="index.html#katalog">Katalog</a></li>
-          <li><a href="index.html#kontak-section">Kontak</a></li>
-          <li><a href="admin.html">Admin</a></li>
+          <li><a href="/">Beranda</a></li>
+          <li><a href="/#katalog">Katalog</a></li>
+          <li><a href="/#kontak-section">Kontak</a></li>
+          <li><a href="/admin">Admin</a></li>
         </ul>
       </div>
     </div>
@@ -1071,25 +1071,9 @@ btt.addEventListener('click', function(){ window.scrollTo({ top: 0, behavior: 's
   </div>
 </div>
 
+<script src="assets/js/utils.js"></script>
 <script src="assets/js/warga-auth.js"></script>
 <script src="assets/js/auth.js"></script>
-<script>
-(function () {
-  var API_BASE = (window.location.protocol === 'file:' || window.location.port === '5500')
-    ? 'http://localhost:8000/api'
-    : (window.location.port === '3000' ? 'http://localhost:3000/api' : '/api');
-
-  fetch(API_BASE + '/settings/logo')
-    .then(function (r) { return r.json(); })
-    .then(function (res) {
-      if (res && res.status === 'success' && res.data && res.data.path) {
-        document.querySelectorAll('[data-site-logo]').forEach(function (img) {
-          img.src = res.data.path;
-        });
-      }
-    })
-    .catch(function () { /* biarkan logo bawaan jika request gagal */ });
-})();
-</script>
+<script src="assets/js/site-logo.js"></script>
 </body>
 </html>
