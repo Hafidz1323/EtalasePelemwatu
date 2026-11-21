@@ -11,6 +11,9 @@
   <link rel="stylesheet" href="assets/css/galeri.css">
   <script>
     (function () {
+      var savedTheme = localStorage.getItem('ep_admin_theme') || 'light';
+      document.documentElement.setAttribute('data-theme', savedTheme);
+
       function toLogin() {
         ['adminLoggedIn', 'adminUser', 'ep_admin_session'].forEach(function (k) { localStorage.removeItem(k); });
         sessionStorage.removeItem('ep_admin_session');
@@ -29,44 +32,44 @@
     })();
   </script>
   <style>
-    /* â”€â”€ Pengaturan Menu Rows â”€â”€ */
+    /* ── Pengaturan Menu Rows ── */
     .peng-menu-row {
       width:100%;display:flex;align-items:center;gap:.85rem;padding:.85rem 1rem;
       background:none;border:none;cursor:pointer;text-align:left;transition:background .15s;
       border-radius:0;
     }
-    .peng-menu-row:hover { background:rgba(9,74,116,.05); }
+    .peng-menu-row:hover { background:var(--adm-pill-bg, rgba(9,74,116,.05)); }
     .peng-menu-icon {
       width:36px;height:36px;border-radius:9px;display:flex;align-items:center;
       justify-content:center;font-size:1rem;flex-shrink:0;
     }
-    .peng-menu-label { flex:1;font-size:.9rem;font-weight:600;color:var(--clr-blue,#094a74); }
-    .peng-menu-arrow { font-size:.75rem;color:#aaa; }
-    .peng-menu-divider { height:1px;background:var(--border,#e5e7eb);margin:0 1rem; }
+    .peng-menu-label { flex:1;font-size:.9rem;font-weight:600;color:var(--adm-text-title, #094a74); }
+    .peng-menu-arrow { font-size:.75rem;color:var(--adm-text-light, #aaa); }
+    .peng-menu-divider { height:1px;background:var(--adm-card-border, #e5e7eb);margin:0 1rem; }
     /* Password eye toggle */
     .peng-eye-btn {
       position:absolute;right:.75rem;top:50%;transform:translateY(-50%);
-      background:none;border:none;color:#aaa;cursor:pointer;padding:.25rem .4rem;font-size:1rem;line-height:1;
+      background:none;border:none;color:var(--adm-text-light, #aaa);cursor:pointer;padding:.25rem .4rem;font-size:1rem;line-height:1;
     }
-    .peng-eye-btn:hover { color:var(--clr-blue,#094a74); }
+    .peng-eye-btn:hover { color:var(--clr-orange, #f2630f); }
     /* Password strength bar */
     .peng-strength-bar { display:flex;gap:4px;margin-top:.5rem; }
-    .peng-strength-seg { flex:1;height:5px;border-radius:3px;background:#e5e7eb;transition:background .3s; }
+    .peng-strength-seg { flex:1;height:5px;border-radius:3px;background:var(--adm-card-border, #e5e7eb);transition:background .3s; }
     /* Modal Profil Admin layout */
     .mp-left { display:flex;flex-direction:column;align-items:center;gap:.5rem;min-width:120px; }
     .mp-avatar-wrap { position:relative;width:90px;height:90px; }
     .mp-avatar-circle {
-      width:90px;height:90px;border-radius:50%;background:var(--clr-bg,#f4f7fb);
-      border:2px solid var(--border,#e5e7eb);display:flex;align-items:center;
+      width:90px;height:90px;border-radius:50%;background:var(--adm-pill-bg, #f4f7fb);
+      border:2px solid var(--adm-card-border, #e5e7eb);display:flex;align-items:center;
       justify-content:center;overflow:hidden;
     }
     .mp-avatar-plus {
       position:absolute;bottom:0;right:0;width:26px;height:26px;border-radius:50%;
-      background:var(--clr-blue,#094a74);border:2px solid #fff;color:#fff;
+      background:var(--clr-orange, #f2630f);border:2px solid var(--adm-card-bg, #fff);color:#fff;
       font-size:.75rem;display:flex;align-items:center;justify-content:center;cursor:pointer;
       padding:0;
     }
-    .mp-divider { width:1px;background:var(--border,#e5e7eb);align-self:stretch;min-height:140px;flex-shrink:0; }
+    .mp-divider { width:1px;background:var(--adm-card-border, #e5e7eb);align-self:stretch;min-height:140px;flex-shrink:0; }
   </style>
 </head>
 <body class="admin-page">
@@ -77,7 +80,6 @@
 <aside class="admin-sidebar" id="adminSidebar">
   <div class="sidebar-header">
     <div class="sidebar-logo">
-      <div class="sidebar-logo-icon"><i class="bi bi-shop-window"></i></div>
       <div class="sidebar-logo-text">
         <span class="site-name">EtalasePelemwatu</span>
         <span class="site-sub">Panel Admin</span>
@@ -90,7 +92,7 @@
       <i class="bi bi-speedometer2"></i><span>Dashboard</span>
     </button>
     <button class="sidebar-nav-item" data-section="kelola-potensi">
-      <i class="bi bi-grid"></i><span>Kelola Potensi</span><span class="nav-badge">8</span>
+      <i class="bi bi-grid"></i><span>Kelola Potensi</span><span class="nav-badge" id="potensiBadge"></span>
     </button>
     <button class="sidebar-nav-item" data-section="verifikasi">
       <i class="bi bi-clipboard-check"></i><span>Verifikasi</span>
@@ -138,123 +140,189 @@
 <!-- ============================================================  MAIN  -->
 <div class="admin-main" id="adminMain">
   <div class="admin-topbar">
-    <div class="d-flex align-items-center gap-3">
+    <div class="admin-topbar-left">
       <button class="btn p-1" id="sidebarToggle"
-              style="color:var(--clr-blue);font-size:1.3rem;border:none;background:none;">
+              style="font-size:1.3rem;border:none;background:none;color:var(--adm-text-title);"
+              title="Buka / Tutup Menu">
         <i class="bi bi-list"></i>
       </button>
-      <span class="admin-topbar-title" id="adminPageTitle">Dashboard</span>
+      <div class="admin-header-greeting">
+        <h1 class="admin-header-title">
+          Welcome, <span id="adminGreetingName">Admin</span>
+        </h1>
+        <p class="admin-header-subtitle">
+          Panel Kendali &bull; EtalasePelemwatu
+        </p>
+        <span id="adminPageTitle" class="d-none">Dashboard</span>
+      </div>
     </div>
     <div class="admin-topbar-right">
-      <div class="position-relative" id="notifBellWrap">
-        <button id="btnNotifBell" class="btn p-1 position-relative"
-                style="color:var(--clr-blue);font-size:1.2rem;border:none;background:none;"
-                title="Notifikasi" aria-expanded="false">
-          <i class="bi bi-bell"></i>
-          <span id="notifBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill"
-                style="background:var(--clr-orange);font-size:.6rem;">2</span>
+      <div class="admin-topbar-capsule">
+        <!-- Quick Search Trigger -->
+        <button type="button" class="admin-tool-btn" id="btnSearchTopbar" title="Cari data" onclick="var s = document.getElementById('searchPotensi'); if(s && s.offsetParent !== null){ s.focus(); } else { switchSection('kelola-potensi'); setTimeout(function(){ var inp = document.getElementById('searchPotensi'); if(inp) inp.focus(); }, 200); }">
+          <i class="bi bi-search"></i>
         </button>
 
-        <!-- Panel Notifikasi -->
-        <div id="notifPanel"
-             style="display:none;position:absolute;top:calc(100% + 10px);right:0;width:320px;
-                    background:#fff;border:1px solid #e0e7ef;border-radius:12px;
-                    box-shadow:0 8px 28px rgba(9,74,116,.13);z-index:9999;">
-          <div style="display:flex;align-items:center;justify-content:space-between;
-                      padding:.75rem 1rem .6rem;border-bottom:1px solid #f0f4f8;">
-            <span style="font-weight:700;font-size:.92rem;color:var(--clr-blue);">
-              <i class="bi bi-bell-fill me-1" style="color:var(--clr-orange);"></i>Notifikasi
-            </span>
-            <button id="btnNotifTandaiSemua"
-                    style="font-size:.75rem;color:var(--clr-orange);background:none;border:none;
-                           padding:0;cursor:pointer;font-weight:600;">
-              Tandai semua dibaca
-            </button>
+        <!-- Dark / Light Mode Toggle -->
+        <button type="button" class="admin-tool-btn" id="themeToggleBtn" title="Ganti Mode Tampilan (Terang / Gelap)" aria-label="Toggle Dark / Light Mode">
+          <i class="bi bi-moon-stars" id="themeToggleIcon"></i>
+        </button>
+
+        <!-- Notification Bell -->
+        <div class="position-relative" id="notifBellWrap">
+          <button id="btnNotifBell" class="admin-tool-btn position-relative" title="Notifikasi" aria-expanded="false">
+            <i class="bi bi-bell"></i>
+            <span id="notifBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill"
+                  style="background:var(--clr-orange);font-size:.6rem;">0</span>
+          </button>
+
+          <!-- Panel Notifikasi -->
+          <div id="notifPanel"
+               style="display:none;position:absolute;top:calc(100% + 10px);right:0;width:320px;
+                      background:var(--adm-card-bg,#fff);border:1px solid var(--adm-card-border,#e0e7ef);border-radius:16px;
+                      box-shadow:var(--adm-card-shadow-hover,0 12px 32px rgba(9,74,116,.15));z-index:9999;">
+            <div style="display:flex;align-items:center;justify-content:space-between;
+                        padding:.85rem 1.1rem .7rem;border-bottom:1px solid var(--adm-card-border,#f0f4f8);">
+              <span style="font-weight:700;font-size:.92rem;color:var(--adm-text-title,var(--clr-blue));">
+                <i class="bi bi-bell-fill me-1" style="color:var(--clr-orange);"></i>Notifikasi
+              </span>
+              <button id="btnNotifTandaiSemua"
+                      style="font-size:.75rem;color:var(--clr-orange);background:none;border:none;
+                             padding:0;cursor:pointer;font-weight:600;">
+                Tandai semua dibaca
+              </button>
+            </div>
+            <ul id="notifList" style="list-style:none;margin:0;padding:.4rem 0;max-height:320px;overflow-y:auto;">
+              <li id="notifLoadingRow" style="padding:.85rem 1rem;text-align:center;font-size:.82rem;color:var(--adm-text-muted,#6b7a8d);">Memuat notifikasi…</li>
+              <li style="padding:.65rem 1rem;text-align:center;">
+                <button id="btnNotifLihatSemua"
+                        style="font-size:.8rem;color:var(--adm-text-title,var(--clr-blue));background:none;border:none;
+                               cursor:pointer;font-weight:600;padding:0;">
+                  Lihat semua di Verifikasi &rarr;
+                </button>
+              </li>
+            </ul>
           </div>
-          <ul id="notifList" style="list-style:none;margin:0;padding:.4rem 0;max-height:320px;overflow-y:auto;">
-            <li id="notifLoadingRow" style="padding:.85rem 1rem;text-align:center;font-size:.82rem;color:#6b7a8d;">Memuat notifikasi…</li>
-            <li style="padding:.65rem 1rem;text-align:center;">
-              <button id="btnNotifLihatSemua"
-                      style="font-size:.8rem;color:var(--clr-blue);background:none;border:none;
-                             cursor:pointer;font-weight:600;padding:0;">
-                Lihat semua di Verifikasi →
+        </div>
+
+        <!-- Date Capsule Pill -->
+        <div class="admin-date-pill d-none d-lg-flex" id="topbarDate">
+          <i class="bi bi-calendar3"></i> <span></span>
+        </div>
+
+        <!-- Admin Profile Pill Dropdown -->
+        <div class="dropdown">
+          <button class="admin-profile-pill dropdown-toggle" type="button" id="adminProfileMenuBtn" data-bs-toggle="dropdown" aria-expanded="false">
+            <div class="admin-profile-avatar">
+              <span id="adminAvatarInitial">A</span>
+            </div>
+            <span class="d-none d-md-inline" id="adminTopName">Admin</span>
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end admin-dropdown-menu" aria-labelledby="adminProfileMenuBtn">
+            <li class="dropdown-header">Akun Administrator</li>
+            <li><button type="button" class="dropdown-item" onclick="openProfilModal()"><i class="bi bi-person-gear me-2"></i>Profil Admin</button></li>
+            <li><button type="button" class="dropdown-item" onclick="switchSection('pengaturan')"><i class="bi bi-shield-lock me-2"></i>Keamanan &amp; Sandi</button></li>
+            <li><a class="dropdown-item" href="index.html"><i class="bi bi-house me-2"></i>Lihat Website</a></li>
+            <li><hr class="dropdown-divider my-1"></li>
+            <li>
+              <button type="button" class="dropdown-item text-danger" id="btnLogoutTopbar">
+                <i class="bi bi-box-arrow-right me-2"></i>Keluar (Logout)
               </button>
             </li>
           </ul>
         </div>
       </div>
-      <div class="d-flex align-items-center gap-2" style="font-size:.88rem;color:var(--clr-blue);">
-        <i class="bi bi-person-circle fs-5"></i>
-        <span class="d-none d-sm-inline fw-semibold">Admin</span>
-      </div>
-      <button type="button" class="btn btn-sm btn-outline-danger ms-2 d-flex align-items-center gap-1" id="btnLogoutTopbar" title="Keluar dari Panel Admin" style="font-size:.8rem;padding:.3rem .75rem;border-radius:6px;">
-        <i class="bi bi-box-arrow-right"></i>
-        <span class="d-none d-md-inline">Logout</span>
-      </button>
     </div>
+  </div>
+
+  <!-- Sub-navigation Horizontal Pill Tabs (Matching Reference) -->
+  <div class="admin-quick-tabs">
+    <button type="button" class="admin-tab-pill active" data-tab-section="dashboard">
+      <i class="bi bi-speedometer2"></i> <span>Dashboard</span>
+    </button>
+    <button type="button" class="admin-tab-pill" data-tab-section="kelola-potensi">
+      <i class="bi bi-grid"></i> <span>Kelola Potensi</span>
+    </button>
+    <button type="button" class="admin-tab-pill" data-tab-section="verifikasi">
+      <i class="bi bi-clipboard-check"></i> <span>Verifikasi</span>
+    </button>
+    <button type="button" class="admin-tab-pill" data-tab-section="permintaan-hapus">
+      <i class="bi bi-trash"></i> <span>Permintaan Hapus</span>
+    </button>
+    <button type="button" class="admin-tab-pill" data-tab-section="galeri">
+      <i class="bi bi-images"></i> <span>Galeri</span>
+    </button>
+    <button type="button" class="admin-tab-pill" data-tab-section="perangkat">
+      <i class="bi bi-person-badge"></i> <span>Perangkat Desa</span>
+    </button>
+    <button type="button" class="admin-tab-pill" data-tab-section="pengaturan">
+      <i class="bi bi-gear"></i> <span>Pengaturan</span>
+    </button>
   </div>
 
   <div class="admin-content">
 
-    <!-- â”€â”€â”€ DASHBOARD â”€â”€â”€ -->
+    <!-- ─── DASHBOARD ─── -->
     <div class="admin-section active" id="section-dashboard">
       <div class="admin-page-header">
         <h2>Dashboard</h2>
         <p>Selamat datang di Panel Admin EtalasePelemwatu. Pantau dan kelola data potensi lokal Desa Pelemwatu.</p>
       </div>
-      <div class="row g-3 mb-4">
-        <div class="col-md-6 col-xl-3">
+      <!-- KPI Row (Harmonious equal-height cards matching homepage colors) -->
+      <div class="row g-3 mb-4 kpi-row">
+        <div class="col-sm-6 col-xl-3">
           <div class="kpi-card">
-            <div class="kpi-icon" style="background:rgba(242,99,15,.12);">
-              <i class="bi bi-grid" style="color:var(--clr-orange);"></i>
+            <div class="kpi-icon-wrap icon-orange">
+              <i class="bi bi-grid"></i>
             </div>
             <div class="kpi-data">
-              <div class="kpi-num" id="kpiTotal">–</div>
               <div class="kpi-label">Total Potensi</div>
-              
+              <div class="kpi-num" id="kpiTotal">–</div>
+              <div class="kpi-trend">Semua usaha terdaftar</div>
             </div>
           </div>
         </div>
-        <div class="col-md-6 col-xl-3">
+        <div class="col-sm-6 col-xl-3">
           <div class="kpi-card">
-            <div class="kpi-icon" style="background:rgba(255,193,7,.12);">
-              <i class="bi bi-clock-history" style="color:#d49a00;"></i>
+            <div class="kpi-icon-wrap icon-yellow">
+              <i class="bi bi-clock-history"></i>
             </div>
             <div class="kpi-data">
-              <div class="kpi-num" id="kpiPending">–</div>
               <div class="kpi-label">Menunggu Verifikasi</div>
-              <div class="kpi-trend" style="color:#d49a00;">Perlu ditinjau</div>
+              <div class="kpi-num" id="kpiPending">–</div>
+              <div class="kpi-trend" style="color:var(--clr-yellow,#FFC20B);">Perlu ditinjau</div>
             </div>
           </div>
         </div>
-        <div class="col-md-6 col-xl-3">
+        <div class="col-sm-6 col-xl-3">
           <div class="kpi-card">
-            <div class="kpi-icon" style="background:rgba(40,167,69,.12);">
-              <i class="bi bi-check-circle" style="color:#28a745;"></i>
+            <div class="kpi-icon-wrap icon-green">
+              <i class="bi bi-check-circle"></i>
             </div>
             <div class="kpi-data">
-              <div class="kpi-num" id="kpiVerified">–</div>
               <div class="kpi-label">Terverifikasi</div>
-              <div class="kpi-trend up">Aktif ditampilkan</div>
+              <div class="kpi-num" id="kpiVerified">–</div>
+              <div class="kpi-trend up"><i class="bi bi-arrow-up-short"></i> Aktif ditampilkan</div>
             </div>
           </div>
         </div>
-        <div class="col-md-6 col-xl-3">
+        <div class="col-sm-6 col-xl-3">
           <div class="kpi-card">
-            <div class="kpi-icon" style="background:rgba(9,74,116,.12);">
-              <i class="bi bi-eye" style="color:var(--clr-blue);"></i>
+            <div class="kpi-icon-wrap icon-blue">
+              <i class="bi bi-tags"></i>
             </div>
             <div class="kpi-data">
-              <div class="kpi-num">142</div>
-              <div class="kpi-label">Kunjungan</div>
+              <div class="kpi-label">Kategori Usaha</div>
+              <div class="kpi-num" id="kpiCategories">4</div>
+              <div class="kpi-trend">Kuliner, Jasa, dsb.</div>
             </div>
           </div>
         </div>
       </div><!-- /kpi row -->
 
-      <div class="row g-4">
+      <div class="row g-4 align-items-stretch">
         <div class="col-lg-8">
-          <div class="admin-card">
+          <div class="admin-card h-100">
             <div class="admin-card-header">
               <h5><i class="bi bi-clock-history me-2" style="color:var(--clr-orange);"></i>Pendaftaran Terbaru</h5>
               <button class="btn btn-sm btn-outline-secondary" id="btnLihatSemua">
@@ -264,38 +332,37 @@
             <div class="table-responsive">
               <table class="table admin-table mb-0">
                 <thead>
-                  <tr><th>No</th><th>Nama Potensi</th><th>Kategori</th><th>Tanggal</th><th>Status</th><th>Aksi</th></tr>
+                  <tr><th>No</th><th>Nama Potensi</th><th>Kategori</th><th>Tanggal</th><th>Status</th><th class="text-end">Aksi</th></tr>
                 </thead>
-                <tbody>
-                  <tr>
+                <tbody id="dashboardRecentTbody">
+                  <tr data-name="Omah Dimsum" data-cat="Usaha &amp; Produk" data-date="28 Okt 2024" data-status="Aktif" data-owner="Ibu Siti" data-wa="081234567890" data-address="Dsn. Pelemwatu RT 02 RW 01" data-desc="Menyediakan berbagai varian olahan dimsum lezat, halal, higienis, dan terjangkau untuk seluruh keluarga.">
                     <td>1</td><td><strong>Omah Dimsum</strong></td>
                     <td><span class="potensi-badge badge-usaha">Usaha &amp; Produk</span></td>
                     <td>28 Okt 2024</td>
                     <td><span class="status-badge status-aktif">Aktif</span></td>
-                    <td><button class="btn btn-sm btn-outline-primary btn-action btn-lihat-db">Lihat</button></td>
+                    <td class="text-end"><button type="button" class="btn btn-sm btn-action btn-lihat-db" title="Lihat Detail Potensi"><i class="bi bi-eye"></i></button></td>
                   </tr>
-                  <tr>
+                  <tr data-name="Moni Laundry 24 Jam" data-cat="Jasa" data-date="25 Okt 2024" data-status="Aktif" data-owner="Bpk. Budi" data-wa="082345678901" data-address="Jl. Raya Pelemwatu No. 15" data-desc="Layanan pencucian pakaian cepat, bersih, wangi, dengan peralatan modern buka 24 jam nonstop.">
                     <td>2</td><td><strong>Moni Laundry 24 Jam</strong></td>
                     <td><span class="potensi-badge badge-jasa">Jasa</span></td>
                     <td>25 Okt 2024</td>
                     <td><span class="status-badge status-aktif">Aktif</span></td>
-                    <td><button class="btn btn-sm btn-outline-primary btn-action btn-lihat-db">Lihat</button></td>
+                    <td class="text-end"><button type="button" class="btn btn-sm btn-action btn-lihat-db" title="Lihat Detail Potensi"><i class="bi bi-eye"></i></button></td>
                   </tr>
-                  <tr>
+                  <tr data-name="My Kost" data-cat="Hunian" data-date="20 Okt 2024" data-status="Aktif" data-owner="Ibu Rahayu" data-wa="083456789012" data-address="Dsn. Pelemwatu RT 05 RW 02" data-desc="Hunian kost eksklusif, aman, bersih, kamar mandi dalam, kasur empuk, wifi super cepat, parkir motor luas.">
                     <td>3</td><td><strong>My Kost</strong></td>
                     <td><span class="potensi-badge badge-hunian">Hunian</span></td>
                     <td>20 Okt 2024</td>
                     <td><span class="status-badge status-aktif">Aktif</span></td>
-                    <td><button class="btn btn-sm btn-outline-primary btn-action btn-lihat-db">Lihat</button></td>
+                    <td class="text-end"><button type="button" class="btn btn-sm btn-action btn-lihat-db" title="Lihat Detail Potensi"><i class="bi bi-eye"></i></button></td>
                   </tr>
-
                 </tbody>
               </table>
             </div>
           </div>
         </div>
         <div class="col-lg-4">
-          <div class="admin-card">
+          <div class="admin-card h-100">
             <div class="admin-card-header">
               <h5><i class="bi bi-lightning me-2" style="color:var(--clr-orange);"></i>Aksi Cepat</h5>
             </div>
@@ -324,7 +391,7 @@
       <div class="admin-card">
         <div class="admin-card-header">
           <h5><i class="bi bi-grid me-2" style="color:var(--clr-orange);"></i>Daftar Potensi</h5>
-          <div class="d-flex gap-2 flex-wrap potensi-toolbar">
+          <div class="potensi-toolbar">
             <div class="admin-search-bar">
               <input type="text" placeholder="Cari nama potensi..." id="searchPotensi">
               <select class="form-select form-select-sm" style="width:auto;" id="filterKategori" hidden tabindex="-1" aria-hidden="true">
@@ -345,17 +412,15 @@
                     hidden></ul>
               </div>
             </div>
-            <a href="daftar-potensi.html"
-               class="btn btn-sm btn-primary"
-               style="background:var(--clr-orange);border-color:var(--clr-orange);">
-              <i class="bi bi-plus-lg me-1"></i> Tambah
+            <a href="daftar-potensi.html" class="btn-tambah-potensi">
+              <i class="bi bi-plus-lg"></i> Tambah Potensi
             </a>
           </div>
         </div>
         <div class="table-responsive">
           <table class="table admin-table mb-0" id="tabelPotensi">
             <thead>
-              <tr><th>No</th><th>Nama Potensi</th><th>Kategori</th><th>Status</th><th>Tgl Daftar</th><th>Aksi</th></tr>
+              <tr><th>No</th><th>Nama Potensi</th><th>Kategori</th><th>Status</th><th>Tgl Daftar</th><th class="text-end">Aksi</th></tr>
             </thead>
             <tbody>
               <tr class="empty-row text-center"><td colspan="6" class="py-4 text-muted">Memuat data...</td></tr>
@@ -636,6 +701,104 @@
     </div>
     <!-- /modal edit potensi -->
 
+    <!-- Modal Detail Potensi Admin -->
+    <div class="modal fade" id="modalDetailPotensiAdmin" tabindex="-1" aria-labelledby="modalDetailPotensiAdminLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+          <div class="modal-header d-flex align-items-center justify-content-between">
+            <div class="d-flex align-items-center gap-2">
+              <div style="width:36px;height:36px;border-radius:10px;background:rgba(9,74,116,0.1);color:var(--clr-blue);display:flex;align-items:center;justify-content:center;font-size:1.1rem;">
+                <i class="bi bi-eye-fill"></i>
+              </div>
+              <div>
+                <h5 class="modal-title mb-0 fw-bold" id="modalDetailPotensiAdminLabel" style="font-size:1.05rem;">Detail Potensi Desa</h5>
+                <small class="text-muted" style="font-size:.8rem;">Informasi lengkap potensi dan data pemilik</small>
+              </div>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+          </div>
+          <div class="modal-body p-4">
+            <!-- Banner / Status Bar -->
+            <div class="adm-detail-banner mb-4 d-flex align-items-center justify-content-between flex-wrap gap-2">
+              <div class="d-flex align-items-center gap-2">
+                <span class="potensi-badge badge-usaha" id="admDetailCat">-</span>
+                <span class="status-badge status-aktif" id="admDetailStatus">Aktif</span>
+              </div>
+              <small class="text-muted fw-semibold" id="admDetailDate"><i class="bi bi-calendar3 me-1"></i> -</small>
+            </div>
+
+            <!-- Foto Potensi Preview -->
+            <div class="mb-4" id="admDetailPhotoWrap">
+              <label class="adm-detail-label mb-2"><i class="bi bi-images me-1"></i> Foto Potensi</label>
+              <div id="admDetailPhotoList" class="d-flex gap-2 flex-wrap align-items-center">
+                <!-- dynamic photos -->
+              </div>
+            </div>
+
+            <!-- Grid Info -->
+            <div class="row g-3">
+              <div class="col-md-6">
+                <div class="adm-detail-box h-100">
+                  <span class="adm-detail-label">Nama Potensi / Usaha</span>
+                  <div class="adm-detail-value" id="admDetailName">-</div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="adm-detail-box h-100">
+                  <span class="adm-detail-label">Nama Pemilik / Warga</span>
+                  <div class="adm-detail-value" id="admDetailOwner">-</div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="adm-detail-box h-100">
+                  <span class="adm-detail-label">Kontak WhatsApp</span>
+                  <div class="adm-detail-value" id="admDetailWa">-</div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="adm-detail-box h-100">
+                  <span class="adm-detail-label">Email</span>
+                  <div class="adm-detail-value text-break" id="admDetailEmail">-</div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="adm-detail-box h-100">
+                  <span class="adm-detail-label">Jenis Usaha</span>
+                  <div class="adm-detail-value" id="admDetailJenis">-</div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="adm-detail-box h-100">
+                  <span class="adm-detail-label">Jam Operasional</span>
+                  <div class="adm-detail-value" id="admDetailJam">-</div>
+                </div>
+              </div>
+              <div class="col-12">
+                <div class="adm-detail-box">
+                  <span class="adm-detail-label">Alamat &amp; Lokasi</span>
+                  <div class="adm-detail-value" id="admDetailAddress">-</div>
+                  <div id="admDetailLocation" class="text-muted mt-1 small" style="display:none;"></div>
+                </div>
+              </div>
+              <div class="col-12">
+                <div class="adm-detail-box">
+                  <span class="adm-detail-label">Deskripsi Potensi</span>
+                  <p class="adm-detail-value fw-normal mb-0 text-break" style="white-space:pre-line;line-height:1.6;" id="admDetailDesc">-</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer d-flex justify-content-between align-items-center">
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" style="border-radius:50px;padding:.45rem 1.25rem;">Tutup</button>
+            <button type="button" class="btn btn-warning text-dark fw-bold" id="btnEditFromDetail" style="border-radius:50px;padding:.45rem 1.35rem;background:#FFC20B;border:none;">
+              <i class="bi bi-pencil me-1"></i> Edit Potensi
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- /modal detail potensi admin -->
+
     <!-- â”€â”€â”€ PERANGKAT â”€â”€â”€ -->
     <div class="admin-section" id="section-perangkat">
       <div class="admin-page-header"><h2>Perangkat Desa</h2><p>Data perangkat Desa Pelemwatu.</p></div>
@@ -725,7 +888,7 @@
 
         <!-- Kelompok: Akun -->
         <div style="font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-light);padding:.5rem .25rem .4rem;">Akun</div>
-        <div style="background:var(--white);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:1.25rem;box-shadow:var(--shadow-sm);">
+        <div class="peng-menu-card">
           <button class="peng-menu-row" id="peng-open-profil">
             <span class="peng-menu-icon" style="background:rgba(242,99,15,.1);color:var(--clr-orange);"><i class="bi bi-person-fill"></i></span>
             <span class="peng-menu-label">Profil Admin</span>
@@ -741,7 +904,7 @@
 
         <!-- Kelompok: Tampilan Website -->
         <div style="font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-light);padding:.5rem .25rem .4rem;">Tampilan Website</div>
-        <div style="background:var(--white);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:1.25rem;box-shadow:var(--shadow-sm);">
+        <div class="peng-menu-card">
           <button class="peng-menu-row" id="peng-open-tampilan">
             <span class="peng-menu-icon" style="background:rgba(104,147,75,.1);color:var(--clr-green);"><i class="bi bi-display-fill"></i></span>
             <span class="peng-menu-label">Tampilan &amp; Maintenance</span>
@@ -757,7 +920,7 @@
 
         <!-- Kelompok: Notifikasi -->
         <div style="font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-light);padding:.5rem .25rem .4rem;">Notifikasi</div>
-        <div style="background:var(--white);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:1.25rem;box-shadow:var(--shadow-sm);">
+        <div class="peng-menu-card">
           <button class="peng-menu-row" id="peng-open-notif">
             <span class="peng-menu-icon" style="background:rgba(255,194,11,.18);color:#b8860b;"><i class="bi bi-bell-fill"></i></span>
             <span class="peng-menu-label">Notifikasi</span>
@@ -767,7 +930,7 @@
 
         <!-- Kelompok: Lainnya -->
         <div style="font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-light);padding:.5rem .25rem .4rem;">Lainnya</div>
-        <div style="background:var(--white);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:1.25rem;box-shadow:var(--shadow-sm);">
+        <div class="peng-menu-card">
           <button class="peng-menu-row" id="peng-open-tentang">
             <span class="peng-menu-icon" style="background:rgba(9,74,116,.08);color:var(--clr-blue);"><i class="bi bi-info-circle-fill"></i></span>
             <span class="peng-menu-label">Tentang Aplikasi</span>
@@ -1062,16 +1225,20 @@ function showAdminToast(msg, type) {
   setTimeout(function(){t.style.opacity='0';t.style.transform='translateX(40px)';t.style.transition='all .35s ease';setTimeout(function(){t.remove();},380);},3500);
 }
 
-/* â”€â”€ Section Switch â”€â”€ */
+/* ── Section Switch ── */
 function switchSection(name) {
   document.querySelectorAll('.sidebar-nav-item[data-section]').forEach(function(i){i.classList.remove('active');});
+  document.querySelectorAll('.admin-tab-pill[data-tab-section]').forEach(function(t){t.classList.remove('active');});
   document.querySelectorAll('.admin-section').forEach(function(s){s.classList.remove('active');});
-  var item = document.querySelector('[data-section="'+name+'"]');
+  var item = document.querySelector('.sidebar-nav-item[data-section="'+name+'"]');
   if (item) item.classList.add('active');
+  var tab = document.querySelector('.admin-tab-pill[data-tab-section="'+name+'"]');
+  if (tab) tab.classList.add('active');
   var sec = document.getElementById('section-'+name);
   if (sec) sec.classList.add('active');
   var lbl = item && item.querySelector('span') ? item.querySelector('span').textContent : name;
-  document.getElementById('adminPageTitle').textContent = lbl;
+  var titleEl = document.getElementById('adminPageTitle');
+  if (titleEl) titleEl.textContent = lbl;
   if (window.innerWidth < 992) {
     document.getElementById('adminSidebar').classList.remove('open');
     document.getElementById('sidebarOverlay').classList.remove('show');
@@ -1079,10 +1246,76 @@ function switchSection(name) {
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
-/* â”€â”€ Nav items â”€â”€ */
+/* ── Nav items ── */
 document.querySelectorAll('.sidebar-nav-item[data-section]').forEach(function(item){
   item.addEventListener('click', function(){switchSection(this.dataset.section);});
 });
+
+/* ── Sub-navigation quick tab items ── */
+document.querySelectorAll('.admin-tab-pill[data-tab-section]').forEach(function(tab){
+  tab.addEventListener('click', function(){switchSection(this.dataset.tabSection);});
+});
+
+/* ── Dark / Light Mode Toggle ── */
+(function initAdminTheme() {
+  var saved = localStorage.getItem('ep_admin_theme') || 'light';
+  function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('ep_admin_theme', theme);
+    var icon = document.getElementById('themeToggleIcon');
+    if (icon) {
+      if (theme === 'dark') {
+        icon.className = 'bi bi-sun-fill text-warning';
+      } else {
+        icon.className = 'bi bi-moon-stars';
+      }
+    }
+  }
+  applyTheme(saved);
+  var btn = document.getElementById('themeToggleBtn');
+  if (btn) {
+    btn.addEventListener('click', function() {
+      var current = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+      var next = current === 'dark' ? 'light' : 'dark';
+      applyTheme(next);
+      if (typeof showAdminToast === 'function') {
+        showAdminToast('Mode ' + (next === 'dark' ? 'Gelap (Dark)' : 'Terang (Light)') + ' diaktifkan.', 'info');
+      }
+    });
+  }
+})();
+
+/* ── Topbar Date Pill ── */
+(function initTopbarDate() {
+  var el = document.getElementById('topbarDate');
+  if (!el) return;
+  var now = new Date();
+  var str = now.toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+  var sp = el.querySelector('span');
+  if (sp) sp.textContent = str;
+})();
+
+/* ── Admin User Info Sync ── */
+(function syncAdminUserInfo() {
+  try {
+    var raw = localStorage.getItem('adminUser');
+    if (raw) {
+      var u = JSON.parse(raw);
+      if (u.name) {
+        var g = document.getElementById('adminGreetingName');
+        if (g) g.textContent = u.name;
+        var topName = document.getElementById('adminTopName');
+        if (topName) topName.textContent = u.name;
+        var initial = document.getElementById('adminAvatarInitial');
+        if (initial) initial.textContent = u.name.charAt(0).toUpperCase();
+        var sidebarUname = document.querySelector('.sidebar-user-info .uname');
+        if (sidebarUname) sidebarUname.textContent = u.name;
+        var sidebarAvatar = document.querySelector('.sidebar-user-avatar');
+        if (sidebarAvatar) sidebarAvatar.textContent = u.name.charAt(0).toUpperCase();
+      }
+    }
+  } catch (e) {}
+})();
 
 /* â”€â”€ Mobile toggle â”€â”€ */
 document.getElementById('sidebarToggle').addEventListener('click', function(){
@@ -1282,6 +1515,8 @@ document.getElementById('btnExport').addEventListener('click',function(){showAdm
             var pendingTotal = all.filter(function (p) { return p.status === 'pending'; }).length;
             var vb = document.getElementById('verifikasiBadge');
             if (vb) vb.textContent = pendingTotal > 0 ? pendingTotal : '';
+            var pb = document.getElementById('potensiBadge');
+            if (pb) pb.textContent = all.length > 0 ? all.length : '';
 
             // Ambil 5 teratas bukan rejected
             _items = all.filter(function (p) { return p.status !== 'rejected'; }).slice(0, 5);
@@ -1370,9 +1605,162 @@ document.getElementById('btnExport').addEventListener('click',function(){showAdm
 document.querySelectorAll('.btn-go-verifikasi').forEach(function(b){
   b.addEventListener('click',function(){switchSection('verifikasi');});
 });
-document.querySelectorAll('.btn-lihat-db').forEach(function(b){
-  b.addEventListener('click',function(){showAdminToast('Detail potensi belum tersedia.','info');});
-});
+
+/* Detail Potensi Admin Handler */
+(function () {
+  function esc(s) {
+    if (s == null) return '';
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  }
+
+  window.openDetailPotensiAdmin = function (item) {
+    if (!item) return;
+    var modalEl = document.getElementById('modalDetailPotensiAdmin');
+    if (!modalEl) return;
+
+    var nameEl = document.getElementById('admDetailName');
+    if (nameEl) nameEl.textContent = item.name || '-';
+
+    var ownerEl = document.getElementById('admDetailOwner');
+    if (ownerEl) ownerEl.textContent = item.owner_name || '-';
+
+    var catName = (item.category && item.category.name) ? item.category.name : (item.category || '-');
+    var catEl = document.getElementById('admDetailCat');
+    if (catEl) {
+      catEl.textContent = catName;
+      catEl.className = 'potensi-badge badge-usaha';
+      var lowerCat = String(catName).toLowerCase();
+      if (lowerCat.indexOf('jasa') !== -1) catEl.className = 'potensi-badge badge-jasa';
+      else if (lowerCat.indexOf('hunian') !== -1) catEl.className = 'potensi-badge badge-hunian';
+      else if (lowerCat.indexOf('barang') !== -1) catEl.className = 'potensi-badge badge-barang';
+    }
+
+    var st = (item.status || 'pending').toLowerCase();
+    var stEl = document.getElementById('admDetailStatus');
+    if (stEl) {
+      if (st === 'approved' || st === 'aktif') {
+        stEl.className = 'status-badge status-aktif';
+        stEl.textContent = 'Aktif';
+      } else if (st === 'rejected' || st === 'ditolak') {
+        stEl.className = 'status-badge status-rejected';
+        stEl.textContent = 'Ditolak';
+      } else {
+        stEl.className = 'status-badge status-pending';
+        stEl.textContent = 'Menunggu';
+      }
+    }
+
+    var dateEl = document.getElementById('admDetailDate');
+    if (dateEl) {
+      var dStr = item.created_at || '';
+      var d = new Date(dStr);
+      var BULAN = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+      var formatted = !isNaN(d.getTime()) ? (d.getDate() + ' ' + BULAN[d.getMonth()] + ' ' + d.getFullYear()) : (dStr || '-');
+      dateEl.innerHTML = '<i class="bi bi-calendar3 me-1"></i> Terdaftar: ' + esc(formatted);
+    }
+
+    var waEl = document.getElementById('admDetailWa');
+    if (waEl) {
+      if (item.whatsapp) {
+        var num = String(item.whatsapp).replace(/\D/g, '');
+        if (num.startsWith('0')) num = '62' + num.substring(1);
+        waEl.innerHTML = '<a href="https://wa.me/' + num + '" target="_blank" rel="noopener" class="d-inline-flex align-items-center gap-1 text-decoration-none" style="color:var(--clr-orange);font-weight:600;"><i class="bi bi-whatsapp"></i> ' + esc(item.whatsapp) + '</a>';
+      } else {
+        waEl.textContent = '-';
+      }
+    }
+
+    var emailEl = document.getElementById('admDetailEmail');
+    if (emailEl) {
+      if (item.email) {
+        emailEl.innerHTML = '<a href="mailto:' + esc(item.email) + '" class="text-decoration-none" style="color:var(--clr-orange);"><i class="bi bi-envelope me-1"></i>' + esc(item.email) + '</a>';
+      } else {
+        emailEl.textContent = '-';
+      }
+    }
+
+    var jenisEl = document.getElementById('admDetailJenis');
+    if (jenisEl) jenisEl.textContent = item.jenis || catName || '-';
+
+    var jamEl = document.getElementById('admDetailJam');
+    if (jamEl) jamEl.textContent = item.jam_operasional || '-';
+
+    var addrEl = document.getElementById('admDetailAddress');
+    if (addrEl) addrEl.textContent = item.address || '-';
+
+    var locEl = document.getElementById('admDetailLocation');
+    if (locEl) {
+      if (item.location) {
+        locEl.style.display = 'block';
+        locEl.innerHTML = '<i class="bi bi-geo-alt me-1 text-danger"></i> ' + esc(item.location);
+      } else {
+        locEl.style.display = 'none';
+        locEl.textContent = '';
+      }
+    }
+
+    var descEl = document.getElementById('admDetailDesc');
+    if (descEl) descEl.textContent = item.description || '-';
+
+    var photoWrap = document.getElementById('admDetailPhotoList');
+    if (photoWrap) {
+      photoWrap.innerHTML = '';
+      var photos = item.images || [];
+      if (photos.length > 0) {
+        photos.forEach(function (p) {
+          var src = (p.path || p.image_path || p);
+          if (typeof src === 'string') {
+            var img = document.createElement('img');
+            img.src = src;
+            img.alt = item.name || 'Foto Potensi';
+            img.style.cssText = 'width:90px;height:90px;object-fit:cover;border-radius:12px;border:1px solid var(--adm-card-border);cursor:pointer;transition:transform .2s;';
+            img.addEventListener('mouseover', function () { this.style.transform = 'scale(1.05)'; });
+            img.addEventListener('mouseout', function () { this.style.transform = 'scale(1)'; });
+            img.addEventListener('click', function () { window.open(src, '_blank'); });
+            photoWrap.appendChild(img);
+          }
+        });
+      } else {
+        photoWrap.innerHTML = '<div class="d-flex align-items-center gap-2 text-muted p-2 rounded" style="background:var(--adm-pill-bg);font-size:.84rem;"><i class="bi bi-image" style="font-size:1.3rem;"></i> Tidak ada foto dilampirkan</div>';
+      }
+    }
+
+    var btnEdit = document.getElementById('btnEditFromDetail');
+    if (btnEdit) {
+      btnEdit.onclick = function () {
+        var modalInst = bootstrap.Modal.getInstance(modalEl);
+        if (modalInst) modalInst.hide();
+        setTimeout(function () {
+          if (typeof window.openEditModal === 'function') window.openEditModal(item);
+        }, 350);
+      };
+    }
+
+    bootstrap.Modal.getOrCreateInstance(modalEl).show();
+  };
+
+  document.addEventListener('click', function(e) {
+    var btn = e.target.closest('.btn-lihat-db');
+    if (!btn) return;
+    var tr = btn.closest('tr');
+    if (tr && tr.dataset && tr.dataset.name) {
+      var staticItem = {
+        name: tr.dataset.name,
+        owner_name: tr.dataset.owner || '-',
+        category: { name: tr.dataset.cat || '-' },
+        whatsapp: tr.dataset.wa || '-',
+        email: tr.dataset.email || '-',
+        address: tr.dataset.address || '-',
+        description: tr.dataset.desc || '-',
+        jam_operasional: tr.dataset.jam || 'Setiap Hari (08.00 - 21.00)',
+        jenis: tr.dataset.jenis || tr.dataset.cat || '-',
+        status: tr.dataset.status || 'Aktif',
+        created_at: tr.dataset.date || ''
+      };
+      window.openDetailPotensiAdmin(staticItem);
+    }
+  });
+})();
 
 /* -- Verifikasi: lihat blok 'Verifikasi live' di bawah -- */
 /* -- Verifikasi live: daftar pending dari API, aksi lewat /potensi/{id}/review -- */
@@ -1516,11 +1904,52 @@ document.querySelectorAll('.btn-lihat-db').forEach(function(b){
           setText('kpiVerified', verified.length);
           setText('pendingCount', pending.length);
           setText('verifikasiBadge', pending.length > 0 ? pending.length : '');
+          setText('potensiBadge', all.length > 0 ? all.length : '');
           if (warn) warn.style.display = pending.length ? '' : 'none';
 
           list.textContent = '';
           pending.forEach(function (p) { list.appendChild(card(p)); });
           if (emptyBox) emptyBox.style.display = pending.length ? 'none' : '';
+
+          // Update Dashboard "Pendaftaran Terbaru" table dynamically if data exists
+          var recentTbody = document.getElementById('dashboardRecentTbody');
+          if (recentTbody && all.length > 0) {
+            recentTbody.innerHTML = '';
+            var recentItems = all.slice(0, 5);
+            recentItems.forEach(function (item, idx) {
+              var kat = (item.category && item.category.name) ? item.category.name : (item.category || '-');
+              var katBadge = '<span class="potensi-badge badge-usaha">' + el('span', '', kat).textContent + '</span>';
+              var lowerKat = String(kat).toLowerCase();
+              if (lowerKat.indexOf('jasa') !== -1) katBadge = '<span class="potensi-badge badge-jasa">' + el('span', '', kat).textContent + '</span>';
+              else if (lowerKat.indexOf('hunian') !== -1) katBadge = '<span class="potensi-badge badge-hunian">' + el('span', '', kat).textContent + '</span>';
+              else if (lowerKat.indexOf('barang') !== -1) katBadge = '<span class="potensi-badge badge-barang">' + el('span', '', kat).textContent + '</span>';
+
+              var st = (item.status || 'pending').toLowerCase();
+              var stClass = 'status-pending', stLabel = 'Menunggu';
+              if (st === 'approved' || st === 'aktif') { stClass = 'status-aktif'; stLabel = 'Aktif'; }
+              else if (st === 'rejected' || st === 'ditolak') { stClass = 'status-rejected'; stLabel = 'Ditolak'; }
+
+              var tr = document.createElement('tr');
+              var itemDate = item.created_at ? fmtDate(item.created_at) : '-';
+              tr.innerHTML =
+                '<td>' + (idx + 1) + '</td>'
+                + '<td><strong>' + (el('span', '', item.name || '-').textContent) + '</strong></td>'
+                + '<td>' + katBadge + '</td>'
+                + '<td>' + itemDate + '</td>'
+                + '<td><span class="status-badge ' + stClass + '">' + stLabel + '</span></td>'
+                + '<td class="text-end">'
+                  + '<button type="button" class="btn btn-sm btn-action btn-lihat-db" title="Lihat Detail Potensi"><i class="bi bi-eye"></i></button>'
+                + '</td>';
+
+              var btn = tr.querySelector('.btn-lihat-db');
+              if (btn) {
+                btn.addEventListener('click', function () {
+                  if (window.openDetailPotensiAdmin) window.openDetailPotensiAdmin(item);
+                });
+              }
+              recentTbody.appendChild(tr);
+            });
+          }
         })
         .catch(function () {
           list.textContent = '';
@@ -1742,9 +2171,12 @@ document.querySelectorAll('.btn-lihat-db').forEach(function(b){
       +'<td>'+katBadge+'</td>'
       +'<td><span class="status-badge '+stClass+'">'+stLabel+'</span></td>'
       +'<td>'+fmtDate(item.created_at)+'</td>'
-      +'<td>'
-        +'<button class="btn btn-sm btn-outline-warning btn-action btn-edit-row"><i class="bi bi-pencil"></i></button> '
-        +'<button class="btn btn-sm btn-outline-danger btn-action btn-hapus"><i class="bi bi-trash"></i></button>'
+      +'<td class="text-end">'
+        +'<div class="d-inline-flex align-items-center gap-1">'
+          +'<button type="button" class="btn btn-sm btn-action btn-lihat-row" title="Lihat Detail Potensi"><i class="bi bi-eye"></i></button>'
+          +'<button type="button" class="btn btn-sm btn-action btn-edit-row" title="Edit Potensi"><i class="bi bi-pencil"></i></button>'
+          +'<button type="button" class="btn btn-sm btn-action btn-hapus" title="Hapus Potensi"><i class="bi bi-trash"></i></button>'
+        +'</div>'
       +'</td>';
     return tr;
   }
@@ -1882,6 +2314,14 @@ document.querySelectorAll('.btn-lihat-db').forEach(function(b){
         })
         .catch(function(){btnH.disabled=false;showAdminToast('Gagal menghapus data.','error');});
     }
+    var btnV = e.target.closest('.btn-lihat-row');
+    if (btnV) {
+      var trV = btnV.closest('tr'), idV = trV ? trV.dataset.id : null;
+      if (!idV) return;
+      var itemV = _allData.find(function(x){ return String(x.id) === String(idV); });
+      if (itemV && window.openDetailPotensiAdmin) window.openDetailPotensiAdmin(itemV);
+      return;
+    }
     if (btnE) {
       var tr=btnE.closest('tr'), id=tr?tr.dataset.id:null;
       if (!id) return;
@@ -1927,6 +2367,7 @@ document.querySelectorAll('.btn-lihat-db').forEach(function(b){
       bootstrap.Modal.getOrCreateInstance(document.getElementById('modalEditPotensi')).show();
     });
   }
+  window.openEditModal = openEditModal;
 
   function setInv(fid,msg){
     var el=document.getElementById(fid),err=document.getElementById(fid+'Err');

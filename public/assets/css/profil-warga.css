@@ -1,0 +1,760 @@
+/* ============================================================
+   EtalasePelemwatu — Profil Warga Modern Component Stylesheet
+   Theme: Floating Card Component with Cover Banner, Avatar Overlap,
+   Statistics Row, Segmented Control Tabs, and Settings Rows Grid.
+   Prefix: .pw-
+   ============================================================ */
+
+/* ============================================================
+   1. DESIGN TOKENS & CSS VARIABLES
+   ============================================================ */
+:root {
+  /* Brand Colors */
+  --pw-orange: #F2630F;
+  --pw-orange-hover: #D45005;
+  --pw-orange-soft: rgba(242, 99, 15, 0.08);
+  --pw-orange-ring: rgba(242, 99, 15, 0.18);
+  --pw-blue: #094A74;
+  --pw-blue-dark: #063452;
+  --pw-blue-pale: #E6F0F8;
+  --pw-green: #2D9E5F;
+  --pw-green-soft: rgba(45, 158, 95, 0.12);
+  --pw-yellow: #FFC20B;
+  --pw-red: #EF4444;
+  --pw-red-soft: rgba(239, 68, 68, 0.1);
+
+  /* Neutrals */
+  --pw-bg: #F4F7FB;
+  --pw-card-bg: #FFFFFF;
+  --pw-card-border: #E8EEF5;
+  --pw-card-shadow: 0 12px 40px rgba(9, 74, 116, 0.06), 0 1px 3px rgba(0, 0, 0, 0.03);
+  --pw-card-radius: 26px;
+
+  /* Typography */
+  --pw-text-title: #0F172A;
+  --pw-text-body: #334155;
+  --pw-text-muted: #64748B;
+  --pw-text-light: #94A3B8;
+
+  /* Inputs & Buttons */
+  --pw-input-bg: #FFFFFF;
+  --pw-input-border: #E2E8F0;
+  --pw-input-radius: 14px;
+  --pw-btn-radius: 50px;
+  --pw-pill-radius: 50px;
+
+  /* Spacing */
+  --pw-sp-xs: 4px;
+  --pw-sp-sm: 8px;
+  --pw-sp-md: 16px;
+  --pw-sp-lg: 24px;
+  --pw-sp-xl: 32px;
+  --pw-sp-2xl: 48px;
+
+  /* Transitions */
+  --pw-transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ============================================================
+   2. PAGE WRAPPER & FLOATING CARD
+   ============================================================ */
+body.pw-page-body {
+  background-color: var(--pw-bg) !important;
+  background-image: radial-gradient(circle at 10% 20%, rgba(242, 99, 15, 0.03) 0%, transparent 40%),
+                    radial-gradient(circle at 90% 80%, rgba(9, 74, 116, 0.04) 0%, transparent 40%),
+                    var(--pw-bg) !important;
+  background-attachment: fixed !important;
+  color: var(--pw-text-body) !important;
+  font-family: var(--font-main, 'Montserrat', sans-serif);
+  padding-top: 0 !important;
+  min-height: 100vh;
+}
+
+.pw-container {
+  max-width: 960px;
+  margin: 1.25rem auto 3.5rem;
+  padding: 0 1rem;
+}
+
+.pw-card-main {
+  background: var(--pw-card-bg);
+  border-radius: var(--pw-card-radius);
+  border: 1px solid var(--pw-card-border);
+  box-shadow: var(--pw-card-shadow);
+  overflow: hidden;
+  position: relative;
+  transition: box-shadow 0.3s ease;
+}
+
+/* ============================================================
+   3. BANNER COVER & OVERLAPPING AVATAR
+   ============================================================ */
+.pw-cover-wrapper {
+  position: relative;
+  background: #FFFFFF;
+}
+
+.pw-cover {
+  height: 180px;
+  border-radius: calc(var(--pw-card-radius) - 2px) calc(var(--pw-card-radius) - 2px) 0 0;
+  position: relative;
+  background: linear-gradient(135deg, #E6F0F8 0%, #D8EBF7 35%, #E2F2E9 75%, #FDEEE4 100%);
+  overflow: hidden;
+  border-bottom: 1px solid rgba(9, 74, 116, 0.08);
+}
+
+.pw-cover::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(#094A74 0.75px, transparent 0.75px);
+  background-size: 16px 16px;
+  opacity: 0.12;
+  pointer-events: none;
+}
+
+.pw-avatar-wrap {
+  width: 104px;
+  height: 104px;
+  border-radius: 50%;
+  border: 4.5px solid #FFFFFF;
+  background: linear-gradient(135deg, var(--pw-orange), #ff7b2b);
+  box-shadow: 0 6px 20px rgba(9, 74, 116, 0.14);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  bottom: -48px;
+  left: 2rem;
+  z-index: 10;
+  overflow: hidden;
+  transition: transform 0.2s ease;
+}
+
+.pw-avatar-wrap:hover {
+  transform: scale(1.03);
+}
+
+.pw-avatar-initial {
+  font-size: 2.35rem;
+  font-weight: 700;
+  color: #FFFFFF;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.pw-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* ============================================================
+   4. USER IDENTITY & TOP ACTIONS
+   ============================================================ */
+.pw-identity-section {
+  padding: 3.5rem 2.25rem 1.5rem;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.pw-identity-main {
+  flex: 1;
+  min-width: 250px;
+}
+
+.pw-name-badge-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 4px;
+}
+
+.pw-profile-name {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--pw-text-title);
+  margin: 0;
+  line-height: 1.25;
+  letter-spacing: -0.4px;
+}
+
+.pw-badge-verified {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: var(--pw-pill-radius);
+  background: rgba(45, 158, 95, 0.1);
+  color: #1e7e48;
+  font-size: 0.76rem;
+  font-weight: 700;
+  border: 1px solid rgba(45, 158, 95, 0.2);
+  line-height: 1.2;
+}
+
+.pw-badge-verified i {
+  font-size: 0.85rem;
+  color: var(--pw-green);
+}
+
+.pw-profile-sub {
+  font-size: 0.88rem;
+  color: var(--pw-text-muted);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.pw-sub-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.pw-identity-actions {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ============================================================
+   5. STATISTICS ROW (Separated by Thin Vertical Dividers)
+   ============================================================ */
+.pw-stats-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0 2.25rem 1.5rem;
+  padding: 1.2rem 1.5rem;
+  background: #F8FAFC;
+  border: 1px solid var(--pw-card-border);
+  border-radius: 18px;
+}
+
+.pw-stat-col {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 0 0.5rem;
+}
+
+.pw-stat-divider {
+  width: 1px;
+  height: 38px;
+  background: var(--pw-card-border);
+  flex-shrink: 0;
+}
+
+.pw-stat-label {
+  font-size: 0.74rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--pw-text-muted);
+  margin-bottom: 3px;
+}
+
+.pw-stat-val {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--pw-text-title);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
+}
+
+/* ============================================================
+   6. SEGMENTED CONTROL / PILL TABS
+   ============================================================ */
+.pw-tabs-wrapper {
+  padding: 0 2.25rem;
+  margin-bottom: 1.75rem;
+}
+
+.pw-segmented-tabs {
+  background: #F1F5F9 !important;
+  border-radius: var(--pw-pill-radius) !important;
+  padding: 4px !important;
+  display: inline-flex !important;
+  border: 1px solid var(--pw-card-border) !important;
+  gap: 4px !important;
+}
+
+.pw-segmented-tabs .nav-item {
+  margin: 0 !important;
+}
+
+.pw-segmented-tabs .nav-link {
+  border: none !important;
+  border-radius: var(--pw-pill-radius) !important;
+  padding: 8px 18px !important;
+  font-size: 0.88rem !important;
+  font-weight: 600 !important;
+  color: var(--pw-text-muted) !important;
+  background: transparent !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  transition: var(--pw-transition) !important;
+  cursor: pointer !important;
+}
+
+.pw-segmented-tabs .nav-link:hover {
+  color: var(--pw-text-title) !important;
+}
+
+.pw-segmented-tabs .nav-link.active {
+  background: #FFFFFF !important;
+  color: var(--pw-orange) !important;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08) !important;
+  font-weight: 700 !important;
+}
+
+.pw-tab-badge {
+  background: var(--pw-orange);
+  color: #FFFFFF;
+  border-radius: var(--pw-pill-radius);
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  line-height: 1.2;
+  margin-left: 4px;
+}
+
+/* ============================================================
+   7. FORM "SETTINGS ROWS" (2-Column Desktop Grid)
+   ============================================================ */
+.pw-tab-content {
+  padding: 0 2.25rem 2.25rem;
+}
+
+.pw-settings-row {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 2.5rem;
+  padding: 1.5rem 0;
+}
+
+.pw-settings-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.pw-settings-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--pw-text-title);
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pw-settings-desc {
+  font-size: 0.85rem;
+  color: var(--pw-text-muted);
+  line-height: 1.55;
+  margin: 0;
+}
+
+.pw-settings-form {
+  min-width: 0;
+}
+
+.pw-row-divider {
+  height: 1px;
+  background: var(--pw-card-border);
+  margin: 0.5rem 0;
+}
+
+/* ============================================================
+   8. INPUTS, LABELS & EYE TOGGLE
+   ============================================================ */
+.pw-label {
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: var(--pw-text-title);
+  margin-bottom: 6px;
+  display: block;
+}
+
+.pw-hint {
+  font-size: 0.78rem;
+  color: var(--pw-text-light);
+  font-weight: 400;
+}
+
+.pw-input {
+  height: 46px !important;
+  border-radius: var(--pw-input-radius) !important;
+  border: 1px solid var(--pw-input-border) !important;
+  background-color: var(--pw-input-bg) !important;
+  color: var(--pw-text-title) !important;
+  font-size: 0.92rem !important;
+  padding: 0.55rem 1rem !important;
+  transition: var(--pw-transition) !important;
+  outline: none !important;
+}
+
+.pw-input:focus {
+  border-color: var(--pw-orange) !important;
+  box-shadow: 0 0 0 3px var(--pw-orange-ring) !important;
+}
+
+.pw-eye-btn {
+  position: absolute;
+  right: 0.85rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--pw-text-light);
+  cursor: pointer;
+  padding: 4px 6px;
+  font-size: 1.05rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.15s;
+}
+
+.pw-eye-btn:hover {
+  color: var(--pw-orange);
+}
+
+/* ============================================================
+   9. BUTTONS (Primary Orange / Secondary Light Pill)
+   ============================================================ */
+.pw-btn-primary {
+  height: 44px;
+  border-radius: var(--pw-btn-radius);
+  background: var(--pw-orange);
+  border: 1.5px solid var(--pw-orange);
+  color: #FFFFFF;
+  font-size: 0.88rem;
+  font-weight: 600;
+  padding: 0 1.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+  box-shadow: 0 3px 12px rgba(242, 99, 15, 0.25);
+  text-decoration: none;
+  transition: var(--pw-transition);
+}
+
+.pw-btn-primary:hover {
+  background: var(--pw-orange-hover);
+  border-color: var(--pw-orange-hover);
+  color: #FFFFFF;
+  transform: translateY(-1px);
+  box-shadow: 0 5px 16px rgba(242, 99, 15, 0.35);
+}
+
+.pw-btn-secondary {
+  height: 44px;
+  border-radius: var(--pw-btn-radius);
+  background: #F8FAFC;
+  border: 1px solid var(--pw-card-border);
+  color: var(--pw-text-body);
+  font-size: 0.88rem;
+  font-weight: 600;
+  padding: 0 1.4rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: var(--pw-transition);
+}
+
+.pw-btn-secondary:hover {
+  background: #EEF2F6;
+  border-color: #CBD5E1;
+  color: var(--pw-text-title);
+  transform: translateY(-1px);
+}
+
+.pw-btn-sm {
+  height: 38px;
+  padding: 0 1.15rem;
+  font-size: 0.84rem;
+}
+
+/* ============================================================
+   10. POTENSI SAYA TAB & CARDS
+   ============================================================ */
+.potensi-card {
+  border: 1px solid var(--pw-card-border);
+  border-radius: 18px;
+  padding: 1.25rem 1.4rem;
+  background: #FFFFFF;
+  margin-bottom: 0.85rem;
+  transition: var(--pw-transition);
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.02);
+}
+
+.potensi-card:hover {
+  box-shadow: 0 6px 20px rgba(9, 74, 116, 0.08);
+  border-color: #CBD5E1;
+  transform: translateY(-1px);
+}
+
+.potensi-card-title {
+  font-weight: 700;
+  color: var(--pw-blue);
+  font-size: 1.05rem;
+  margin-bottom: 2px;
+}
+
+.potensi-card-meta {
+  font-size: 0.82rem;
+  color: var(--pw-text-muted);
+  margin-bottom: 6px;
+}
+
+.status-badge {
+  font-size: 0.74rem;
+  padding: 0.25rem 0.65rem;
+  border-radius: var(--pw-pill-radius);
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  line-height: 1.2;
+}
+
+.badge-pending  { background: rgba(255, 194, 11, 0.18); color: #855c00; }
+.badge-approved { background: rgba(45, 158, 95, 0.14); color: #15803d; }
+.badge-rejected { background: rgba(239, 68, 68, 0.12); color: #b91c1c; }
+
+.rejection-box {
+  background: rgba(239, 68, 68, 0.06);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: 10px;
+  padding: 0.6rem 0.9rem;
+  font-size: 0.82rem;
+  color: #b91c1c;
+  margin-top: 0.6rem;
+}
+
+.btn-ikon-hapus, .btn-ikon-edit {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--pw-card-border);
+  background: #F8FAFC;
+  cursor: pointer;
+  transition: var(--pw-transition);
+}
+
+.btn-ikon-edit {
+  color: var(--pw-blue);
+}
+.btn-ikon-edit:hover {
+  background: rgba(9, 74, 116, 0.1);
+  border-color: var(--pw-blue);
+  color: var(--pw-blue);
+}
+
+.btn-ikon-hapus {
+  color: var(--pw-red);
+}
+.btn-ikon-hapus:hover {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: var(--pw-red);
+  color: var(--pw-red);
+}
+
+.photo-thumb {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 1.5px solid var(--pw-card-border);
+  cursor: pointer;
+}
+.photo-thumb-wrap {
+  position: relative;
+  display: inline-block;
+}
+.btn-del-photo {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 20px;
+  height: 20px;
+  background: var(--pw-red);
+  color: #FFFFFF;
+  border: 1.5px solid #FFFFFF;
+  border-radius: 50%;
+  font-size: 0.75rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+/* ============================================================
+   11. EMPTY STATE & ALERTS
+   ============================================================ */
+.pw-empty-state {
+  text-align: center;
+  padding: 3.5rem 1.5rem;
+  background: #F8FAFC;
+  border-radius: 20px;
+  border: 1.5px dashed var(--pw-card-border);
+}
+
+.pw-empty-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 20px;
+  background: rgba(242, 99, 15, 0.1);
+  color: var(--pw-orange);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.85rem;
+  margin: 0 auto 1.25rem;
+}
+
+.pw-empty-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--pw-text-title);
+  margin-bottom: 6px;
+}
+
+.pw-empty-desc {
+  font-size: 0.88rem;
+  color: var(--pw-text-muted);
+  max-width: 440px;
+  margin: 0 auto 1.5rem;
+  line-height: 1.55;
+}
+
+.alert-inline {
+  display: none;
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  font-size: 0.86rem;
+  font-weight: 500;
+  margin-bottom: 1.25rem;
+}
+.alert-inline.show {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  animation: pwFadeIn 0.2s ease;
+}
+.alert-inline.error {
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  color: #b91c1c;
+}
+.alert-inline.success {
+  background: rgba(34, 197, 94, 0.08);
+  border: 1px solid rgba(34, 197, 94, 0.2);
+  color: #15803d;
+}
+
+@keyframes pwFadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.spinner-sm {
+  width: 1.2rem;
+  height: 1.2rem;
+  border: 2px solid rgba(0, 0, 0, 0.1);
+  border-top-color: var(--pw-orange);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  display: inline-block;
+  vertical-align: middle;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ============================================================
+   12. RESPONSIVE BREAKPOINTS (1920, 1366, 1024, 768, 390px)
+   ============================================================ */
+@media (max-width: 768px) {
+  body.pw-page-body {
+    padding-top: 0 !important;
+  }
+  .pw-container {
+    padding: 0 0.75rem;
+    margin: 0.85rem auto 2.5rem;
+  }
+  .pw-cover {
+    height: 140px;
+  }
+  .pw-avatar-wrap {
+    width: 86px;
+    height: 86px;
+    bottom: -38px;
+    left: 1.25rem;
+    border-width: 3.5px;
+  }
+  .pw-avatar-initial {
+    font-size: 1.95rem;
+  }
+  .pw-identity-section {
+    padding: 2.75rem 1.25rem 1.25rem;
+    gap: 1rem;
+  }
+  .pw-profile-name {
+    font-size: 1.4rem;
+  }
+  .pw-stats-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin: 0 1.25rem 1.25rem;
+    padding: 1rem;
+  }
+  .pw-stat-divider {
+    display: none;
+  }
+  .pw-tabs-wrapper {
+    padding: 0 1.25rem;
+  }
+  .pw-tab-content {
+    padding: 0 1.25rem 1.75rem;
+  }
+  .pw-settings-row {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+    padding: 1.25rem 0;
+  }
+  .pw-btn-primary,
+  .pw-btn-secondary {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 390px) {
+  .pw-profile-name {
+    font-size: 1.25rem;
+  }
+  .pw-stats-row {
+    grid-template-columns: 1fr;
+  }
+}

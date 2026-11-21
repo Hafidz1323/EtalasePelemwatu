@@ -7,42 +7,11 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   <link rel="stylesheet" href="assets/css/style.css">
-  <style>
-    body { background:#f4f7fb;padding-top:72px; }
-    .profile-header { background:linear-gradient(135deg,#094a74,#0a6098);color:#fff;padding:2.5rem 0 1.5rem;margin-bottom:2rem; }
-    .profile-avatar { width:80px;height:80px;border-radius:50%;object-fit:cover;border:3px solid rgba(255,255,255,.3);background:#1a7ab0;display:flex;align-items:center;justify-content:center;font-size:2rem;color:#fff; }
-    .profile-name { font-size:1.4rem;font-weight:700;margin-bottom:.2rem; }
-    .profile-role { font-size:.82rem;opacity:.75;background:rgba(255,255,255,.15);border-radius:999px;padding:.2rem .75rem;display:inline-block; }
-    .status-badge { font-size:.75rem;padding:.25rem .65rem;border-radius:999px;font-weight:600; }
-    .badge-pending  { background:rgba(255,193,7,.15);color:#856404; }
-    .badge-approved { background:rgba(40,167,69,.12);color:#1a6e30; }
-    .badge-rejected { background:rgba(220,53,69,.1);color:#8b1a24; }
-    .potensi-card { border:1.5px solid #e5e9f0;border-radius:14px;padding:1.1rem 1.25rem;background:#fff;margin-bottom:.85rem;transition:box-shadow .2s; }
-    .potensi-card:hover { box-shadow:0 4px 16px rgba(9,74,116,.1); }
-    .potensi-card-title { font-weight:700;color:var(--clr-blue);font-size:.95rem; }
-    .potensi-card-meta { font-size:.8rem;color:#9ca3af;margin-top:.25rem; }
-    .rejection-box { background:rgba(220,53,69,.07);border:1px solid rgba(220,53,69,.2);border-radius:8px;padding:.6rem .9rem;font-size:.82rem;color:#8b1a24;margin-top:.5rem; }
-    .section-title { font-size:1rem;font-weight:700;color:var(--clr-blue);margin-bottom:1rem;display:flex;align-items:center;gap:.5rem; }
-    .tab-wrapper .nav-link { color:#6b7280;font-weight:600;font-size:.9rem;border-radius:10px 10px 0 0; }
-    .tab-wrapper .nav-link.active { color:var(--clr-orange);border-color:#dee2e6 #dee2e6 #fff; }
-    .alert-inline { display:none;padding:.6rem 1rem;border-radius:8px;font-size:.84rem;margin-bottom:1rem; }
-    .alert-inline.show { display:flex;align-items:center;gap:.5rem; }
-    .spinner-sm { width:1.1rem;height:1.1rem;border:.2rem solid rgba(0,0,0,.12);border-top-color:var(--clr-orange);border-radius:50%;animation:spin .7s linear infinite;display:inline-block;vertical-align:middle; }
-    @keyframes spin { to { transform:rotate(360deg); } }
-    .empty-state { text-align:center;padding:3rem 1rem;color:#9ca3af; }
-    .empty-state i { font-size:3rem;margin-bottom:.75rem;display:block;opacity:.4; }
-    .btn-ikon-hapus { background:none;border:none;padding:.25rem .4rem;color:#dc3545;cursor:pointer;border-radius:6px; }
-    .btn-ikon-hapus:hover { background:rgba(220,53,69,.1); }
-    .btn-ikon-edit { background:none;border:none;padding:.25rem .4rem;color:var(--clr-blue);cursor:pointer;border-radius:6px; }
-    .btn-ikon-edit:hover { background:rgba(9,74,116,.1); }
-    .photo-thumb { width:60px;height:60px;object-fit:cover;border-radius:8px;border:1.5px solid #e5e9f0;cursor:pointer; }
-    .photo-thumb-wrap { position:relative;display:inline-block; }
-    .btn-del-photo { position:absolute;top:-6px;right:-6px;width:18px;height:18px;background:#dc3545;color:#fff;border:none;border-radius:50%;font-size:.6rem;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1; }
-  </style>
+  <link rel="stylesheet" href="assets/css/profil-warga.css">
 </head>
-<body>
+<body class="pw-page-body">
 
-<!-- NAVBAR -->
+<!-- NAVBAR (Publik — Tidak Diubah) -->
 <header id="siteHeader">
   <nav class="navbar navbar-expand-lg" id="mainNavbar">
     <div class="container">
@@ -73,182 +42,279 @@
   </nav>
 </header>
 
-<!-- PROFILE HEADER -->
-<div class="profile-header" id="profileHeader">
-  <div class="container">
-    <div class="d-flex align-items-center gap-3 flex-wrap">
-      <div class="profile-avatar" id="avatarWrap"><i class="bi bi-person"></i></div>
-      <div>
-        <div class="profile-name" id="profileName">Memuat...</div>
-        <div class="profile-role">Warga Desa Pelemwatu</div>
-        <div style="font-size:.82rem;opacity:.7;margin-top:.3rem;" id="profilePhone"></div>
+<!-- MAIN FLOATING CARD WRAPPER -->
+<main class="pw-container">
+  <div class="pw-card-main">
+    
+    <!-- BANNER COVER & OVERLAPPING AVATAR -->
+    <div class="pw-cover-wrapper">
+      <div class="pw-cover"></div>
+      <div class="pw-avatar-wrap" id="avatarWrap">
+        <span class="pw-avatar-initial">W</span>
       </div>
     </div>
-  </div>
-</div>
 
-<!-- MAIN CONTENT -->
-<div class="container pb-5">
-  <div class="tab-wrapper">
-    <ul class="nav nav-tabs mb-0" id="profilTabs">
-      <li class="nav-item"><button class="nav-link active" id="tab-profil-btn" data-bs-toggle="tab" data-bs-target="#tab-profil">
-        <i class="bi bi-person-gear me-1"></i>Profil Saya
-      </button></li>
-      <li class="nav-item"><button class="nav-link" id="tab-potensi-btn" data-bs-toggle="tab" data-bs-target="#tab-potensi">
-        <i class="bi bi-shop me-1"></i>Potensi Saya <span class="badge bg-secondary ms-1 rounded-pill" id="potensiCount" style="font-size:.7rem;">0</span>
-      </button></li>
-    </ul>
-    <div class="tab-content bg-white border border-top-0 rounded-bottom p-4" style="border-radius:0 8px 8px 8px;">
+    <!-- USER IDENTITY & TOP ACTIONS -->
+    <div class="pw-identity-section">
+      <div class="pw-identity-main">
+        <div class="pw-name-badge-row">
+          <h1 class="pw-profile-name" id="profileName">Memuat...</h1>
+        </div>
+        <div class="pw-profile-sub">
+          <span class="pw-sub-item" id="profilePhone"><i class="bi bi-telephone"></i> -</span>
+          <span class="text-muted d-none d-sm-inline">&bull;</span>
+          <span class="pw-sub-item text-muted"><i class="bi bi-geo-alt"></i> Desa Pelemwatu, Menganti, Gresik</span>
+        </div>
+      </div>
+      <div class="pw-identity-actions">
+        <a href="/#katalog" class="pw-btn-secondary pw-btn-sm" title="Jelajahi Katalog Potensi">
+          <i class="bi bi-grid-fill me-1"></i> Lihat Katalog
+        </a>
+      </div>
+    </div>
 
-      <!-- TAB: PROFIL -->
-      <div class="tab-pane fade show active" id="tab-profil">
-        <div class="row g-4">
+    <!-- STATISTICS ROW (Separated by Thin Vertical Dividers) -->
+    <div class="pw-stats-row">
+      <div class="pw-stat-col">
+        <div class="pw-stat-label">Potensi Terdaftar</div>
+        <div class="pw-stat-val"><span id="statPotensiCount">0</span> Usaha</div>
+      </div>
+      <div class="pw-stat-divider"></div>
+      <div class="pw-stat-col">
+        <div class="pw-stat-label">Nomor WhatsApp</div>
+        <div class="pw-stat-val" id="statPhone">-</div>
+      </div>
+      <div class="pw-stat-divider"></div>
+      <div class="pw-stat-col">
+        <div class="pw-stat-label">Email Terdaftar</div>
+        <div class="pw-stat-val" id="statEmail">-</div>
+      </div>
+      <div class="pw-stat-divider"></div>
+      <div class="pw-stat-col">
+        <div class="pw-stat-label">Status Warga</div>
+        <div class="pw-stat-val" style="color:var(--pw-green);">
+          <i class="bi bi-check-circle-fill me-1"></i> Terverifikasi
+        </div>
+      </div>
+    </div>
 
-          <!-- Edit Profil -->
-          <div class="col-lg-6">
-            <div class="section-title"><i class="bi bi-person-lines-fill"></i>Edit Data Profil</div>
-            <div class="alert-inline error" id="editAlert" style="background:rgba(220,53,69,.1);border:1px solid rgba(220,53,69,.25);color:#8b1a24;">
-              <i class="bi bi-exclamation-circle-fill flex-shrink-0"></i><span id="editAlertMsg"></span>
+    <!-- SEGMENTED CONTROL / PILL TABS -->
+    <div class="pw-tabs-wrapper">
+      <ul class="nav nav-pills pw-segmented-tabs" id="profilTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+          <button class="nav-link active" id="tab-profil-btn" data-bs-toggle="tab" data-bs-target="#tab-profil" type="button" role="tab">
+            <i class="bi bi-person-gear"></i> Profil Saya
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="tab-potensi-btn" data-bs-toggle="tab" data-bs-target="#tab-potensi" type="button" role="tab">
+            <i class="bi bi-shop"></i> Potensi Saya
+            <span class="pw-tab-badge" id="potensiCount">0</span>
+          </button>
+        </li>
+      </ul>
+    </div>
+
+    <!-- TAB CONTENTS -->
+    <div class="tab-content pw-tab-content">
+
+      <!-- TAB: PROFIL (Settings Rows Layout) -->
+      <div class="tab-pane fade show active" id="tab-profil" role="tabpanel">
+
+        <!-- Row 1: Data Profil -->
+        <div class="pw-settings-row">
+          <div class="pw-settings-info">
+            <h3 class="pw-settings-title"><i class="bi bi-person-vcard me-1 text-primary"></i> Data Profil</h3>
+            <p class="pw-settings-desc">
+              Informasi identitas warga. Nama lengkap dan kontak aktif akan memudahkan pembeli dan warga desa menghubungi Anda.
+            </p>
+          </div>
+          <div class="pw-settings-form">
+            <div class="alert-inline error" id="editAlert">
+              <i class="bi bi-exclamation-circle-fill flex-shrink-0"></i>
+              <span id="editAlertMsg"></span>
             </div>
-            <div class="alert-inline" id="editSuccess" style="background:rgba(40,167,69,.1);border:1px solid rgba(40,167,69,.25);color:#1a6e30;">
-              <i class="bi bi-check-circle-fill flex-shrink-0"></i><span>Profil berhasil diperbarui.</span>
+            <div class="alert-inline success" id="editSuccess">
+              <i class="bi bi-check-circle-fill flex-shrink-0"></i>
+              <span>Profil berhasil diperbarui.</span>
             </div>
             <form id="formEditProfil">
               <div class="mb-3">
-                <label class="form-label fw-semibold" style="font-size:.85rem;color:var(--clr-blue);">Nama Lengkap *</label>
-                <input type="text" class="form-control" id="editNama" maxlength="100">
+                <label class="pw-label" for="editNama">Nama Lengkap <span class="text-danger">*</span></label>
+                <input type="text" class="form-control pw-input" id="editNama" maxlength="100" placeholder="Masukkan nama lengkap">
               </div>
               <div class="mb-3">
-                <label class="form-label fw-semibold" style="font-size:.85rem;color:var(--clr-blue);">Nomor HP *</label>
-                <input type="tel" class="form-control" id="editPhone" maxlength="20" inputmode="tel">
+                <label class="pw-label" for="editPhone">Nomor WhatsApp / HP <span class="text-danger">*</span></label>
+                <input type="tel" class="form-control pw-input" id="editPhone" maxlength="20" inputmode="tel" placeholder="Contoh: 081234567890">
               </div>
-              <div class="mb-3">
-                <label class="form-label fw-semibold" style="font-size:.85rem;color:var(--clr-blue);">Email <span class="text-muted fw-normal">(opsional)</span></label>
-                <input type="email" class="form-control" id="editEmail" maxlength="100">
+              <div class="mb-4">
+                <label class="pw-label" for="editEmail">Alamat Email <span class="pw-hint">(opsional)</span></label>
+                <input type="email" class="form-control pw-input" id="editEmail" maxlength="100" placeholder="nama@email.com">
               </div>
-              <button type="submit" class="btn btn-primary px-4" id="btnSaveProfil" style="background:var(--clr-orange);border-color:var(--clr-orange);font-weight:600;">
-                Simpan Perubahan
-              </button>
+              <div class="d-flex justify-content-end">
+                <button type="submit" class="pw-btn-primary" id="btnSaveProfil">
+                  Simpan Perubahan
+                </button>
+              </div>
             </form>
           </div>
+        </div>
 
-          <!-- Ganti Password -->
-          <div class="col-lg-6">
-            <div class="section-title"><i class="bi bi-shield-lock"></i>Ganti Password</div>
-            <div class="alert-inline" id="passAlert" style="background:rgba(220,53,69,.1);border:1px solid rgba(220,53,69,.25);color:#8b1a24;">
-              <i class="bi bi-exclamation-circle-fill flex-shrink-0"></i><span id="passAlertMsg"></span>
+        <div class="pw-row-divider"></div>
+
+        <!-- Row 2: Keamanan Akun & Password -->
+        <div class="pw-settings-row">
+          <div class="pw-settings-info">
+            <h3 class="pw-settings-title"><i class="bi bi-shield-lock me-1 text-primary"></i> Keamanan Akun</h3>
+            <p class="pw-settings-desc">
+              Pastikan akun Anda terlindungi dengan menggunakan kata sandi unik minimal 8 karakter.
+            </p>
+          </div>
+          <div class="pw-settings-form">
+            <div class="alert-inline error" id="passAlert">
+              <i class="bi bi-exclamation-circle-fill flex-shrink-0"></i>
+              <span id="passAlertMsg"></span>
             </div>
-            <div class="alert-inline" id="passSuccess" style="background:rgba(40,167,69,.1);border:1px solid rgba(40,167,69,.25);color:#1a6e30;">
-              <i class="bi bi-check-circle-fill flex-shrink-0"></i><span>Password berhasil diperbarui.</span>
+            <div class="alert-inline success" id="passSuccess">
+              <i class="bi bi-check-circle-fill flex-shrink-0"></i>
+              <span>Password berhasil diperbarui.</span>
             </div>
             <form id="formPassword">
               <div class="mb-3">
-                <label class="form-label fw-semibold" style="font-size:.85rem;color:var(--clr-blue);">Password Lama *</label>
-                <input type="password" class="form-control" id="passLama" maxlength="100">
+                <label class="pw-label" for="passLama">Password Lama <span class="text-danger">*</span></label>
+                <div class="position-relative">
+                  <input type="password" class="form-control pw-input pe-5" id="passLama" maxlength="100" placeholder="Masukkan password saat ini">
+                  <button type="button" class="pw-eye-btn" onclick="togglePasswordVisibility('passLama', this)" aria-label="Toggle password">
+                    <i class="bi bi-eye"></i>
+                  </button>
+                </div>
               </div>
               <div class="mb-3">
-                <label class="form-label fw-semibold" style="font-size:.85rem;color:var(--clr-blue);">Password Baru * <span class="text-muted fw-normal">(min. 8 karakter)</span></label>
-                <input type="password" class="form-control" id="passBaru" maxlength="100">
+                <label class="pw-label" for="passBaru">Password Baru <span class="text-danger">*</span> <span class="pw-hint">(min. 8 karakter)</span></label>
+                <div class="position-relative">
+                  <input type="password" class="form-control pw-input pe-5" id="passBaru" maxlength="100" placeholder="Masukkan password baru">
+                  <button type="button" class="pw-eye-btn" onclick="togglePasswordVisibility('passBaru', this)" aria-label="Toggle password">
+                    <i class="bi bi-eye"></i>
+                  </button>
+                </div>
               </div>
-              <div class="mb-3">
-                <label class="form-label fw-semibold" style="font-size:.85rem;color:var(--clr-blue);">Konfirmasi Password Baru *</label>
-                <input type="password" class="form-control" id="passBaruConfirm" maxlength="100">
+              <div class="mb-4">
+                <label class="pw-label" for="passBaruConfirm">Konfirmasi Password Baru <span class="text-danger">*</span></label>
+                <div class="position-relative">
+                  <input type="password" class="form-control pw-input pe-5" id="passBaruConfirm" maxlength="100" placeholder="Ulangi password baru">
+                  <button type="button" class="pw-eye-btn" onclick="togglePasswordVisibility('passBaruConfirm', this)" aria-label="Toggle password">
+                    <i class="bi bi-eye"></i>
+                  </button>
+                </div>
               </div>
-              <button type="submit" class="btn btn-outline-secondary px-4" id="btnSavePass" style="font-weight:600;">
-                Perbarui Password
-              </button>
+              <div class="d-flex justify-content-end">
+                <button type="submit" class="pw-btn-secondary" id="btnSavePass">
+                  Perbarui Password
+                </button>
+              </div>
             </form>
           </div>
-
         </div>
+
       </div><!-- /tab-profil -->
 
       <!-- TAB: POTENSI SAYA -->
-      <div class="tab-pane fade" id="tab-potensi">
-        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-          <div class="section-title mb-0"><i class="bi bi-shop"></i>Potensi Saya</div>
-          <a href="/daftar-potensi" class="btn btn-sm px-3" style="background:var(--clr-orange);color:#fff;font-weight:600;border-radius:8px;">
-            <i class="bi bi-plus-lg me-1"></i>Daftar Potensi Baru
+      <div class="tab-pane fade" id="tab-potensi" role="tabpanel">
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+          <div>
+            <h3 class="pw-settings-title mb-1"><i class="bi bi-shop me-1 text-primary"></i> Daftar Potensi Saya</h3>
+            <p class="pw-settings-desc mb-0">Kelola usaha, produk, jasa, atau hunian yang telah Anda daftarkan di desa.</p>
+          </div>
+          <a href="/daftar-potensi" class="pw-btn-primary pw-btn-sm">
+            <i class="bi bi-plus-lg me-1"></i> Tambah Usaha Baru
           </a>
         </div>
 
-        <div id="potensiLoadingState" class="text-center py-4">
-          <div class="spinner-sm"></div> <span style="color:#9ca3af;font-size:.88rem;margin-left:.5rem;">Memuat data...</span>
+        <div id="potensiLoadingState" class="text-center py-5">
+          <div class="spinner-sm"></div> <span style="color:#64748B;font-size:.9rem;margin-left:.6rem;">Memuat data potensi...</span>
         </div>
-        <div id="potensiEmptyState" class="empty-state" style="display:none;">
-          <i class="bi bi-shop"></i>
-          <div>Anda belum memiliki potensi yang terdaftar.</div>
-          <a href="/daftar-potensi" class="btn btn-sm mt-3" style="background:var(--clr-orange);color:#fff;font-weight:600;border-radius:8px;">
-            Daftarkan Sekarang
+        
+        <div id="potensiEmptyState" class="pw-empty-state" style="display:none;">
+          <div class="pw-empty-icon">
+            <i class="bi bi-shop-window"></i>
+          </div>
+          <h4 class="pw-empty-title">Belum Ada Potensi Terdaftar</h4>
+          <p class="pw-empty-desc">
+            Daftarkan usaha, jasa, produk kuliner, atau hunian Anda agar warga dan tamu desa dapat dengan mudah menemukannya di katalog digital.
+          </p>
+          <a href="/daftar-potensi" class="pw-btn-primary">
+            <i class="bi bi-plus-lg me-1"></i> Daftarkan Sekarang
           </a>
         </div>
-        <div id="potensiList"></div>
+
+        <div id="potensiList" class="d-flex flex-column gap-3"></div>
       </div><!-- /tab-potensi -->
 
-    </div>
-  </div>
-</div>
+    </div><!-- /tab-content -->
 
-<!-- MODAL EDIT POTENSI -->
+  </div>
+</main>
+
+<!-- MODAL EDIT POTENSI (Struktur & ID Utuh Sesuai Aslinya) -->
 <div class="modal fade" id="modalEditPotensi" tabindex="-1">
   <div class="modal-dialog modal-lg modal-dialog-scrollable">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title fw-bold" style="color:var(--clr-blue);">
-          <i class="bi bi-pencil-square me-2"></i>Edit Potensi
+    <div class="modal-content" style="border-radius:24px;border:1px solid #E2E8F0;box-shadow:0 12px 36px rgba(9,74,116,.15);">
+      <div class="modal-header" style="border-bottom:1px solid #E2E8F0;padding:1.25rem 1.5rem;">
+        <h5 class="modal-title fw-bold" style="color:var(--pw-blue);font-size:1.15rem;">
+          <i class="bi bi-pencil-square me-2 text-primary"></i>Edit Data Potensi
         </h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body p-4">
-        <div class="alert-inline" id="editPotensiAlert" style="background:rgba(220,53,69,.1);border:1px solid rgba(220,53,69,.25);color:#8b1a24;margin-bottom:1rem;">
+        <div class="alert-inline error" id="editPotensiAlert" style="margin-bottom:1rem;">
           <i class="bi bi-exclamation-circle-fill flex-shrink-0"></i><span id="editPotensiAlertMsg"></span>
         </div>
         <input type="hidden" id="editPotensiId">
         <div class="row g-3">
           <div class="col-md-6">
-            <label class="form-label fw-semibold" style="font-size:.84rem;">Nama Potensi *</label>
-            <input type="text" class="form-control" id="epNama" maxlength="100">
+            <label class="pw-label">Nama Potensi <span class="text-danger">*</span></label>
+            <input type="text" class="form-control pw-input" id="epNama" maxlength="100">
           </div>
           <div class="col-md-6">
-            <label class="form-label fw-semibold" style="font-size:.84rem;">Kategori</label>
-            <select class="form-select" id="epKategori"><option value="">-- Pilih --</option></select>
+            <label class="pw-label">Kategori</label>
+            <select class="form-select pw-input" id="epKategori"><option value="">-- Pilih --</option></select>
           </div>
           <div class="col-12">
-            <label class="form-label fw-semibold" style="font-size:.84rem;">Deskripsi *</label>
-            <textarea class="form-control" id="epDeskripsi" rows="4" maxlength="1000"></textarea>
-            <div class="form-text">Minimal 20 karakter.</div>
+            <label class="pw-label">Deskripsi <span class="text-danger">*</span></label>
+            <textarea class="form-control pw-input" id="epDeskripsi" rows="4" maxlength="1000" style="height:auto !important;border-radius:14px !important;"></textarea>
+            <div class="form-text" style="font-size:.78rem;">Minimal 20 karakter.</div>
           </div>
           <div class="col-md-6">
-            <label class="form-label fw-semibold" style="font-size:.84rem;">Nomor Telepon / WA *</label>
-            <input type="tel" class="form-control" id="epWa" maxlength="20" inputmode="tel">
+            <label class="pw-label">Nomor Telepon / WA <span class="text-danger">*</span></label>
+            <input type="tel" class="form-control pw-input" id="epWa" maxlength="20" inputmode="tel">
           </div>
           <div class="col-md-6">
-            <label class="form-label fw-semibold" style="font-size:.84rem;">Jenis / Subkategori</label>
-            <input type="text" class="form-control" id="epJenis" maxlength="100">
+            <label class="pw-label">Jenis / Subkategori</label>
+            <input type="text" class="form-control pw-input" id="epJenis" maxlength="100">
           </div>
           <div class="col-12">
-            <label class="form-label fw-semibold" style="font-size:.84rem;">Alamat / Lokasi Usaha</label>
-            <input type="text" class="form-control" id="epLokasi" maxlength="255">
+            <label class="pw-label">Alamat / Lokasi Usaha</label>
+            <input type="text" class="form-control pw-input" id="epLokasi" maxlength="255">
           </div>
           <div class="col-md-6">
-            <label class="form-label fw-semibold" style="font-size:.84rem;">Jam Operasional</label>
-            <input type="text" class="form-control" id="epJam" maxlength="100">
+            <label class="pw-label">Jam Operasional</label>
+            <input type="text" class="form-control pw-input" id="epJam" maxlength="100">
           </div>
           <div class="col-12">
-            <label class="form-label fw-semibold" style="font-size:.84rem;">Foto Baru <span class="text-muted fw-normal">(opsional, ganti semua foto lama)</span></label>
-            <input type="file" class="form-control" id="epFoto" accept="image/jpeg,image/jpg,image/png,image/webp" multiple>
-            <div class="form-text">Maks. 3 foto, 2 MB per foto. JPG/PNG/WebP.</div>
+            <label class="pw-label">Foto Baru <span class="pw-hint">(opsional, ganti semua foto lama)</span></label>
+            <input type="file" class="form-control pw-input" id="epFoto" accept="image/jpeg,image/jpg,image/png,image/webp" multiple style="padding-top:.45rem;">
+            <div class="form-text" style="font-size:.78rem;">Maks. 3 foto, 2 MB per foto. JPG/PNG/WebP.</div>
           </div>
           <div class="col-12" id="currentPhotoWrap" style="display:none;">
-            <label class="form-label fw-semibold" style="font-size:.84rem;">Foto Saat Ini</label>
+            <label class="pw-label">Foto Saat Ini</label>
             <div id="currentPhotos" class="d-flex gap-2 flex-wrap"></div>
-            <div class="form-text">Klik × untuk hapus foto individual.</div>
+            <div class="form-text" style="font-size:.78rem;">Klik × untuk hapus foto individual.</div>
           </div>
         </div>
       </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
-        <button type="button" class="btn px-4 fw-600" id="btnSavePotensi" style="background:var(--clr-orange);color:#fff;font-weight:600;">
+      <div class="modal-footer" style="border-top:1px solid #E2E8F0;padding:1rem 1.5rem;gap:.5rem;">
+        <button type="button" class="pw-btn-secondary" data-bs-dismiss="modal">Batal</button>
+        <button type="button" class="pw-btn-primary" id="btnSavePotensi">
           Simpan Perubahan
         </button>
       </div>
@@ -270,13 +336,47 @@ if (!window.epWarga || !window.epWarga.isLoggedIn()) {
 var currentUser = window.epWarga.getUser();
 var categories  = [];
 
+/* ── Toggle password eye ── */
+function togglePasswordVisibility(id, btn) {
+  var inp = document.getElementById(id);
+  if (!inp) return;
+  var isPass = inp.type === 'password';
+  inp.type = isPass ? 'text' : 'password';
+  var icon = btn.querySelector('i');
+  if (icon) {
+    icon.className = isPass ? 'bi bi-eye-slash' : 'bi bi-eye';
+  }
+}
+
 /* ── Render header profil ── */
 function renderProfileHeader() {
-  document.getElementById('profileName').textContent = currentUser.name || 'Warga';
-  document.getElementById('profilePhone').textContent = currentUser.phone || '';
-  document.getElementById('editNama').value  = currentUser.name  || '';
-  document.getElementById('editPhone').value = currentUser.phone || '';
-  document.getElementById('editEmail').value = currentUser.email || '';
+  var name = currentUser.name || 'Warga';
+  var initial = name.trim().charAt(0).toUpperCase() || 'W';
+  var avatarWrap = document.getElementById('avatarWrap');
+  if (avatarWrap) {
+    if (currentUser.avatar || currentUser.photo) {
+      avatarWrap.innerHTML = '<img src="' + (currentUser.avatar || currentUser.photo) + '" alt="' + name + '" class="pw-avatar-img">';
+    } else {
+      avatarWrap.innerHTML = '<span class="pw-avatar-initial">' + initial + '</span>';
+    }
+  }
+
+  var pName = document.getElementById('profileName');
+  if (pName) pName.textContent = name;
+  var pPhone = document.getElementById('profilePhone');
+  if (pPhone) pPhone.innerHTML = '<i class="bi bi-telephone me-1"></i> ' + (currentUser.phone || '-');
+
+  var sPhone = document.getElementById('statPhone');
+  if (sPhone) sPhone.textContent = currentUser.phone || '-';
+  var sEmail = document.getElementById('statEmail');
+  if (sEmail) sEmail.textContent = currentUser.email || 'Belum diatur';
+
+  var eNama = document.getElementById('editNama');
+  if (eNama) eNama.value = currentUser.name || '';
+  var ePhone = document.getElementById('editPhone');
+  if (ePhone) ePhone.value = currentUser.phone || '';
+  var eEmail = document.getElementById('editEmail');
+  if (eEmail) eEmail.value = currentUser.email || '';
 }
 
 /* ── Alert helpers ── */
@@ -330,8 +430,7 @@ document.getElementById('formEditProfil').addEventListener('submit', async funct
     var newUser = Object.assign({}, currentUser, { name: nama, phone: phone, email: email });
     window.epWarga.saveSession(window.epWarga.getToken(), newUser);
     currentUser = newUser;
-    document.getElementById('profileName').textContent  = nama;
-    document.getElementById('profilePhone').textContent = phone;
+    renderProfileHeader();
     document.getElementById('editSuccess').classList.add('show');
     setTimeout(function() { hideInlineAlert('editSuccess'); }, 3000);
   } else {
@@ -408,7 +507,10 @@ async function loadPotensi() {
   if (!res) return;
 
   var items = res.data.data || [];
-  document.getElementById('potensiCount').textContent = res.data.meta ? res.data.meta.total : items.length;
+  var total = res.data.meta ? res.data.meta.total : items.length;
+  document.getElementById('potensiCount').textContent = total;
+  var statCount = document.getElementById('statPotensiCount');
+  if (statCount) statCount.textContent = total;
 
   if (!items.length) {
     document.getElementById('potensiEmptyState').style.display = '';
@@ -453,7 +555,7 @@ async function loadPotensi() {
         '<div class="flex-grow-1">' +
           '<div class="potensi-card-title">' + p.name + '</div>' +
           '<div class="potensi-card-meta">' +
-            (p.category ? p.category.name + ' · ' : '') +
+            (p.category ? p.category.name + ' &bull; ' : '') +
             new Date(p.created_at).toLocaleDateString('id-ID', {day:'numeric',month:'long',year:'numeric'}) +
           '</div>' +
           statusHtml +
@@ -462,10 +564,10 @@ async function loadPotensi() {
           photosHtml +
         '</div>' +
         '<div class="d-flex gap-1 flex-shrink-0 align-items-start">' +
-          (canEdit ? '<button class="btn-ikon-edit" title="Edit" data-id="' + p.id + '"><i class="bi bi-pencil-fill"></i></button>' : '') +
+          (canEdit ? '<button class="btn-ikon-edit" title="Edit Potensi" data-id="' + p.id + '"><i class="bi bi-pencil"></i></button>' : '') +
           (!isDeletionPending
-            ? '<button class="btn-ikon-hapus" title="' + (p.status === 'approved' ? 'Ajukan Hapus ke Admin' : 'Hapus') + '" data-id="' + p.id + '" data-status="' + p.status + '"><i class="bi bi-trash-fill"></i></button>'
-            : '<button class="btn-ikon-hapus btn-cancel-del" title="Batalkan Permintaan Hapus" data-id="' + p.id + '" style="color:#f59e0b;border-color:#f59e0b;"><i class="bi bi-x-circle-fill"></i></button>'
+            ? '<button class="btn-ikon-hapus" title="' + (p.status === 'approved' ? 'Ajukan Hapus ke Admin' : 'Hapus Potensi') + '" data-id="' + p.id + '" data-status="' + p.status + '"><i class="bi bi-trash"></i></button>'
+            : '<button class="btn-ikon-hapus btn-cancel-del" title="Batalkan Permintaan Hapus" data-id="' + p.id + '" style="color:#f59e0b;border-color:#f59e0b;"><i class="bi bi-x-circle"></i></button>'
           ) +
         '</div>' +
       '</div>';
