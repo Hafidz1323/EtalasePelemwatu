@@ -234,4 +234,111 @@ class ProfilDesaTest extends TestCase
         $homeRes->assertStatus(200);
         $homeRes->assertSee(ProfilDesaController::DEFAULTS['desa_alamat']);
     }
+
+    public function test_keterhubungan_profil_desa_admin_ke_homepage_lengkap(): void
+    {
+        Sanctum::actingAs($this->makeAdmin());
+
+        $this->putJson('/api/admin/profil-desa', [
+            'desa_kode_pos' => '61174',
+            'desa_kepala' => 'Kepala Uji Coba',
+            'desa_telepon' => '031-1234567',
+            'desa_jumlah_kk' => 1234,
+            'desa_alamat' => 'Jl. Uji Coba No. 1',
+            'desa_email' => 'ujicoba@desa.id',
+            'desa_whatsapp' => '081234567890',
+            'desa_instagram' => 'ujicoba_desa',
+        ])->assertOk();
+
+        $res = $this->get('/')->assertOk();
+        $html = $res->getContent();
+
+        // 1. Kepala desa muncul di Identitas Desa sebelum baris Status
+        $this->assertStringContainsString('Kepala Uji Coba', $html);
+        $posKepala = strpos($html, 'Kepala Uji Coba');
+        $posStatus = strpos($html, 'Desa Aktif');
+        $this->assertTrue($posKepala !== false && $posStatus !== false && $posKepala < $posStatus, 'Kepala desa harus muncul sebelum baris Status');
+
+        // 2. Kode pos muncul di kartu Lokasi dan TIDAK muncul di bagian Kontak/footer
+        $posLokasi = strpos($html, 'id="tab-lokasi"');
+        $posKontak = strpos($html, 'id="kontak-section"');
+        $this->assertTrue($posLokasi !== false && $posKontak !== false);
+
+        $posKodePos = strpos($html, '61174');
+        $this->assertTrue($posKodePos !== false && $posKodePos > $posLokasi && $posKodePos < $posKontak, 'Kode pos harus muncul di kartu Lokasi');
+
+        $kontakAndFooter = substr($html, $posKontak);
+        $this->assertFalse(strpos($kontakAndFooter, '61174'), 'Kode pos TIDAK boleh muncul di bagian Kontak atau footer');
+
+        // 3. Telepon muncul di bagian Kontak dengan href tel:
+        $res->assertSee('href="tel:031-1234567"', false);
+        $res->assertSee('Telp. Kantor:');
+
+        // 4. KK muncul di #statKK dalam format angka Indonesia (1.234)
+        $res->assertSee('id="statKK">1.234<', false);
+    }
+
+    public function test_field_profil_desa_dikosongkan_baris_hilang_dan_kk_menampilkan_strip(): void
+    {
+        Sanctum::actingAs($this->makeAdmin());
+
+        // Kosongkan field opsional
+        $this->putJson('/api/admin/profil-desa', [
+            'desa_kode_pos' => '',
+            'desa_kepala' => '',
+            'desa_telepon' => '',
+            'desa_jumlah_kk' => '',
+        ])->assertOk();
+
+        $res = $this->get('/')->assertOk();
+        $html = $res->getContent();
+
+        // Baris Kepala Desa tidak boleh tampil di tabel Identitas Desa
+        $this->assertStringNotContainsString('<td>Kepala Desa</td>', $html);
+
+        // Baris Kode Pos tidak boleh tampil di kartu Lokasi
+        $this->assertStringNotContainsString('<h6 class="lokasi-label">Kode Pos</h6>', $html);
+
+        // Baris Telepon Kantor tidak boleh tampil di kartu WhatsApp
+        $this->assertStringNotContainsString('Telp. Kantor:', $html);
+
+        // KK menampilkan tanda strip
+        $res->assertSee('id="statKK">—<', false);
+    }
+
+    public function test_cache_otomatis_dibersihkan_saat_put_kedua_langsung_tampil_nilai_baru(): void
+    {
+        Sanctum::actingAs($this->makeAdmin());
+
+        // PUT pertama
+        $this->putJson('/api/admin/profil-desa', [
+            'desa_kepala' => 'Kepala Versi Pertama',
+        ])->assertOk();
+
+        $res1 = $this->get('/')->assertOk();
+        $res1->assertSee('Kepala Versi Pertama');
+
+        // PUT kedua (tanpa manual Cache::forget)
+        $this->putJson('/api/admin/profil-desa', [
+            'desa_kepala' => 'Kepala Versi Kedua',
+        ])->assertOk();
+
+        $res2 = $this->get('/')->assertOk();
+        $res2->assertSee('Kepala Versi Kedua');
+        $res2->assertDontSee('Kepala Versi Pertama');
+    }
+
+    public function test_karakter_khusus_dan_xss_ter_escape_di_homepage(): void
+    {
+        // Masukkan data dengan tag HTML langsung di DB untuk simulasi escape Blade {{ }}
+        Setting::set('desa_kepala', '<script>alert("xss")</script>');
+        Cache::forget('profil_desa_settings');
+
+        $res = $this->get('/')->assertOk();
+
+        // Tidak boleh muncul sebagai script aktif / raw HTML
+        $res->assertDontSee('<script>alert("xss")</script>', false);
+        // Harus ter-escape secara aman
+        $res->assertSee('&lt;script&gt;alert(&quot;xss&quot;)&lt;/script&gt;', false);
+    }
 }

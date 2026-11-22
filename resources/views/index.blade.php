@@ -157,6 +157,12 @@
                   <td style="color:var(--text-light);">Provinsi</td>
                   <td style="color:var(--clr-blue);font-weight:600;">Jawa Timur</td>
                 </tr>
+                @if(!empty($desa['kepala']))
+                <tr>
+                  <td style="color:var(--text-light);">Kepala Desa</td>
+                  <td style="color:var(--clr-blue);font-weight:600;">{{ $desa['kepala'] }}</td>
+                </tr>
+                @endif
                 <tr>
                   <td style="color:var(--text-light);">Status</td>
                   <td><span class="status-badge status-aktif">Desa Aktif</span></td>
@@ -169,7 +175,7 @@
           <div class="desa-stat-row">
             <div class="desa-stat-card">
               <!-- GANTI angka di bawah dengan jumlah KK resmi dari data desa -->
-              <div class="desa-stat-num" id="statKK">{{ !empty($desa['jumlah_kk']) ? $desa['jumlah_kk'] : '—' }}</div>
+              <div class="desa-stat-num" id="statKK">{{ ($desa['jumlah_kk'] !== null && $desa['jumlah_kk'] !== '') ? number_format((int) $desa['jumlah_kk'], 0, ',', '.') : '—' }}</div>
               <div class="desa-stat-label">Jumlah KK</div>
             </div>
             <div class="desa-stat-card">
@@ -189,6 +195,10 @@
             <h4>Lokasi Desa Pelemwatu</h4>
             <h6 class="lokasi-label">Alamat Resmi</h6>
             <p class="lokasi-alamat">{{ $desa['alamat'] }}</p>
+            @if(!empty($desa['kode_pos']))
+            <h6 class="lokasi-label">Kode Pos</h6>
+            <p class="lokasi-alamat">{{ $desa['kode_pos'] }}</p>
+            @endif
             <a class="btn-outline-custom lokasi-btn" href="https://www.google.com/maps/search/?api=1&query=Desa+Pelemwatu+Menganti+Gresik" target="_blank" rel="noopener">Buka di Google Maps</a>
           </div>
         </div>
@@ -414,6 +424,11 @@
         <i class="bi bi-whatsapp kontak-ikon" aria-hidden="true"></i>
         <h6>WhatsApp</h6>
         <p><a href="https://wa.me/{{ $desa['whatsapp'] }}?text=Halo%2C%20saya%20ingin%20bertanya%20tentang%20EtalasePelemwatu." target="_blank" rel="noopener noreferrer">{{ $desa['whatsapp_display'] }}</a></p>
+        @if(!empty($desa['telepon']))
+        <p class="mt-1 mb-0" style="font-size:.82rem;color:var(--text-light, #6b7280);">
+          Telp. Kantor: <a href="tel:{{ $desa['telepon'] }}" style="color:var(--clr-blue);font-weight:600;">{{ $desa['telepon'] }}</a>
+        </p>
+        @endif
       </div>
       <div class="kontak-item">
         <i class="bi bi-envelope kontak-ikon" aria-hidden="true"></i>
@@ -425,13 +440,6 @@
         <h6>Instagram</h6>
         <p><a href="https://www.instagram.com/{{ $desa['instagram'] }}" target="_blank" rel="noopener noreferrer">{{ '@' . $desa['instagram'] }}</a></p>
       </div>
-      @if(!empty($desa['telepon']))
-      <div class="kontak-item">
-        <i class="bi bi-telephone kontak-ikon" aria-hidden="true"></i>
-        <h6>Telepon</h6>
-        <p><a href="tel:{{ $desa['telepon'] }}">{{ $desa['telepon'] }}</a></p>
-      </div>
-      @endif
     </div>
   </div>
 </section>

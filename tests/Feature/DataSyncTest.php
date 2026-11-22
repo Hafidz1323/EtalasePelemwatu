@@ -231,8 +231,11 @@ class DataSyncTest extends TestCase
         // Verifikasi di homepage GET /
         $home = $this->get('/')->assertOk();
         $home->assertSee('Jl. Merdeka Baru No. 99, Pelemwatu');
+        $home->assertSee('Bambang Sujarwo');
+        $home->assertSee('61254');
+        $home->assertSee('031-8989898');
         $home->assertSee('halo@pelemwatu.desa.id');
-        $home->assertSee('1450');
+        $home->assertSee('1.450');
         $home->assertSee('wa.me/6282299887766');
 
         // Verifikasi di GET /daftar-potensi
