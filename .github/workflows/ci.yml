@@ -24,7 +24,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'npm'
 
       - name: Cache Composer dependencies
@@ -46,11 +46,11 @@ jobs:
       - name: Run Laravel Pint (Code Style Check)
         run: vendor/bin/pint --test
 
-      - name: Run PHPUnit Tests
-        run: php artisan test
-
       - name: Install NPM dependencies
         run: npm ci
 
       - name: Build Assets with Vite
         run: npm run build
+
+      - name: Run PHPUnit Tests
+        run: php artisan test

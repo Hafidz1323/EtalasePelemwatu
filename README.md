@@ -229,6 +229,8 @@ php artisan backup:run
 - **Rotasi Otomatis**: Sistem secara otomatis hanya menyimpan 7 arsip cadangan terakhir dan menghapus arsip yang lebih lama.
 - Cadangan dijadwalkan berjalan otomatis setiap hari via Laravel Scheduler (`routes/console.php`).
 
+> **Penting**: Berkas arsip cadangan tersimpan di penyimpanan lokal server yang sama (`storage/app/backups/`). Untuk mengantisipasi kegagalan server fisik atau kerusakan disk, salin berkas arsip secara berkala ke lokasi penyimpanan luar (offsite/cloud storage) dan lakukan simulasi pemulihan (uji restore) minimal sekali untuk memastikan keutuhan data cadangan.
+
 ### Konfigurasi mysqldump untuk MySQL/MariaDB
 
 Jika menggunakan driver `mysql` atau `mariadb`, pastikan binary `mysqldump` terpasang di sistem dan tentukan path-nya pada `.env`:
@@ -260,15 +262,23 @@ Password dikirim secara aman melalui environment variable `MYSQL_PWD` (tidak tam
 
 ## Panduan Deploy (Produksi)
 
+### Syarat Server
+Sebelum instalasi, pastikan lingkungan server hosting memenuhi checklist berikut:
+- [ ] **PHP >= 8.3**
+- [ ] **Ekstensi PHP wajib**: `gd`, `zip`, `mbstring`, `intl`, dan driver database (`pdo_sqlite` atau `pdo_mysql`)
+- [ ] **Node.js 20.19+ atau 22.12+** (syarat Vite 8) & NPM (untuk proses build aset Vite)
+- [ ] **Koneksi HTTPS aktif** (sertifikat SSL/TLS valid)
+- [ ] **Web Server** (Nginx/Apache) dengan Document Root mengarah langsung ke folder `public/`
+
 ### 1. Konfigurasi Wajib Produksi di `.env`
 
-Pastikan variabel berikut diubah dari nilai bawaan pengembangan:
+Pastikan variabel berikut disesuaikan dari nilai bawaan pengembangan:
 
 ```env
 APP_NAME=EtalasePelemwatu
 APP_ENV=production
 APP_DEBUG=false
-APP_URL=https://etalase.pelemwatu.desa.id
+APP_URL=https://etalase.pelemwatu.id
 
 # Koneksi Database Produksi (Bisa tetap SQLite atau MySQL)
 DB_CONNECTION=sqlite
@@ -276,12 +286,23 @@ DB_CONNECTION=sqlite
 # Kunci Sesi & Keamanan
 APP_KEY=base64:...
 
+# Akun Administrator Awal (Diisi SEBELUM menjalankan seeder)
+ADMIN_NAME="Administrator Desa"
+# Ganti dengan email yang benar-benar Anda kuasai (dipakai untuk login admin)
+ADMIN_EMAIL=admin@pelemwatu.desa.id
+ADMIN_PASSWORD=ISI_PASSWORD_ACAK_MINIMAL_16_KARAKTER
+
 # Token Sanctum Kedaluwarsa (Menit)
 SANCTUM_EXPIRATION=480
 
-# Reverse Proxy (Jika menggunakan Cloudflare/Nginx)
-TRUSTED_PROXIES=*
+# Reverse Proxy:
+# Atur TRUSTED_PROXIES=* HANYA jika server benar-benar berada di balik reverse proxy tepercaya (misalnya Cloudflare atau load balancer Nginx).
+# Jika server langsung melayani pengunjung tanpa reverse proxy, KOSONGKAN variabel ini (TRUSTED_PROXIES=)
+# agar IP asli pengunjung tidak dapat dipalsukan dan pembatasan laju login (rate limiting) tidak dilewati.
+TRUSTED_PROXIES=
 ```
+
+> **Penting (Document Root & Keamanan .env)**: Document root web server (Nginx/Apache) **wajib** mengarah ke folder `public/`. Jangan pernah menaruh seluruh folder proyek langsung di dalam folder root publik web (seperti `public_html`). Uji melalui browser bahwa URL `https://etalase.pelemwatu.id/.env` mengembalikan respons **403 Forbidden** atau **404 Not Found**, bukan mengunduh atau menampilkan isi berkas.
 
 ### 2. Perintah Build & Optimasi Produksi
 
@@ -291,10 +312,19 @@ npm ci
 npm run build
 
 php artisan migrate --force
+php artisan db:seed --force
 php artisan config:cache
 php artisan route:cache
 php artisan view:cache
 ```
+
+> **Catatan Build Aset Vite**:
+> Folder `public/build` diabaikan oleh git (`.gitignore`). Menjalankan `npm ci && npm run build` di server **wajib** dilakukan (atau lakukan build di lingkungan lokal kemudian unggah folder `public/build` ke server). Tanpa langkah ini, seluruh halaman web akan gagal dimuat dengan galat *"Vite manifest not found"*.
+
+> **Catatan Inisialisasi Database Seeder (`db:seed --force`)**:
+> - Pastikan Anda telah mengisi `ADMIN_PASSWORD` yang kuat dan menyesuaikan `ADMIN_EMAIL` di file `.env` **sebelum** menjalankan perintah seeder.
+> - Seeder bersifat idempoten: jika akun admin dengan email tersebut sudah terdaftar di database, seeder **tidak akan menimpa** data nama atau password yang sudah ada.
+> - Segera ganti kata sandi administrator melalui menu profil admin setelah berhasil masuk untuk pertama kali.
 
 ### 3. Izin Akses Folder (File Permissions)
 
@@ -302,6 +332,18 @@ php artisan view:cache
 chmod -R 775 storage bootstrap/cache public/uploads
 chown -R www-data:www-data storage bootstrap/cache public/uploads
 ```
+
+### 4. Konfigurasi Penjadwal Tugas (Cron Job Scheduler)
+
+Jalankan perintah penjadwal Laravel setiap menit menggunakan crontab server Linux (`crontab -e -u www-data`):
+
+```bash
+* * * * * cd /path/ke/proyek && php artisan schedule:run >> /dev/null 2>&1
+```
+
+> **Penting**: Penjadwal tugas (Laravel Scheduler) bertanggung jawab menjalankan proses otomatis krusial secara berkala:
+> 1. **Pencadangan Data Harian (Backup)**: Menjalankan `php artisan backup:run` setiap hari dan melakukan rotasi 7 cadangan terakhir.
+> 2. **Pembersihan Token Sanctum**: Menghapus token autentikasi yang sudah kedaluwarsa dari tabel `personal_access_tokens` agar database tetap bersih dan optimal.
 
 ---
 
@@ -311,7 +353,7 @@ Untuk mencegah eksekusi skrip PHP yang diunggah ke folder publik, tambahkan konf
 
 ```nginx
 server {
-    server_name etalase.pelemwatu.desa.id;
+    server_name etalase.pelemwatu.id;
     root /var/www/EtalasePelemwatu/public;
 
     index index.php index.html;
@@ -357,4 +399,4 @@ vendor/bin/pint --test
 
 ## Lisensi
 
-Proprietary — Pemerintah Desa Pelemwatu. Seluruh hak cipta dilindungi undang-undang.
+Proprietary — Pemerintah Desa Pelemwatu. Seluruh hak cipta dilindungi undang-undang. Teks lengkap ada di berkas [LICENSE](LICENSE).
