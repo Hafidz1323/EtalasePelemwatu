@@ -1,0 +1,39 @@
+# Matikan eksekusi script dan listing direktori
+Options -Indexes -ExecCGI
+
+# Nonaktifkan engine PHP di Apache mod_php jika aktif
+<IfModule mod_php.c>
+    php_flag engine off
+</IfModule>
+<IfModule mod_php7.c>
+    php_flag engine off
+</IfModule>
+<IfModule mod_php8.c>
+    php_flag engine off
+</IfModule>
+
+# Hapus handler script
+RemoveHandler .php .phtml .php3 .php4 .php5 .php7 .php8 .phps .cgi .pl .asp .aspx .sh .bash .exe
+RemoveType .php .phtml .php3 .php4 .php5 .php7 .php8 .phps .cgi .pl .asp .aspx .sh .bash .exe
+
+# Blokir semua eksekusi file script
+<FilesMatch "(?i)\.(php|phtml|php[0-9]|phps|cgi|pl|asp|aspx|sh|bash|exe|py|rb|js)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order deny,allow
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+# Hanya izinkan file gambar
+<FilesMatch "(?i)\.(jpg|jpeg|png|webp)$">
+    <IfModule mod_authz_core.c>
+        Require all granted
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Allow from all
+    </IfModule>
+</FilesMatch>
