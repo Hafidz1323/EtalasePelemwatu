@@ -179,6 +179,7 @@
                   <div class="col-md-6">
                     <label class="form-label">Nomor Telepon <span class="required-mark">*</span></label>
                     <input type="tel" class="form-control" id="f-telp" placeholder="Contoh: 08123456789" required inputmode="tel" maxlength="20">
+                    <div class="form-text text-muted" style="font-size: .8rem;">Nomor ini akan ditampilkan di halaman publik agar pembeli dapat menghubungi Anda.</div>
                   </div>
                   <div class="col-md-6">
                     <label class="form-label">Email</label>
@@ -262,6 +263,7 @@
                   <div class="col-12">
                     <label class="form-label">Kontak Usaha</label>
                     <input type="tel" class="form-control" id="f-kontak-usaha" placeholder="Nomor yang dapat dihubungi calon pelanggan" inputmode="tel" maxlength="20">
+                    <div class="form-text text-muted" style="font-size: .8rem;">Nomor ini akan ditampilkan di halaman publik agar pembeli dapat menghubungi Anda.</div>
                   </div>
                 </div>
 

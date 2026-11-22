@@ -5,10 +5,10 @@ return [
     |--------------------------------------------------------------------------
     | Tampilkan Kontak di Respons Publik
     |--------------------------------------------------------------------------
-    | Jika true, field whatsapp akan disertakan dalam PotensiPublicResource.
-    | Set ke true jika tombol "Hubungi" di frontend membutuhkan nomor WA.
-    | Default: false — lindungi privasi nomor WA warga di endpoint publik.
+    | Jika true (default), field whatsapp akan disertakan dalam PotensiPublicResource
+    | agar calon pembeli / pengunjung dapat menghubungi nomor WhatsApp UMKM.
+    | Set POTENSI_SHOW_CONTACT=false jika ingin menyembunyikan nomor WA dari API publik.
     |
     */
-    'show_contact' => env('POTENSI_SHOW_CONTACT', false),
+    'show_contact' => env('POTENSI_SHOW_CONTACT', true),
 ];

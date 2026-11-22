@@ -174,4 +174,49 @@ class BugFixTest extends TestCase
         $this->assertArrayHasKey('whatsapp', $item,
             'Nomor WhatsApp harus tampil di respons publik saat show_contact=true');
     }
+
+    public function test_secara_default_whatsapp_muncul_di_respons_publik_index_dan_detail(): void
+    {
+        // Tanpa mengatur config, default harus true
+        $p = Potensi::create([
+            'name' => 'Usaha Default Publik WA',
+            'owner_name' => 'Owner Rahasia Privat',
+            'email' => 'privat@desa.id',
+            'whatsapp' => '081234567899',
+            'address' => 'Jl. Rahasia No. 12',
+            'location' => 'Desa Pelemwatu RT 01',
+            'jenis' => 'Kuliner',
+            'jam_operasional' => '08.00 - 17.00 WIB',
+            'description' => 'Usaha kuliner lezat khas desa',
+            'status' => 'approved',
+        ]);
+
+        // 1. Index publik GET /api/potensi
+        $res = $this->getJson('/api/potensi')->assertOk();
+        $item = collect($res->json('data'))->firstWhere('id', $p->id);
+        $this->assertNotNull($item);
+        $this->assertArrayHasKey('whatsapp', $item);
+        $this->assertEquals('081234567899', $item['whatsapp']);
+
+        // Field privat tetap tidak boleh bocor
+        $this->assertArrayNotHasKey('owner_name', $item);
+        $this->assertArrayNotHasKey('email', $item);
+        $this->assertArrayNotHasKey('address', $item);
+        $this->assertArrayNotHasKey('status', $item);
+        $this->assertArrayNotHasKey('rejection_reason', $item);
+
+        // 2. Detail publik GET /api/potensi/{id}
+        $detailRes = $this->getJson('/api/potensi/'.$p->id)->assertOk();
+        $detail = $detailRes->json('data');
+        $this->assertNotNull($detail);
+        $this->assertArrayHasKey('whatsapp', $detail);
+        $this->assertEquals('081234567899', $detail['whatsapp']);
+
+        // Field privat pada detail tetap tidak boleh bocor
+        $this->assertArrayNotHasKey('owner_name', $detail);
+        $this->assertArrayNotHasKey('email', $detail);
+        $this->assertArrayNotHasKey('address', $detail);
+        $this->assertArrayNotHasKey('status', $detail);
+        $this->assertArrayNotHasKey('rejection_reason', $detail);
+    }
 }

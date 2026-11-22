@@ -553,6 +553,7 @@
               <div class="col-md-6">
                 <label class="form-label fw-semibold" style="color:var(--clr-blue);">Nomor WhatsApp <span class="text-danger">*</span></label>
                 <input type="text" class="form-control" id="editPotensiWa" placeholder="08xxxxxxxxxx" maxlength="20">
+                <div class="form-text text-muted" style="font-size: .8rem;">Nomor ini akan ditampilkan di halaman publik agar pembeli dapat menghubungi Anda.</div>
                 <div class="invalid-feedback" id="editPotensiWaErr"></div>
               </div>
               <div class="col-md-6">
@@ -1622,7 +1623,7 @@ document.querySelectorAll('.btn-go-verifikasi').forEach(function(b){
     if (jenisEl) jenisEl.textContent = item.jenis || catName || '-';
 
     var jamEl = document.getElementById('admDetailJam');
-    if (jamEl) jamEl.textContent = item.jam_operasional || '-';
+    if (jamEl) jamEl.textContent = (item.jam_operasional && item.jam_operasional !== '-') ? item.jam_operasional : '—';
 
     var addrEl = document.getElementById('admDetailAddress');
     if (addrEl) addrEl.textContent = item.address || '-';
@@ -1692,7 +1693,7 @@ document.querySelectorAll('.btn-go-verifikasi').forEach(function(b){
         email: tr.dataset.email || '-',
         address: tr.dataset.address || '-',
         description: tr.dataset.desc || '-',
-        jam_operasional: tr.dataset.jam || 'Setiap Hari (08.00 - 21.00)',
+        jam_operasional: tr.dataset.jam || '—',
         jenis: tr.dataset.jenis || tr.dataset.cat || '-',
         status: tr.dataset.status || 'Aktif',
         created_at: tr.dataset.date || ''
