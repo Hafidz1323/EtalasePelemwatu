@@ -7,7 +7,6 @@ use App\Models\Potensi;
 use App\Models\PotensiImage;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
@@ -38,7 +37,7 @@ class PotensiStatusTest extends TestCase
 
     private function admin(): User
     {
-        return User::factory()->create();
+        return User::factory()->admin()->create();
     }
 
     private function category(): Category
@@ -50,12 +49,12 @@ class PotensiStatusTest extends TestCase
     {
         return Potensi::create(array_merge([
             'category_id' => $this->category()->id,
-            'name'        => 'Usaha Test',
-            'owner_name'  => 'Budi Santoso',
-            'whatsapp'    => '081234567890',
-            'address'     => 'Jl. Raya Pelemwatu No. 1',
+            'name' => 'Usaha Test',
+            'owner_name' => 'Budi Santoso',
+            'whatsapp' => '081234567890',
+            'address' => 'Jl. Raya Pelemwatu No. 1',
             'description' => 'Deskripsi usaha yang cukup panjang dan jelas.',
-            'status'      => 'pending',
+            'status' => 'pending',
         ], $attrs));
     }
 
@@ -97,9 +96,9 @@ class PotensiStatusTest extends TestCase
     {
         // Sisipkan langsung nilai lama 'aktif' ke DB (bypass model)
         $id = DB::table('potensi')->insertGetId([
-            'name'       => 'Lama Aktif',
+            'name' => 'Lama Aktif',
             'owner_name' => 'Test',
-            'status'     => 'aktif',
+            'status' => 'aktif',
             'created_at' => now(),
             'updated_at' => now(),
         ]);
@@ -123,8 +122,8 @@ class PotensiStatusTest extends TestCase
         $p = $this->potensi();
 
         $this->putJson("/api/potensi/{$p->id}", ['owner_name' => 'Ahmad123'])
-             ->assertStatus(422)
-             ->assertJsonValidationErrors('owner_name');
+            ->assertStatus(422)
+            ->assertJsonValidationErrors('owner_name');
     }
 
     /** update() harus menolak description yang berisi huruf berulang (not_regex). */
@@ -136,7 +135,7 @@ class PotensiStatusTest extends TestCase
         $this->putJson("/api/potensi/{$p->id}", [
             'description' => 'Ini deskripsi dengan aaaaaaaaaaaaa huruf berulang.',
         ])->assertStatus(422)
-          ->assertJsonValidationErrors('description');
+            ->assertJsonValidationErrors('description');
     }
 
     /** update() harus menolak status 'aktif' (sudah dihapus dari enum). */
@@ -146,8 +145,8 @@ class PotensiStatusTest extends TestCase
         $p = $this->potensi();
 
         $this->putJson("/api/potensi/{$p->id}", ['status' => 'aktif'])
-             ->assertStatus(422)
-             ->assertJsonValidationErrors('status');
+            ->assertStatus(422)
+            ->assertJsonValidationErrors('status');
     }
 
     /** update() menerima status 'approved'. */
@@ -157,7 +156,7 @@ class PotensiStatusTest extends TestCase
         $p = $this->potensi(['status' => 'pending']);
 
         $this->putJson("/api/potensi/{$p->id}", ['status' => 'approved'])
-             ->assertOk();
+            ->assertOk();
 
         $this->assertDatabaseHas('potensi', ['id' => $p->id, 'status' => 'approved']);
     }
@@ -171,16 +170,16 @@ class PotensiStatusTest extends TestCase
     {
         Sanctum::actingAs($this->admin());
         $p = $this->potensi([
-            'status'           => 'rejected',
+            'status' => 'rejected',
             'rejection_reason' => 'Tidak memenuhi syarat',
         ]);
 
         $this->putJson("/api/potensi/{$p->id}", ['status' => 'approved'])
-             ->assertOk();
+            ->assertOk();
 
         $this->assertDatabaseHas('potensi', [
-            'id'               => $p->id,
-            'status'           => 'approved',
+            'id' => $p->id,
+            'status' => 'approved',
             'rejection_reason' => null,
         ]);
     }
@@ -190,12 +189,12 @@ class PotensiStatusTest extends TestCase
     {
         Sanctum::actingAs($this->admin());
         $p = $this->potensi([
-            'status'           => 'rejected',
+            'status' => 'rejected',
             'rejection_reason' => 'Alasan lama',
         ]);
 
         $this->putJson("/api/potensi/{$p->id}", ['status' => 'pending'])
-             ->assertOk();
+            ->assertOk();
 
         $this->assertNull($p->fresh()->rejection_reason);
     }
@@ -205,13 +204,13 @@ class PotensiStatusTest extends TestCase
     {
         Sanctum::actingAs($this->admin());
         $p = $this->potensi([
-            'status'           => 'rejected',
+            'status' => 'rejected',
             'rejection_reason' => 'Alasan tetap',
         ]);
 
         // Update field lain, bukan status
         $this->putJson("/api/potensi/{$p->id}", ['name' => 'Nama Baru Usaha'])
-             ->assertOk();
+            ->assertOk();
 
         $this->assertEquals('Alasan tetap', $p->fresh()->rejection_reason);
     }
@@ -227,15 +226,15 @@ class PotensiStatusTest extends TestCase
         $p = $this->potensi();
 
         // Buat file fisik palsu di public/uploads
-        $filename = 'test_destroy_' . uniqid() . '.jpg';
-        $filePath = public_path('uploads/' . $filename);
+        $filename = 'test_destroy_'.uniqid().'.jpg';
+        $filePath = public_path('uploads/'.$filename);
         file_put_contents($filePath, 'fake image content');
         $this->createdFiles[] = $filePath; // fallback cleanup
 
         // Daftarkan di potensi_images
         PotensiImage::create([
             'potensi_id' => $p->id,
-            'image_path' => '/uploads/' . $filename,
+            'image_path' => '/uploads/'.$filename,
         ]);
 
         $this->assertTrue(file_exists($filePath), 'File harus ada sebelum dihapus');
@@ -255,7 +254,7 @@ class PotensiStatusTest extends TestCase
         // Daftarkan path yang tidak ada di disk
         PotensiImage::create([
             'potensi_id' => $p->id,
-            'image_path' => '/uploads/file_yang_tidak_ada_' . uniqid() . '.jpg',
+            'image_path' => '/uploads/file_yang_tidak_ada_'.uniqid().'.jpg',
         ]);
 
         $this->deleteJson("/api/potensi/{$p->id}")->assertOk();
@@ -273,7 +272,7 @@ class PotensiStatusTest extends TestCase
         $p = $this->potensi();
 
         $this->postJson("/api/potensi/{$p->id}/review", ['status' => 'aktif'])
-             ->assertStatus(422);
+            ->assertStatus(422);
     }
 
     /** PotensiReviewController menerima status 'approved'. */
@@ -283,7 +282,7 @@ class PotensiStatusTest extends TestCase
         $p = $this->potensi(['status' => 'pending']);
 
         $this->postJson("/api/potensi/{$p->id}/review", ['status' => 'approved'])
-             ->assertOk();
+            ->assertOk();
 
         $this->assertDatabaseHas('potensi', ['id' => $p->id, 'status' => 'approved']);
     }

@@ -5,10 +5,26 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Daftarkan Potensi Lokal — EtalasePelemwatu</title>
   <meta name="description" content="Formulir pendaftaran potensi lokal Desa Pelemwatu. Daftarkan usaha, produk, jasa, atau hunian Anda.">
+  <link rel="canonical" href="{{ url()->current() }}">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="{{ url()->current() }}">
+  <meta property="og:title" content="Daftarkan Potensi Lokal — EtalasePelemwatu">
+  <meta property="og:description" content="Formulir pendaftaran potensi lokal Desa Pelemwatu. Daftarkan usaha, produk, jasa, atau hunian Anda.">
+  <meta property="og:image" content="{{ asset('assets/img/foto-kantor-desa.jpg') }}">
+  <meta property="og:locale" content="id_ID">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="{{ url()->current() }}">
+  <meta name="twitter:title" content="Daftarkan Potensi Lokal — EtalasePelemwatu">
+  <meta name="twitter:description" content="Formulir pendaftaran potensi lokal Desa Pelemwatu. Daftarkan usaha, produk, jasa, atau hunian Anda.">
+  <meta name="twitter:image" content="{{ asset('assets/img/foto-kantor-desa.jpg') }}">
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  @vite(['resources/css/app.css', 'resources/js/app.js'])
   <link rel="stylesheet" href="assets/css/style.css">
   <style>
     .form-page-content { padding-top: 80px; }
@@ -163,6 +179,7 @@
                   <div class="col-md-6">
                     <label class="form-label">Nomor Telepon <span class="required-mark">*</span></label>
                     <input type="tel" class="form-control" id="f-telp" placeholder="Contoh: 08123456789" required inputmode="tel" maxlength="20">
+                    <div class="form-text text-muted" style="font-size: .8rem;">Nomor ini akan ditampilkan di halaman publik agar pembeli dapat menghubungi Anda.</div>
                   </div>
                   <div class="col-md-6">
                     <label class="form-label">Email</label>
@@ -246,6 +263,7 @@
                   <div class="col-12">
                     <label class="form-label">Kontak Usaha</label>
                     <input type="tel" class="form-control" id="f-kontak-usaha" placeholder="Nomor yang dapat dihubungi calon pelanggan" inputmode="tel" maxlength="20">
+                    <div class="form-text text-muted" style="font-size: .8rem;">Nomor ini akan ditampilkan di halaman publik agar pembeli dapat menghubungi Anda.</div>
                   </div>
                 </div>
 
@@ -341,7 +359,7 @@
                   Nomor referensi: <strong id="refNumber" style="color:var(--clr-orange);">#EP-0000</strong>
                 </p>
                 <div class="d-flex gap-3 justify-content-center flex-wrap">
-                  <a href="index.html" class="btn-riviera-custom">
+                  <a href="/" class="btn-riviera-custom">
                     <i class="bi bi-house"></i> Kembali ke Beranda
                   </a>
                   <button type="button" class="btn-outline-custom" id="btnDaftarLagi">
@@ -400,13 +418,13 @@
               </p>
               <div style="background:var(--clr-bg);border-radius:8px;padding:.85rem;font-size:.84rem;color:var(--clr-blue);margin-bottom:.6rem;">
                 <i class="bi bi-geo-alt me-1" style="color:var(--clr-orange);"></i>
-                Jl. Raya Pelemwatu No. 128, Kec. Menganti, Kab. Gresik
+                {{ $desa['alamat'] }}
               </div>
               <div style="background:var(--clr-bg);border-radius:8px;padding:.85rem;font-size:.84rem;color:var(--clr-blue);margin-bottom:.6rem;">
                 <i class="bi bi-clock me-1" style="color:var(--clr-orange);"></i>
-                Senin – Jumat, 08.00 – 16.00 WIB
+                {{ $desa['jam_operasional'] }}
               </div>
-              <a href="https://wa.me/6282245730256?text=Halo%2C%20saya%20butuh%20bantuan%20pengisian%20formulir%20EtalasePelemwatu."
+              <a href="https://wa.me/{{ $desa['whatsapp'] }}?text=Halo%2C%20saya%20butuh%20bantuan%20pengisian%20formulir%20EtalasePelemwatu."
                  target="_blank" rel="noopener noreferrer"
                  class="w-100 justify-content-center mt-3"
                  style="display:flex;align-items:center;gap:.5rem;background:#25D366;color:#fff;
@@ -414,7 +432,7 @@
                         text-decoration:none;border:none;">
                 <i class="bi bi-whatsapp"></i> Chat WhatsApp
               </a>
-              <a href="index.html#kontak-section" class="btn-outline-custom w-100 justify-content-center mt-2" style="font-size:.85rem;">
+              <a href="{{ url('/#kontak-section') }}" class="btn-outline-custom w-100 justify-content-center mt-2" style="font-size:.85rem;">
                 <i class="bi bi-envelope"></i> Lihat Info Kontak
               </a>
             </div>
@@ -440,10 +458,10 @@
       </div>
       <div class="col-md-6 text-md-end">
         <ul class="footer-links d-flex gap-3 justify-content-md-end flex-wrap" style="margin:0;">
-          <li><a href="index.html">Beranda</a></li>
-          <li><a href="index.html#katalog">Katalog</a></li>
-          <li><a href="index.html#kontak-section">Kontak</a></li>
-          <li><a href="admin.html">Admin</a></li>
+          <li><a href="/">Beranda</a></li>
+          <li><a href="/#katalog">Katalog</a></li>
+          <li><a href="/#kontak-section">Kontak</a></li>
+          <li><a href="/admin">Admin</a></li>
         </ul>
       </div>
     </div>
@@ -456,7 +474,6 @@
 <div id="toastContainer"></div>
 <button id="backToTop" title="Kembali ke atas"><i class="bi bi-arrow-up"></i></button>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
 'use strict';
 
@@ -1071,25 +1088,9 @@ btt.addEventListener('click', function(){ window.scrollTo({ top: 0, behavior: 's
   </div>
 </div>
 
+<script src="assets/js/utils.js"></script>
 <script src="assets/js/warga-auth.js"></script>
 <script src="assets/js/auth.js"></script>
-<script>
-(function () {
-  var API_BASE = (window.location.protocol === 'file:' || window.location.port === '5500')
-    ? 'http://localhost:8000/api'
-    : (window.location.port === '3000' ? 'http://localhost:3000/api' : '/api');
-
-  fetch(API_BASE + '/settings/logo')
-    .then(function (r) { return r.json(); })
-    .then(function (res) {
-      if (res && res.status === 'success' && res.data && res.data.path) {
-        document.querySelectorAll('[data-site-logo]').forEach(function (img) {
-          img.src = res.data.path;
-        });
-      }
-    })
-    .catch(function () { /* biarkan logo bawaan jika request gagal */ });
-})();
-</script>
+<script src="assets/js/site-logo.js"></script>
 </body>
 </html>

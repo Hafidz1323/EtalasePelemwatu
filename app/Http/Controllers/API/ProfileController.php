@@ -6,8 +6,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
-use Illuminate\Validation\ValidationException;
 use Illuminate\Validation\Rules\Password;
+use Illuminate\Validation\ValidationException;
 
 class ProfileController extends Controller
 {
@@ -17,16 +17,13 @@ class ProfileController extends Controller
     public function show(Request $request)
     {
         $user = $request->user();
-        if (! $user || $user->role !== 'admin') {
-            return response()->json(['status' => 'error', 'message' => 'Akses ditolak.'], 403);
-        }
 
         return response()->json([
-            'status'  => 'success',
+            'status' => 'success',
             'message' => 'Profil admin',
-            'data'    => [
-                'name'   => $user->name,
-                'email'  => $user->email,
+            'data' => [
+                'name' => $user->name,
+                'email' => $user->email,
                 'avatar' => $user->avatar ? url($user->avatar) : null,
             ],
         ]);
@@ -38,45 +35,42 @@ class ProfileController extends Controller
     public function update(Request $request)
     {
         $user = $request->user();
-        if (! $user || $user->role !== 'admin') {
-            return response()->json(['status' => 'error', 'message' => 'Akses ditolak.'], 403);
-        }
 
         $data = $request->validate([
-            'name'   => ['required', 'string', 'max:255'],
-            'email'  => ['required', 'email', 'max:255', 'unique:users,email,' . $user->id],
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'max:255', 'unique:users,email,'.$user->id],
             'avatar' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:1024'],
         ]);
 
-        $user->name  = $data['name'];
+        $user->name = $data['name'];
         $user->email = $data['email'];
 
         if ($request->hasFile('avatar')) {
             // Hapus avatar lama jika ada; validasi path berada di dalam public/uploads
             if ($user->avatar) {
-                $oldPath    = public_path(ltrim($user->avatar, '/'));
+                $oldPath = public_path(ltrim($user->avatar, '/'));
                 $uploadsDir = realpath(public_path('uploads'));
-                $realOld    = file_exists($oldPath) ? realpath($oldPath) : null;
-                if ($realOld && $uploadsDir && str_starts_with($realOld, $uploadsDir . DIRECTORY_SEPARATOR)) {
+                $realOld = file_exists($oldPath) ? realpath($oldPath) : null;
+                if ($realOld && $uploadsDir && str_starts_with($realOld, $uploadsDir.DIRECTORY_SEPARATOR)) {
                     @unlink($realOld);
                 }
             }
 
             // Gunakan ekstensi dari ISI file (bukan nama klien) + nama acak
-            $file     = $request->file('avatar');
-            $filename = 'avatar-' . Str::lower(Str::random(24)) . '.' . $file->extension();
+            $file = $request->file('avatar');
+            $filename = 'avatar-'.Str::lower(Str::random(24)).'.'.$file->extension();
             $file->move(public_path('uploads'), $filename);
-            $user->avatar = '/uploads/' . $filename;
+            $user->avatar = '/uploads/'.$filename;
         }
 
         $user->save();
 
         return response()->json([
-            'status'  => 'success',
+            'status' => 'success',
             'message' => 'Profil berhasil diperbarui.',
-            'data'    => [
-                'name'   => $user->name,
-                'email'  => $user->email,
+            'data' => [
+                'name' => $user->name,
+                'email' => $user->email,
                 'avatar' => $user->avatar ? url($user->avatar) : null,
             ],
         ]);
@@ -88,13 +82,10 @@ class ProfileController extends Controller
     public function changePassword(Request $request)
     {
         $user = $request->user();
-        if (! $user || $user->role !== 'admin') {
-            return response()->json(['status' => 'error', 'message' => 'Akses ditolak.'], 403);
-        }
 
         $data = $request->validate([
-            'current_password'      => ['required', 'string'],
-            'password'              => [
+            'current_password' => ['required', 'string'],
+            'password' => [
                 'required', 'string', 'min:8', 'confirmed',
                 'regex:/[A-Z]/',   // minimal 1 huruf besar
                 'regex:/[0-9]/',   // minimal 1 angka
@@ -102,7 +93,7 @@ class ProfileController extends Controller
             'password_confirmation' => ['required', 'string'],
         ]);
 
-        if (!Hash::check($data['current_password'], $user->password)) {
+        if (! Hash::check($data['current_password'], $user->password)) {
             throw ValidationException::withMessages([
                 'current_password' => ['Password lama tidak sesuai.'],
             ]);
@@ -140,9 +131,9 @@ class ProfileController extends Controller
         }
 
         return response()->json([
-            'status'  => 'success',
+            'status' => 'success',
             'message' => 'Password berhasil diperbarui.',
-            'data'    => null,
+            'data' => null,
         ]);
     }
 }

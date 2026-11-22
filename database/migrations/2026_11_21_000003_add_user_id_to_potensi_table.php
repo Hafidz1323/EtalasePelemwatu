@@ -9,15 +9,16 @@ use Illuminate\Support\Facades\Schema;
  * Nullable agar potensi yang didaftarkan anonim (sebelum fitur warga) tetap valid.
  * nullOnDelete: jika user dihapus, potensinya tidak ikut terhapus (tetap di database).
  */
-return new class extends Migration {
+return new class extends Migration
+{
     public function up(): void
     {
         Schema::table('potensi', function (Blueprint $table) {
             $table->foreignId('user_id')
-                  ->nullable()
-                  ->after('id')
-                  ->constrained('users')
-                  ->nullOnDelete();
+                ->nullable()
+                ->after('id')
+                ->constrained('users')
+                ->nullOnDelete();
         });
     }
 

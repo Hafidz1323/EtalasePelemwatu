@@ -11,7 +11,8 @@ use Illuminate\Support\Facades\Schema;
  * dengan STATUS_PUBLIK = ['approved']. Migrasi ini mengubah default menjadi
  * 'pending' agar fresh install langsung benar.
  */
-return new class extends Migration {
+return new class extends Migration
+{
     public function up(): void
     {
         Schema::table('potensi', function (Blueprint $table) {

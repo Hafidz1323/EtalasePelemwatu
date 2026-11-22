@@ -153,9 +153,11 @@ body.admin-page {
 
 /* Main Content Wrapper - Directly adjacent to sidebar with zero margin-left */
 .admin-main {
-  flex: 1 !important;
+  flex: 1 1 0% !important;
   min-width: 0 !important;
+  min-height: 0 !important;
   height: 100vh !important;
+  max-height: 100vh !important;
   display: flex !important;
   flex-direction: column !important;
   margin-left: 0 !important; /* Critical override: eliminate style.css 260px gap */
@@ -172,6 +174,7 @@ body.admin-page {
   min-width: 270px !important;
   max-width: 270px !important;
   height: 100vh !important;
+  max-height: 100vh !important;
   flex-shrink: 0 !important;
   display: flex !important;
   flex-direction: column !important;
@@ -182,6 +185,7 @@ body.admin-page {
   overflow: hidden !important;
   position: relative !important;
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.25s ease;
+  box-sizing: border-box !important;
 }
 
 /* Sidebar Brand Header */
@@ -222,11 +226,14 @@ body.admin-page {
 
 /* Sidebar Navigation Items (Single Scroll Area) */
 .sidebar-nav {
-  flex: 1;
-  overflow-y: auto;
-  overflow-x: hidden;
+  flex: 1 1 0% !important;
+  min-height: 0 !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
   padding-right: 2px;
   scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
 }
 .sidebar-nav-section {
   font-size: .7rem;
@@ -524,18 +531,42 @@ body.admin-page {
    6. SCROLLABLE CONTENT AREA & SECTIONS
    ============================================================ */
 .admin-content {
-  flex: 1 !important;
+  flex: 1 1 0% !important;
   min-width: 0 !important;
+  min-height: 0 !important;
+  max-height: calc(100vh - 74px) !important;
   overflow-y: auto !important;
   overflow-x: hidden !important;
-  padding: 1.75rem 2rem 2.5rem !important;
+  padding: 1.75rem 2rem 3rem !important;
   scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+}
+.admin-content::-webkit-scrollbar,
+.sidebar-nav::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.admin-content::-webkit-scrollbar-track,
+.sidebar-nav::-webkit-scrollbar-track {
+  background: transparent;
+}
+.admin-content::-webkit-scrollbar-thumb,
+.sidebar-nav::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.4);
+  border-radius: 999px;
+}
+.admin-content::-webkit-scrollbar-thumb:hover,
+.sidebar-nav::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.7);
 }
 .admin-section {
   display: none;
 }
 .admin-section.active {
-  display: block;
+  display: block !important;
+  width: 100% !important;
+  min-height: 0 !important;
   animation: adminFadeIn .2s ease;
 }
 @keyframes adminFadeIn {
@@ -1249,6 +1280,7 @@ a.btn-tambah-potensi:hover {
     font-size: .75rem !important;
   }
   .admin-content {
+    max-height: calc(100vh - 64px) !important;
     padding: 1rem 0.85rem 2rem !important;
   }
   .potensi-toolbar {

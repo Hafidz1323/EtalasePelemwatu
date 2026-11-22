@@ -15,7 +15,7 @@ class PaginationTest extends TestCase
 
     private function admin(): User
     {
-        return User::factory()->create();
+        return User::factory()->admin()->create();
     }
 
     private function category(): Category
@@ -30,12 +30,12 @@ class PaginationTest extends TestCase
         for ($i = 1; $i <= $n; $i++) {
             Potensi::create(array_merge([
                 'category_id' => $cat->id,
-                'name'        => "Potensi $i",
-                'owner_name'  => 'Budi Santoso',
-                'whatsapp'    => '081234567890',
-                'address'     => 'Jl. Raya Pelemwatu No. 1',
+                'name' => "Potensi $i",
+                'owner_name' => 'Budi Santoso',
+                'whatsapp' => '081234567890',
+                'address' => 'Jl. Raya Pelemwatu No. 1',
                 'description' => 'Deskripsi potensi yang cukup panjang dan jelas.',
-                'status'      => 'approved',
+                'status' => 'approved',
             ], $attrs));
         }
     }
@@ -67,8 +67,8 @@ class PaginationTest extends TestCase
 
         $this->assertCount(12, $res->json('data'));
         $this->assertSame(12, $res->json('meta.per_page'));
-        $this->assertSame(1,  $res->json('meta.current_page'));
-        $this->assertSame(2,  $res->json('meta.last_page'));
+        $this->assertSame(1, $res->json('meta.current_page'));
+        $this->assertSame(2, $res->json('meta.last_page'));
         $this->assertSame(15, $res->json('meta.total'));
     }
 
@@ -92,8 +92,8 @@ class PaginationTest extends TestCase
         $res = $this->getJson('/api/potensi?per_page=5')->assertOk();
 
         $this->assertCount(5, $res->json('data'));
-        $this->assertSame(5,  $res->json('meta.per_page'));
-        $this->assertSame(2,  $res->json('meta.last_page'));
+        $this->assertSame(5, $res->json('meta.per_page'));
+        $this->assertSame(2, $res->json('meta.last_page'));
         $this->assertSame(10, $res->json('meta.total'));
     }
 
@@ -135,27 +135,27 @@ class PaginationTest extends TestCase
         // Potensi yang namanya mengandung literal '%'
         Potensi::create([
             'category_id' => $cat->id,
-            'name'        => 'Diskon 50% per bulan',
-            'owner_name'  => 'Budi Santoso',
-            'whatsapp'    => '081234567890',
-            'address'     => 'Jl. Raya Pelemwatu No. 1',
+            'name' => 'Diskon 50% per bulan',
+            'owner_name' => 'Budi Santoso',
+            'whatsapp' => '081234567890',
+            'address' => 'Jl. Raya Pelemwatu No. 1',
             'description' => 'Deskripsi dengan persen di dalamnya.',
-            'status'      => 'approved',
+            'status' => 'approved',
         ]);
 
         // Potensi lain yang tidak mengandung '%'
         Potensi::create([
             'category_id' => $cat->id,
-            'name'        => 'Usaha Biasa Tanpa Persen',
-            'owner_name'  => 'Siti Rahayu',
-            'whatsapp'    => '081234567891',
-            'address'     => 'Jl. Raya Pelemwatu No. 2',
+            'name' => 'Usaha Biasa Tanpa Persen',
+            'owner_name' => 'Siti Rahayu',
+            'whatsapp' => '081234567891',
+            'address' => 'Jl. Raya Pelemwatu No. 2',
             'description' => 'Deskripsi normal tanpa karakter khusus.',
-            'status'      => 'approved',
+            'status' => 'approved',
         ]);
 
         // Search dengan '%' — hanya harus menemukan yang namanya mengandung '%'
-        $res = $this->getJson('/api/potensi?per_page=50&search=' . urlencode('%'))->assertOk();
+        $res = $this->getJson('/api/potensi?per_page=50&search='.urlencode('%'))->assertOk();
         $names = collect($res->json('data'))->pluck('name')->all();
 
         $this->assertContains('Diskon 50% per bulan', $names,
@@ -171,26 +171,26 @@ class PaginationTest extends TestCase
 
         Potensi::create([
             'category_id' => $cat->id,
-            'name'        => 'Usaha_Spesial',
-            'owner_name'  => 'Budi Santoso',
-            'whatsapp'    => '081234567890',
-            'address'     => 'Jl. Raya Pelemwatu No. 1',
+            'name' => 'Usaha_Spesial',
+            'owner_name' => 'Budi Santoso',
+            'whatsapp' => '081234567890',
+            'address' => 'Jl. Raya Pelemwatu No. 1',
             'description' => 'Deskripsi dengan underscore di dalam nama.',
-            'status'      => 'approved',
+            'status' => 'approved',
         ]);
 
         Potensi::create([
             'category_id' => $cat->id,
-            'name'        => 'Usaha Normal',
-            'owner_name'  => 'Siti Rahayu',
-            'whatsapp'    => '081234567891',
-            'address'     => 'Jl. Raya Pelemwatu No. 2',
+            'name' => 'Usaha Normal',
+            'owner_name' => 'Siti Rahayu',
+            'whatsapp' => '081234567891',
+            'address' => 'Jl. Raya Pelemwatu No. 2',
             'description' => 'Deskripsi potensi usaha yang cukup panjang.',
-            'status'      => 'approved',
+            'status' => 'approved',
         ]);
 
         // Search dengan literal '_' — hanya menemukan yang namanya mengandung '_'
-        $res = $this->getJson('/api/potensi?per_page=50&search=' . urlencode('_'))->assertOk();
+        $res = $this->getJson('/api/potensi?per_page=50&search='.urlencode('_'))->assertOk();
         $names = collect($res->json('data'))->pluck('name')->all();
 
         $this->assertContains('Usaha_Spesial', $names);
@@ -211,7 +211,7 @@ class PaginationTest extends TestCase
         // Halaman 1
         $res1 = $this->getJson('/api/potensi?per_page=50&page=1')->assertOk();
         $this->assertSame(50, count($res1->json('data')));
-        $this->assertSame(2,  $res1->json('meta.last_page'));
+        $this->assertSame(2, $res1->json('meta.last_page'));
 
         // Halaman 2
         $res2 = $this->getJson('/api/potensi?per_page=50&page=2')->assertOk();

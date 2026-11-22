@@ -82,10 +82,12 @@
       }
     }
 
+    var safeImg = (window.sanitizeSrc ? window.sanitizeSrc(imgSrc, 'assets/img/foto-warung-desa.jpg') : (imgSrc || 'assets/img/foto-warung-desa.jpg'));
+
     var div = document.createElement('div');
     div.className = 'ks-card';
     div.innerHTML =
-      '<img src="' + (imgSrc || 'assets/img/foto-warung-desa.jpg') + '" alt="' + esc(name) + '" loading="lazy" ' +
+      '<img src="' + safeImg + '" alt="' + esc(name) + '" loading="lazy" ' +
       'onerror="this.onerror=null;this.src=\'assets/img/foto-warung-desa.jpg\'">' +
       '<div class="ks-card-overlay">' +
         '<span class="ks-card-cat">' + esc(cat) + '</span>' +
@@ -226,10 +228,10 @@
     set('dm-nama',         d.name);
     set('dm-cat',          d.cat);
     set('dm-nama-potensi', d.name);
-    set('dm-jenis',        d.jenis || '—');
-    set('dm-jam',          d.jam  || '—');
-    set('dm-lokasi',       d.lokasi || '—');
-    set('dm-deskripsi',    d.deskr || '—');
+    set('dm-jenis',        (d.jenis && d.jenis !== '-' && d.jenis !== 'null') ? d.jenis : '—');
+    set('dm-jam',          (d.jam && d.jam !== '-' && d.jam !== 'null') ? d.jam : '—');
+    set('dm-lokasi',       (d.lokasi && d.lokasi !== '-' && d.lokasi !== 'null') ? d.lokasi : '—');
+    set('dm-deskripsi',    (d.deskr && d.deskr !== '-' && d.deskr !== 'null') ? d.deskr : '—');
 
     // Email — tidak ada di public resource, sembunyikan baris jika kosong
     var emailEl     = document.getElementById('dm-email');
@@ -240,7 +242,7 @@
     // WhatsApp: tampilkan sebagai link klik
     var waEl = document.getElementById('dm-wa');
     if (waEl) {
-      if (d.wa) {
+      if (d.wa && d.wa !== '-' && d.wa !== '—' && d.wa !== 'null') {
         var num = d.wa.replace(/\D/g, '');
         if (num.startsWith('0')) num = '62' + num.substring(1);
         waEl.innerHTML =
@@ -257,7 +259,7 @@
     var placeholderEl = document.getElementById('dm-foto-placeholder');
     if (fotoEl && placeholderEl) {
       if (d.img) {
-        fotoEl.src          = d.img;
+        fotoEl.src          = (window.sanitizeSrc ? window.sanitizeSrc(d.img, '') : d.img);
         fotoEl.style.display = '';
         placeholderEl.style.display = 'none';
       } else {

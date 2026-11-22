@@ -8,7 +8,8 @@ use Illuminate\Support\Facades\Schema;
  * Jadikan kolom email di tabel users nullable.
  * Diperlukan karena warga bisa mendaftar hanya dengan nomor HP (tanpa email).
  */
-return new class extends Migration {
+return new class extends Migration
+{
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {

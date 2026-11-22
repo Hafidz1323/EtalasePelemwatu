@@ -12,37 +12,36 @@ use Illuminate\Http\Resources\Json\JsonResource;
  *   owner_name, email, address, reviewed_by, reviewed_at,
  *   rejection_reason, status.
  *
- * Field whatsapp bersifat opsional via config('potensi.show_contact').
- * Aktifkan jika tombol "Hubungi" di frontend membutuhkan nomor WA.
+ * Field whatsapp disertakan secara default (config('potensi.show_contact') = true)
+ * untuk kebutuhan tombol "Hubungi" / kontak pembeli ke UMKM.
  */
 class PotensiPublicResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
         $data = [
-            'id'              => $this->id,
-            'name'            => $this->name,
-            'description'     => $this->description,
-            'location'        => $this->location,
-            'jenis'           => $this->jenis,
+            'id' => $this->id,
+            'name' => $this->name,
+            'description' => $this->description,
+            'location' => $this->location,
+            'jenis' => $this->jenis,
             'jam_operasional' => $this->jam_operasional,
-            'latitude'        => $this->latitude,
-            'longitude'       => $this->longitude,
-            'created_at'      => $this->created_at,
-            'category'        => $this->whenLoaded('category', fn () => [
-                'id'   => $this->category?->id,
+            'latitude' => $this->latitude,
+            'longitude' => $this->longitude,
+            'created_at' => $this->created_at,
+            'category' => $this->whenLoaded('category', fn () => [
+                'id' => $this->category?->id,
                 'name' => $this->category?->name,
             ]),
-            'images'          => $this->whenLoaded('images', fn () =>
-                $this->images->map(fn ($img) => [
-                    'id'   => $img->id,
-                    'path' => $img->image_path,
-                ])
+            'images' => $this->whenLoaded('images', fn () => $this->images->map(fn ($img) => [
+                'id' => $img->id,
+                'path' => $img->image_path,
+            ])
             ),
         ];
 
-        // Sertakan whatsapp hanya jika dikonfigurasi (tombol "Hubungi")
-        if (config('potensi.show_contact', true)) {
+        // Sertakan whatsapp sesuai konfigurasi potensi.show_contact (default: true)
+        if (config('potensi.show_contact')) {
             $data['whatsapp'] = $this->whatsapp;
         }
 

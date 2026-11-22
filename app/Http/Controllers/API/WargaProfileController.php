@@ -18,6 +18,7 @@ class WargaProfileController extends Controller
         if (! $user || $user->role !== 'warga') {
             return response()->json(['status' => 'error', 'message' => 'Akses ditolak.'], 403);
         }
+
         return null;
     }
 
@@ -35,12 +36,12 @@ class WargaProfileController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'data'   => [
-                'id'    => $user->id,
-                'name'  => $user->name,
+            'data' => [
+                'id' => $user->id,
+                'name' => $user->name,
                 'email' => $user->email,
                 'phone' => $user->phone,
-                'role'  => $user->role,
+                'role' => $user->role,
             ],
         ]);
     }
@@ -58,11 +59,11 @@ class WargaProfileController extends Controller
         $user = $request->user();
 
         $data = $request->validate([
-            'name'  => ['sometimes', 'required', 'string', 'max:255'],
-            'phone' => ['sometimes', 'required', 'string', 'regex:/^08[1-9][0-9]{7,10}$/', 'unique:users,phone,' . $user->id],
-            'email' => ['sometimes', 'nullable', 'email:rfc', 'max:255', 'unique:users,email,' . $user->id],
+            'name' => ['sometimes', 'required', 'string', 'max:255'],
+            'phone' => ['sometimes', 'required', 'string', 'regex:/^08[1-9][0-9]{7,10}$/', 'unique:users,phone,'.$user->id],
+            'email' => ['sometimes', 'nullable', 'email:rfc', 'max:255', 'unique:users,email,'.$user->id],
         ], [
-            'phone.regex'  => 'Nomor HP tidak valid. Contoh: 081234567890.',
+            'phone.regex' => 'Nomor HP tidak valid. Contoh: 081234567890.',
             'phone.unique' => 'Nomor HP sudah dipakai akun lain.',
             'email.unique' => 'Email sudah dipakai akun lain.',
         ]);
@@ -70,14 +71,14 @@ class WargaProfileController extends Controller
         $user->fill($data)->save();
 
         return response()->json([
-            'status'  => 'success',
+            'status' => 'success',
             'message' => 'Profil berhasil diperbarui.',
-            'data'    => [
-                'id'    => $user->id,
-                'name'  => $user->name,
+            'data' => [
+                'id' => $user->id,
+                'name' => $user->name,
                 'email' => $user->email,
                 'phone' => $user->phone,
-                'role'  => $user->role,
+                'role' => $user->role,
             ],
         ]);
     }
@@ -95,8 +96,8 @@ class WargaProfileController extends Controller
         $user = $request->user();
 
         $data = $request->validate([
-            'current_password'      => ['required', 'string'],
-            'password'              => ['required', 'string', 'min:8', 'confirmed'],
+            'current_password' => ['required', 'string'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
             'password_confirmation' => ['required', 'string'],
         ]);
 
@@ -111,7 +112,7 @@ class WargaProfileController extends Controller
 
         // Cabut semua token lain
         $currentTokenId = null;
-        $accessToken    = $user->currentAccessToken();
+        $accessToken = $user->currentAccessToken();
         if ($accessToken && isset($accessToken->id)) {
             $currentTokenId = $accessToken->id;
         }
@@ -123,7 +124,7 @@ class WargaProfileController extends Controller
         }
 
         return response()->json([
-            'status'  => 'success',
+            'status' => 'success',
             'message' => 'Password berhasil diperbarui.',
         ]);
     }

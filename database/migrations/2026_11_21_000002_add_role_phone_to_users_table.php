@@ -10,7 +10,8 @@ use Illuminate\Support\Facades\Schema;
  *   Default 'admin' agar user lama (admin yang sudah ada) tetap berfungsi.
  * - phone: nomor WhatsApp/HP warga, dipakai sebagai alternatif login.
  */
-return new class extends Migration {
+return new class extends Migration
+{
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {

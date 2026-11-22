@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\EnsureRole;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -13,10 +14,14 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->alias([
+            'role' => EnsureRole::class,
+        ]);
+
         // Percayai proxy tertentu berdasarkan env TRUSTED_PROXIES.
         // Isi dengan IP proxy (koma-pisah) atau '*' untuk semua, kosongkan jika tidak ada proxy.
         $trustedProxies = env('TRUSTED_PROXIES', '');
-        if (!empty($trustedProxies)) {
+        if (! empty($trustedProxies)) {
             $middleware->trustProxies(
                 at: $trustedProxies === '*' ? '*' : array_map('trim', explode(',', $trustedProxies))
             );

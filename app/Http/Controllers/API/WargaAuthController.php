@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\Rules\Password;
 use Laravel\Sanctum\PersonalAccessToken;
 
 class WargaAuthController extends Controller
@@ -18,44 +17,51 @@ class WargaAuthController extends Controller
     public function register(Request $request)
     {
         $data = $request->validate([
-            'name'                  => ['required', 'string', 'min:3', 'max:100'],
-            'email'                 => ['nullable', 'email:rfc', 'max:100', 'unique:users,email'],
-            'phone'                 => ['required', 'regex:/^08[1-9][0-9]{7,10}$/', 'unique:users,phone'],
-            'password'              => ['required', 'string', 'min:8', 'confirmed'],
+            'name' => ['required', 'string', 'min:3', 'max:100'],
+            'email' => ['nullable', 'email:rfc', 'max:100', 'unique:users,email'],
+            'phone' => ['required', 'regex:/^08[1-9][0-9]{7,10}$/', 'unique:users,phone'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
             'password_confirmation' => ['required', 'string'],
         ], [
-            'name.required'    => 'Nama lengkap wajib diisi.',
-            'name.min'         => 'Nama minimal 3 karakter.',
-            'email.email'      => 'Format email tidak valid.',
-            'email.unique'     => 'Email ini sudah terdaftar.',
-            'phone.required'   => 'Nomor HP wajib diisi.',
-            'phone.regex'      => 'Nomor HP tidak valid. Contoh: 08123456789.',
-            'phone.unique'     => 'Nomor HP ini sudah terdaftar.',
-            'password.min'     => 'Password minimal 8 karakter.',
-            'password.confirmed'=> 'Konfirmasi password tidak cocok.',
+            'name.required' => 'Nama lengkap wajib diisi.',
+            'name.min' => 'Nama minimal 3 karakter.',
+            'email.email' => 'Format email tidak valid.',
+            'email.unique' => 'Email ini sudah terdaftar.',
+            'phone.required' => 'Nomor HP wajib diisi.',
+            'phone.regex' => 'Nomor HP tidak valid. Contoh: 08123456789.',
+            'phone.unique' => 'Nomor HP ini sudah terdaftar.',
+            'password.min' => 'Password minimal 8 karakter.',
+            'password.confirmed' => 'Konfirmasi password tidak cocok.',
         ]);
 
         $user = User::create([
-            'name'     => $data['name'],
-            'email'    => $data['email'] ?? null,
-            'phone'    => $data['phone'],
+            'name' => $data['name'],
+            'email' => $data['email'] ?? null,
+            'phone' => $data['phone'],
             'password' => Hash::make($data['password']),
-            'role'     => 'warga',
+            'role' => 'warga',
         ]);
+
+        // Batasi maksimal 5 token aktif per user
+        $excess = $user->tokens()->count() - 4;
+        if ($excess > 0) {
+            $ids = $user->tokens()->oldest()->limit($excess)->pluck('id');
+            $user->tokens()->whereIn('id', $ids)->delete();
+        }
 
         $token = $user->createToken('warga-token')->plainTextToken;
 
         return response()->json([
-            'status'  => 'success',
+            'status' => 'success',
             'message' => 'Akun berhasil dibuat.',
-            'data'    => [
+            'data' => [
                 'token' => $token,
-                'user'  => [
-                    'id'    => $user->id,
-                    'name'  => $user->name,
+                'user' => [
+                    'id' => $user->id,
+                    'name' => $user->name,
                     'email' => $user->email,
                     'phone' => $user->phone,
-                    'role'  => $user->role,
+                    'role' => $user->role,
                 ],
             ],
         ], 201);
@@ -68,10 +74,10 @@ class WargaAuthController extends Controller
     public function login(Request $request)
     {
         $data = $request->validate([
-            'login'    => ['required', 'string', 'max:255'],
+            'login' => ['required', 'string', 'max:255'],
             'password' => ['required', 'string', 'max:255'],
         ], [
-            'login.required'    => 'Email atau nomor HP wajib diisi.',
+            'login.required' => 'Email atau nomor HP wajib diisi.',
             'password.required' => 'Password wajib diisi.',
         ]);
 
@@ -85,30 +91,37 @@ class WargaAuthController extends Controller
             $user = User::where('phone', $phone)->where('role', 'warga')->first();
         } else {
             $user = User::whereRaw('LOWER(email) = ?', [strtolower($login)])
-                        ->where('role', 'warga')
-                        ->first();
+                ->where('role', 'warga')
+                ->first();
         }
 
         if (! $user || ! Hash::check($data['password'], $user->password)) {
             return response()->json([
-                'status'  => 'error',
+                'status' => 'error',
                 'message' => 'Nomor HP/email atau password salah.',
             ], 401);
+        }
+
+        // Batasi maksimal 5 token aktif per user
+        $excess = $user->tokens()->count() - 4;
+        if ($excess > 0) {
+            $ids = $user->tokens()->oldest()->limit($excess)->pluck('id');
+            $user->tokens()->whereIn('id', $ids)->delete();
         }
 
         $token = $user->createToken('warga-token')->plainTextToken;
 
         return response()->json([
-            'status'  => 'success',
+            'status' => 'success',
             'message' => 'Login berhasil.',
-            'data'    => [
+            'data' => [
                 'token' => $token,
-                'user'  => [
-                    'id'    => $user->id,
-                    'name'  => $user->name,
+                'user' => [
+                    'id' => $user->id,
+                    'name' => $user->name,
                     'email' => $user->email,
                     'phone' => $user->phone,
-                    'role'  => $user->role,
+                    'role' => $user->role,
                 ],
             ],
         ]);
@@ -140,13 +153,13 @@ class WargaAuthController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'data'   => [
+            'data' => [
                 'user' => [
-                    'id'    => $user->id,
-                    'name'  => $user->name,
+                    'id' => $user->id,
+                    'name' => $user->name,
                     'email' => $user->email,
                     'phone' => $user->phone,
-                    'role'  => $user->role,
+                    'role' => $user->role,
                 ],
             ],
         ]);

@@ -21,4 +21,3 @@ class PotensiImage extends Model
         return $this->belongsTo(Potensi::class, 'potensi_id');
     }
 }
-

@@ -1,2 +1,7 @@
 User-agent: *
-Disallow:
+Disallow: /admin
+Disallow: /api/
+Disallow: /profil-warga
+Allow: /
+
+Sitemap: /sitemap.xml

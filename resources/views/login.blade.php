@@ -5,8 +5,24 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Login Admin — EtalasePelemwatu</title>
   <meta name="description" content="Halaman login administrator portal potensi lokal Desa Pelemwatu.">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="canonical" href="{{ url()->current() }}">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="{{ url()->current() }}">
+  <meta property="og:title" content="Login Admin — EtalasePelemwatu">
+  <meta property="og:description" content="Halaman login administrator portal potensi lokal Desa Pelemwatu.">
+  <meta property="og:image" content="{{ asset('assets/img/foto-kantor-desa.jpg') }}">
+  <meta property="og:locale" content="id_ID">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="{{ url()->current() }}">
+  <meta name="twitter:title" content="Login Admin — EtalasePelemwatu">
+  <meta name="twitter:description" content="Halaman login administrator portal potensi lokal Desa Pelemwatu.">
+  <meta name="twitter:image" content="{{ asset('assets/img/foto-kantor-desa.jpg') }}">
+
+  @vite(['resources/css/app.css', 'resources/js/app.js'])
   <link rel="stylesheet" href="assets/css/style.css">
   <style>
     body.login-page {
@@ -250,7 +266,10 @@
   <div class="login-card-container">
     <!-- Header Brand -->
     <div class="login-brand-header">
-      <div class="logo-badge">EP</div>
+      <div class="logo-badge" style="overflow:hidden;position:relative;">
+        <img data-site-logo src="/assets/img/logo-desa.png" alt="Logo Desa" style="width:100%;height:100%;object-fit:contain;display:none;" onload="this.style.display='block';var fb=this.parentNode.querySelector('.logo-fallback');if(fb)fb.style.display='none';">
+        <span class="logo-fallback">EP</span>
+      </div>
       <h1>EtalasePelemwatu</h1>
       <p>Panel Akses Khusus Administrator Desa</p>
     </div>
@@ -330,7 +349,7 @@
 
     <!-- Footer link -->
     <div class="login-footer-links">
-      <a href="index.html">
+      <a href="/">
         <i class="bi bi-arrow-left"></i> Kembali ke Website EtalasePelemwatu
       </a>
     </div>
@@ -369,7 +388,7 @@
           if (parsed && parsed.isLoggedIn) {
             showAlert('Sesi aktif terdeteksi. Mengarahkan ke panel admin...', 'info');
             setTimeout(function () {
-              window.location.href = 'admin.html';
+              window.location.href = '/admin';
             }, 800);
           }
         } catch (e) {
@@ -439,7 +458,7 @@
           // 1. Coba hubungi backend API
           try {
             const API_BASE = (window.location.protocol === 'file:' || window.location.port === '5500') ? 'http://localhost:8000/api' : (window.location.port === '3000' ? 'http://localhost:3000/api' : '/api');
-            const response = await fetch(API_BASE + '/auth/login', {
+            const response = await fetch(API_BASE + '/login', {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json'
@@ -491,7 +510,7 @@
 
             showAlert('Login berhasil! Mengalihkan ke Panel Admin...', 'success');
             setTimeout(function () {
-              window.location.href = 'admin.html';
+              window.location.href = '/admin';
             }, 750);
           } else {
             showAlert('Email atau kata sandi tidak cocok. Silakan periksa kembali.', 'error');
@@ -512,6 +531,8 @@
       }
     })();
   </script>
+  <script src="assets/js/utils.js"></script>
+  <script src="assets/js/site-logo.js"></script>
 </body>
 </html>
 

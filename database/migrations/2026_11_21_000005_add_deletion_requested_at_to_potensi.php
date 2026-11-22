@@ -9,7 +9,8 @@ use Illuminate\Support\Facades\Schema;
  * Diisi saat warga mengajukan permintaan hapus ke admin.
  * Null = tidak ada permintaan; not-null = sedang menunggu persetujuan admin.
  */
-return new class extends Migration {
+return new class extends Migration
+{
     public function up(): void
     {
         Schema::table('potensi', function (Blueprint $table) {

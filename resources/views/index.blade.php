@@ -5,10 +5,26 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>EtalasePelemwatu — Portal Potensi Lokal Desa Pelemwatu</title>
   <meta name="description" content="Portal digital potensi lokal Desa Pelemwatu, Kecamatan Menganti, Kabupaten Gresik, Jawa Timur.">
+  <link rel="canonical" href="{{ url()->current() }}">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="{{ url()->current() }}">
+  <meta property="og:title" content="EtalasePelemwatu — Portal Potensi Lokal Desa Pelemwatu">
+  <meta property="og:description" content="Portal digital potensi lokal Desa Pelemwatu, Kecamatan Menganti, Kabupaten Gresik, Jawa Timur.">
+  <meta property="og:image" content="{{ asset('assets/img/foto-kantor-desa.jpg') }}">
+  <meta property="og:locale" content="id_ID">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="{{ url()->current() }}">
+  <meta name="twitter:title" content="EtalasePelemwatu — Portal Potensi Lokal Desa Pelemwatu">
+  <meta name="twitter:description" content="Portal digital potensi lokal Desa Pelemwatu, Kecamatan Menganti, Kabupaten Gresik, Jawa Timur.">
+  <meta name="twitter:image" content="{{ asset('assets/img/foto-kantor-desa.jpg') }}">
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  @vite(['resources/css/app.css', 'resources/js/app.js'])
   <link rel="stylesheet" href="assets/css/style.css">
   <link rel="stylesheet" href="assets/css/galeri.css">
   <script>document.documentElement.classList.add('js-anim');</script>
@@ -93,20 +109,96 @@
 
     <!-- Tab Nav -->
     <div class="profil-nav reveal">
-      <button class="profil-nav-btn active" data-tab="tab-tentang">
+      <button class="profil-nav-btn active" data-tab="tab-galeri">
+        Galeri Kegiatan
+      </button>
+      <button class="profil-nav-btn" data-tab="tab-tentang">
         Tentang Desa
       </button>
       <button class="profil-nav-btn" data-tab="tab-lokasi">
         Lokasi Desa
       </button>
-      <button class="profil-nav-btn" data-tab="tab-galeri">
-        Galeri Kegiatan
-      </button>
+    </div>
 
+    <!-- TAB: Galeri -->
+    <div class="profil-tab-pane active" id="tab-galeri">
+      @php
+        $galeriItems = \App\Models\Galeri::orderBy('sort_order', 'asc')->orderBy('id', 'asc')->get();
+      @endphp
+
+      @if($galeriItems->isEmpty())
+        <div class="desa-info-card py-5 text-center text-muted gs-empty">
+          <i class="bi bi-images me-2" style="font-size: 2.2rem; display: block; margin-bottom: .6rem; color: var(--clr-text-light);"></i>
+          <span>Belum ada foto kegiatan.</span>
+        </div>
+      @else
+        <div class="gs-container" id="gsContainer" role="region" aria-roledescription="carousel" aria-label="Galeri Kegiatan Desa Pelemwatu" tabindex="0">
+          <div class="gs-layout">
+            <!-- Sisi Kiri: Rel Vertikal & Teks -->
+            <div class="gs-sidebar">
+              <!-- Rel Vertikal Dots -->
+              <div class="gs-rail-wrapper">
+                <div class="gs-rail" id="gsRail">
+                  <div class="gs-rail-line" aria-hidden="true"></div>
+                  <div class="gs-dots-window" id="gsDotsWindow"></div>
+                </div>
+                <div class="gs-counter" id="gsCounter" aria-hidden="true">
+                  <span id="gsCounterCurrent">1</span> / <span id="gsCounterTotal">{{ $galeriItems->count() }}</span>
+                </div>
+              </div>
+
+              <!-- Konten Teks Aktif -->
+              <div class="gs-content" id="gsContent" aria-live="polite">
+                <h3 class="gs-title" id="gsTitle">{{ $galeriItems->first()->caption }}</h3>
+                <p class="gs-desc" id="gsDesc">{{ $galeriItems->first()->description ?: 'Dokumentasi kegiatan masyarakat dan aktivitas di Desa Pelemwatu.' }}</p>
+                <div class="gs-actions">
+                  <button type="button" class="btn-primary-custom gs-btn-view" id="gsBtnView" aria-label="Lihat foto: {{ $galeriItems->first()->caption }}">
+                    <i class="bi bi-arrows-fullscreen me-2"></i>Lihat Foto
+                  </button>
+                  <div class="gs-nav-arrows">
+                    <button type="button" class="gs-arrow gs-arrow-prev" id="gsPrev" aria-label="Foto sebelumnya" disabled>
+                      <i class="bi bi-arrow-left"></i>
+                    </button>
+                    <button type="button" class="gs-arrow gs-arrow-next" id="gsNext" aria-label="Foto berikutnya" {{ $galeriItems->count() <= 1 ? 'disabled' : '' }}>
+                      <i class="bi bi-arrow-right"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Sisi Kanan: Viewport & Track Kartu Horizontal -->
+            <div class="gs-viewport" id="gsViewport">
+              <div class="gs-track" id="gsTrack">
+                @foreach($galeriItems as $idx => $g)
+                <div class="gs-card {{ $idx === 0 ? 'is-active' : '' }}"
+                     data-index="{{ $idx }}"
+                     data-src="{{ $g->image_path }}"
+                     data-caption="{{ $g->caption }}"
+                     data-desc="{{ $g->description ?? '' }}"
+                     role="group"
+                     aria-roledescription="slide"
+                     aria-label="{{ $idx + 1 }} dari {{ $galeriItems->count() }}: {{ $g->caption }}">
+                  <div class="gs-card-inner">
+                    <img src="{{ $g->image_path }}"
+                         alt="{{ $g->caption }}"
+                         loading="{{ $idx < 2 ? 'eager' : 'lazy' }}"
+                         draggable="false">
+                    <div class="gs-card-overlay">
+                      <span class="gs-card-zoom-badge"><i class="bi bi-zoom-in me-1"></i>Perbesar</span>
+                    </div>
+                  </div>
+                </div>
+                @endforeach
+              </div>
+            </div>
+          </div>
+        </div>
+      @endif
     </div>
 
     <!-- TAB: Tentang -->
-    <div class="profil-tab-pane active" id="tab-tentang">
+    <div class="profil-tab-pane" id="tab-tentang">
       <div class="row g-4">
         <div class="col-lg-7">
           <div class="desa-info-card">
@@ -141,6 +233,12 @@
                   <td style="color:var(--text-light);">Provinsi</td>
                   <td style="color:var(--clr-blue);font-weight:600;">Jawa Timur</td>
                 </tr>
+                @if(!empty($desa['kepala']))
+                <tr>
+                  <td style="color:var(--text-light);">Kepala Desa</td>
+                  <td style="color:var(--clr-blue);font-weight:600;">{{ $desa['kepala'] }}</td>
+                </tr>
+                @endif
                 <tr>
                   <td style="color:var(--text-light);">Status</td>
                   <td><span class="status-badge status-aktif">Desa Aktif</span></td>
@@ -153,11 +251,11 @@
           <div class="desa-stat-row">
             <div class="desa-stat-card">
               <!-- GANTI angka di bawah dengan jumlah KK resmi dari data desa -->
-              <div class="desa-stat-num" id="statKK">&mdash;</div>
+              <div class="desa-stat-num" id="statKK">{{ ($desa['jumlah_kk'] !== null && $desa['jumlah_kk'] !== '') ? number_format((int) $desa['jumlah_kk'], 0, ',', '.') : '—' }}</div>
               <div class="desa-stat-label">Jumlah KK</div>
             </div>
             <div class="desa-stat-card">
-              <div class="desa-stat-num" id="statUMKM">7</div>
+              <div class="desa-stat-num" id="statUMKM">&mdash;</div>
               <div class="desa-stat-label">UMKM Terdaftar</div>
             </div>
           </div>
@@ -172,7 +270,11 @@
           <div class="desa-info-card lokasi-card h-100">
             <h4>Lokasi Desa Pelemwatu</h4>
             <h6 class="lokasi-label">Alamat Resmi</h6>
-            <p class="lokasi-alamat">Jl. Raya Pelemwatu No. 128,<br>Kecamatan Menganti,<br>Kabupaten Gresik, Jawa Timur</p>
+            <p class="lokasi-alamat">{{ $desa['alamat'] }}</p>
+            @if(!empty($desa['kode_pos']))
+            <h6 class="lokasi-label">Kode Pos</h6>
+            <p class="lokasi-alamat">{{ $desa['kode_pos'] }}</p>
+            @endif
             <a class="btn-outline-custom lokasi-btn" href="https://www.google.com/maps/search/?api=1&query=Desa+Pelemwatu+Menganti+Gresik" target="_blank" rel="noopener">Buka di Google Maps</a>
           </div>
         </div>
@@ -184,87 +286,6 @@
             </div>
           </div>
         </div>
-      </div>
-    </div>
-
-    <!-- TAB: Galeri -->
-    <div class="profil-tab-pane" id="tab-galeri">
-      <div class="desa-info-card mb-4">
-        <h4>Galeri Kegiatan Desa Pelemwatu</h4>
-        <p class="mb-0">Dokumentasi kegiatan masyarakat dan aktivitas yang berlangsung di Desa Pelemwatu.</p>
-      </div>
-      <div class="galeri-card-grid" id="galeriGrid">
-
-        <div class="galeri-card"
-             data-src="assets/img/kegiatan-kantor-desa.jpg"
-             data-caption="Rapat Koordinasi Desa"
-             data-desc="Kegiatan rapat koordinasi rutin yang dihadiri oleh perangkat desa dan perwakilan warga untuk membahas program dan kebijakan desa.">
-          <div class="galeri-card-img">
-            <img src="assets/img/kegiatan-kantor-desa.jpg" alt="Rapat Koordinasi Desa" loading="lazy">
-            <div class="galeri-card-zoom"><i class="bi bi-zoom-in"></i></div>
-          </div>
-          <div class="galeri-card-info">
-            <h6 class="galeri-card-title">Rapat Koordinasi Desa</h6>
-            <p class="galeri-card-desc">Kegiatan rapat koordinasi rutin yang dihadiri oleh perangkat desa dan perwakilan warga untuk membahas program dan kebijakan desa.</p>
-          </div>
-        </div>
-
-        <div class="galeri-card"
-             data-src="assets/img/kegiatan-kerja-bakti.jpg"
-             data-caption="Kerja Bakti Warga"
-             data-desc="Kegiatan gotong royong membersihkan lingkungan desa yang diikuti oleh seluruh lapisan masyarakat Desa Pelemwatu secara sukarela.">
-          <div class="galeri-card-img">
-            <img src="assets/img/kegiatan-kerja-bakti.jpg" alt="Kerja Bakti Warga" loading="lazy">
-            <div class="galeri-card-zoom"><i class="bi bi-zoom-in"></i></div>
-          </div>
-          <div class="galeri-card-info">
-            <h6 class="galeri-card-title">Kerja Bakti Warga</h6>
-            <p class="galeri-card-desc">Kegiatan gotong royong membersihkan lingkungan desa yang diikuti oleh seluruh lapisan masyarakat Desa Pelemwatu secara sukarela.</p>
-          </div>
-        </div>
-
-        <div class="galeri-card"
-             data-src="assets/img/kegiatan-penghijauan.jpg"
-             data-caption="Program Penghijauan"
-             data-desc="Program penanaman pohon dan tanaman di area desa sebagai upaya menjaga lingkungan hijau dan asri di Desa Pelemwatu.">
-          <div class="galeri-card-img">
-            <img src="assets/img/kegiatan-penghijauan.jpg" alt="Program Penghijauan" loading="lazy">
-            <div class="galeri-card-zoom"><i class="bi bi-zoom-in"></i></div>
-          </div>
-          <div class="galeri-card-info">
-            <h6 class="galeri-card-title">Program Penghijauan</h6>
-            <p class="galeri-card-desc">Program penanaman pohon dan tanaman di area desa sebagai upaya menjaga lingkungan hijau dan asri di Desa Pelemwatu.</p>
-          </div>
-        </div>
-
-        <div class="galeri-card"
-             data-src="assets/img/foto-kantor-desa.jpg"
-             data-caption="Kantor Desa Pelemwatu"
-             data-desc="Kantor Desa Pelemwatu sebagai pusat pelayanan administrasi dan pemerintahan desa yang melayani kebutuhan warga setiap hari kerja.">
-          <div class="galeri-card-img">
-            <img src="assets/img/foto-kantor-desa.jpg" alt="Kantor Desa Pelemwatu" loading="lazy">
-            <div class="galeri-card-zoom"><i class="bi bi-zoom-in"></i></div>
-          </div>
-          <div class="galeri-card-info">
-            <h6 class="galeri-card-title">Kantor Desa Pelemwatu</h6>
-            <p class="galeri-card-desc">Kantor Desa Pelemwatu sebagai pusat pelayanan administrasi dan pemerintahan desa yang melayani kebutuhan warga setiap hari kerja.</p>
-          </div>
-        </div>
-
-        <div class="galeri-card"
-             data-src="assets/img/foto-warung-desa.jpg"
-             data-caption="Warung Usaha Warga"
-             data-desc="Salah satu contoh usaha kuliner milik warga Desa Pelemwatu yang berhasil berkembang dan menjadi bagian dari potensi ekonomi lokal desa.">
-          <div class="galeri-card-img">
-            <img src="assets/img/foto-warung-desa.jpg" alt="Warung Usaha Warga" loading="lazy">
-            <div class="galeri-card-zoom"><i class="bi bi-zoom-in"></i></div>
-          </div>
-          <div class="galeri-card-info">
-            <h6 class="galeri-card-title">Warung Usaha Warga</h6>
-            <p class="galeri-card-desc">Salah satu contoh usaha kuliner milik warga Desa Pelemwatu yang berhasil berkembang dan menjadi bagian dari potensi ekonomi lokal desa.</p>
-          </div>
-        </div>
-
       </div>
     </div>
 
@@ -396,7 +417,7 @@
         <div class="layanan-card reveal">
           <h4>Pendaftaran Potensi Lokal</h4>
           <p>Daftarkan usaha, produk, jasa, hunian, atau barang milik Anda ke dalam katalog potensi Desa Pelemwatu secara mudah dan gratis.</p>
-          <a href="daftar-potensi.html" class="btn-primary-custom">
+          <a href="/daftar-potensi" class="btn-primary-custom">
             Daftarkan Sekarang
           </a>
         </div>
@@ -436,27 +457,32 @@
       <div class="kontak-item">
         <i class="bi bi-geo-alt kontak-ikon" aria-hidden="true"></i>
         <h6>Alamat</h6>
-        <p>Jl. Raya Pelemwatu No. 128, Kecamatan Menganti, Kabupaten Gresik, Jawa Timur</p>
+        <p>{{ $desa['alamat'] }}</p>
       </div>
       <div class="kontak-item">
         <i class="bi bi-clock kontak-ikon" aria-hidden="true"></i>
         <h6>Jam Operasional</h6>
-        <p>Senin – Jumat, 08.00 – 16.00 WIB</p>
+        <p>{{ $desa['jam_operasional'] }}</p>
       </div>
       <div class="kontak-item">
         <i class="bi bi-whatsapp kontak-ikon" aria-hidden="true"></i>
         <h6>WhatsApp</h6>
-        <p><a href="https://wa.me/6282245730256?text=Halo%2C%20saya%20ingin%20bertanya%20tentang%20EtalasePelemwatu." target="_blank" rel="noopener noreferrer">0822-4573-0256</a></p>
+        <p><a href="https://wa.me/{{ $desa['whatsapp'] }}?text=Halo%2C%20saya%20ingin%20bertanya%20tentang%20EtalasePelemwatu." target="_blank" rel="noopener noreferrer">{{ $desa['whatsapp_display'] }}</a></p>
+        @if(!empty($desa['telepon']))
+        <p class="mt-1 mb-0" style="font-size:.82rem;color:var(--text-light, #6b7280);">
+          Telp. Kantor: <a href="tel:{{ $desa['telepon'] }}" style="color:var(--clr-blue);font-weight:600;">{{ $desa['telepon'] }}</a>
+        </p>
+        @endif
       </div>
       <div class="kontak-item">
         <i class="bi bi-envelope kontak-ikon" aria-hidden="true"></i>
         <h6>Email</h6>
-        <p><a href="mailto:info@etalasepelemwatu.id">info@etalasepelemwatu.id</a></p>
+        <p><a href="mailto:{{ $desa['email'] }}">{{ $desa['email'] }}</a></p>
       </div>
       <div class="kontak-item">
         <i class="bi bi-instagram kontak-ikon" aria-hidden="true"></i>
         <h6>Instagram</h6>
-        <p><a href="https://www.instagram.com/official_pelemwatu" target="_blank" rel="noopener noreferrer">@official_pelemwatu</a></p>
+        <p><a href="https://www.instagram.com/{{ $desa['instagram'] }}" target="_blank" rel="noopener noreferrer">{{ '@' . $desa['instagram'] }}</a></p>
       </div>
     </div>
   </div>
@@ -492,7 +518,7 @@
       <div class="col-sm-4 col-lg-3">
         <div class="footer-heading">Layanan</div>
         <ul class="footer-links">
-          <li><a href="daftar-potensi.html">Pendaftaran Potensi</a></li>
+          <li><a href="/daftar-potensi">Pendaftaran Potensi</a></li>
           <li><a href="#katalog">Katalog Potensi</a></li>
           <li><a href="#profil-desa">Informasi Desa</a></li>
           <li><a href="#kontak-section">Kontak Kami</a></li>
@@ -502,12 +528,12 @@
         <div class="footer-heading">Informasi</div>
         <ul class="footer-links">
           <li><a href="#pengenalan-etalase">Tentang EtalasePelemwatu</a></li>
-          <li><a href="daftar-potensi.html">Daftarkan Potensimu</a></li>
-          <li><a href="admin.html">Panel Admin</a></li>
+          <li><a href="/daftar-potensi">Daftarkan Potensimu</a></li>
+          <li><a href="/admin">Panel Admin</a></li>
         </ul>
         <div class="footer-heading mt-4">Alamat</div>
         <p style="font-size:.82rem;color:rgba(255,255,255,.6);line-height:1.6;">
-          Jl. Raya Pelemwatu No. 128<br>Kec. Menganti, Kab. Gresik<br>Jawa Timur
+          {{ $desa['alamat'] }}
         </p>
       </div>
     </div>
@@ -670,7 +696,6 @@
   </button>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="assets/js/main.js"></script>
 <script src="assets/js/auth.js"></script>
 <script>window.APP_URL = "{{ rtrim(config('app.url'), '/') }}";</script>
@@ -711,16 +736,21 @@
     onScroll();
   })();
 
-  // UMKM terdaftar: dihitung dari katalog (usaha, jasa, hunian; barang warga tidak dihitung)
+  // Statistik UMKM terdaftar dari endpoint publik /api/stats/public
   (function () {
     var el = document.getElementById('statUMKM');
     if (!el) return;
-    var n = document.querySelectorAll(
-      '.katalog-grid .potensi-card[data-category="usaha"],' +
-      '.katalog-grid .potensi-card[data-category="jasa"],' +
-      '.katalog-grid .potensi-card[data-category="hunian"]'
-    ).length;
-    if (n) el.textContent = n;
+    fetch('/api/stats/public')
+      .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .then(function (res) {
+        var count = (res && res.data && typeof res.data.umkm !== 'undefined')
+          ? res.data.umkm
+          : (res && typeof res.umkm !== 'undefined' ? res.umkm : null);
+        el.textContent = (count !== null) ? count : '—';
+      })
+      .catch(function () {
+        el.textContent = '—';
+      });
   })();
 
   /* ── Lightbox Galeri ── */
@@ -743,19 +773,33 @@
     lbIndex = (lbIndex + dir + lbItems.length) % lbItems.length;
     renderLightbox();
   }
+  function escapeHtml(s) {
+    if (s == null) return '';
+    return String(s)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  }
+
   function renderLightbox() {
-    document.getElementById('lbImg').src       = lbItems[lbIndex].src;
-    document.getElementById('lbImg').alt       = lbItems[lbIndex].caption;
+    var cur = lbItems[lbIndex] || {};
+    var cap = escapeHtml(cur.caption || '');
+    var desc = cur.desc ? escapeHtml(cur.desc) : '';
+    document.getElementById('lbImg').src       = (window.sanitizeSrc ? window.sanitizeSrc(cur.src) : (cur.src || ''));
+    document.getElementById('lbImg').alt       = cur.caption || '';
     document.getElementById('lbCaption').innerHTML =
-      '<strong style="font-size:1rem;">' + lbItems[lbIndex].caption + '</strong>' +
-      (lbItems[lbIndex].desc ? '<br><span style="font-size:.85rem;opacity:.75;">' + lbItems[lbIndex].desc + '</span>' : '');
+      '<strong style="font-size:1rem;">' + cap + '</strong>' +
+      (desc ? '<br><span style="font-size:.85rem;opacity:.75;">' + desc + '</span>' : '');
     document.getElementById('lbPrev').style.display = lbItems.length > 1 ? '' : 'none';
     document.getElementById('lbNext').style.display = lbItems.length > 1 ? '' : 'none';
   }
 
+  window.openLightbox = openLightbox;
+  window.closeLightbox = closeLightbox;
+  window.shiftLightbox = shiftLightbox;
+
   /* Bind galeri items */
   function bindGaleri() {
-    var items = Array.from(document.querySelectorAll('#galeriGrid .galeri-card'));
+    var items = Array.from(document.querySelectorAll('.gs-card, #galeriGrid .galeri-card'));
     var data  = items.map(function(el) {
       return {
         src:     el.dataset.src,
@@ -763,41 +807,38 @@
         desc:    el.dataset.desc || ''
       };
     });
-    items.forEach(function(el, i) {
-      el.querySelector('.galeri-card-img').addEventListener('click', function() {
-        openLightbox(data, i);
-      });
-    });
+    return data;
   }
   bindGaleri();
+
+  /* Render dinamis dari GET /api/galeri */
+  function fetchAndRenderGaleri() {
+    fetch('/api/galeri')
+      .then(function(r){ return r.json(); })
+      .then(function(res){
+        if (!res || !Array.isArray(res.data)) return;
+        if (typeof window.updateGaleriSlider === 'function') {
+          window.updateGaleriSlider(res.data);
+        }
+      })
+      .catch(function(){});
+  }
+
+  var tabGaleriBtn = document.querySelector('[data-tab="tab-galeri"]');
+  if (tabGaleriBtn) tabGaleriBtn.addEventListener('click', fetchAndRenderGaleri);
 
   /* Keyboard nav */
   document.addEventListener('keydown', function(e) {
     var lb = document.getElementById('lightbox');
-    if (lb.style.display === 'none') return;
+    if (!lb || lb.style.display === 'none') return;
     if (e.key === 'Escape')     closeLightbox();
     if (e.key === 'ArrowLeft')  shiftLightbox(-1);
     if (e.key === 'ArrowRight') shiftLightbox(1);
   });
 </script>
+<script src="assets/js/utils.js"></script>
 <script src="assets/js/warga-auth.js"></script>
-<script>
-(function () {
-  var API_BASE = (window.location.protocol === 'file:' || window.location.port === '5500')
-    ? 'http://localhost:8000/api'
-    : (window.location.port === '3000' ? 'http://localhost:3000/api' : '/api');
-
-  fetch(API_BASE + '/settings/logo')
-    .then(function (r) { return r.json(); })
-    .then(function (res) {
-      if (res && res.status === 'success' && res.data && res.data.path) {
-        document.querySelectorAll('[data-site-logo]').forEach(function (img) {
-          img.src = res.data.path;
-        });
-      }
-    })
-    .catch(function () { /* biarkan logo bawaan jika request gagal */ });
-})();
-</script>
+<script src="assets/js/site-logo.js"></script>
+<script src="assets/js/galeri-slider.js"></script>
 </body>
 </html>
