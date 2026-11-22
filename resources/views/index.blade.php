@@ -109,20 +109,96 @@
 
     <!-- Tab Nav -->
     <div class="profil-nav reveal">
-      <button class="profil-nav-btn active" data-tab="tab-tentang">
+      <button class="profil-nav-btn active" data-tab="tab-galeri">
+        Galeri Kegiatan
+      </button>
+      <button class="profil-nav-btn" data-tab="tab-tentang">
         Tentang Desa
       </button>
       <button class="profil-nav-btn" data-tab="tab-lokasi">
         Lokasi Desa
       </button>
-      <button class="profil-nav-btn" data-tab="tab-galeri">
-        Galeri Kegiatan
-      </button>
+    </div>
 
+    <!-- TAB: Galeri -->
+    <div class="profil-tab-pane active" id="tab-galeri">
+      @php
+        $galeriItems = \App\Models\Galeri::orderBy('sort_order', 'asc')->orderBy('id', 'asc')->get();
+      @endphp
+
+      @if($galeriItems->isEmpty())
+        <div class="desa-info-card py-5 text-center text-muted gs-empty">
+          <i class="bi bi-images me-2" style="font-size: 2.2rem; display: block; margin-bottom: .6rem; color: var(--clr-text-light);"></i>
+          <span>Belum ada foto kegiatan.</span>
+        </div>
+      @else
+        <div class="gs-container" id="gsContainer" role="region" aria-roledescription="carousel" aria-label="Galeri Kegiatan Desa Pelemwatu" tabindex="0">
+          <div class="gs-layout">
+            <!-- Sisi Kiri: Rel Vertikal & Teks -->
+            <div class="gs-sidebar">
+              <!-- Rel Vertikal Dots -->
+              <div class="gs-rail-wrapper">
+                <div class="gs-rail" id="gsRail">
+                  <div class="gs-rail-line" aria-hidden="true"></div>
+                  <div class="gs-dots-window" id="gsDotsWindow"></div>
+                </div>
+                <div class="gs-counter" id="gsCounter" aria-hidden="true">
+                  <span id="gsCounterCurrent">1</span> / <span id="gsCounterTotal">{{ $galeriItems->count() }}</span>
+                </div>
+              </div>
+
+              <!-- Konten Teks Aktif -->
+              <div class="gs-content" id="gsContent" aria-live="polite">
+                <h3 class="gs-title" id="gsTitle">{{ $galeriItems->first()->caption }}</h3>
+                <p class="gs-desc" id="gsDesc">{{ $galeriItems->first()->description ?: 'Dokumentasi kegiatan masyarakat dan aktivitas di Desa Pelemwatu.' }}</p>
+                <div class="gs-actions">
+                  <button type="button" class="btn-primary-custom gs-btn-view" id="gsBtnView" aria-label="Lihat foto: {{ $galeriItems->first()->caption }}">
+                    <i class="bi bi-arrows-fullscreen me-2"></i>Lihat Foto
+                  </button>
+                  <div class="gs-nav-arrows">
+                    <button type="button" class="gs-arrow gs-arrow-prev" id="gsPrev" aria-label="Foto sebelumnya" disabled>
+                      <i class="bi bi-arrow-left"></i>
+                    </button>
+                    <button type="button" class="gs-arrow gs-arrow-next" id="gsNext" aria-label="Foto berikutnya" {{ $galeriItems->count() <= 1 ? 'disabled' : '' }}>
+                      <i class="bi bi-arrow-right"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Sisi Kanan: Viewport & Track Kartu Horizontal -->
+            <div class="gs-viewport" id="gsViewport">
+              <div class="gs-track" id="gsTrack">
+                @foreach($galeriItems as $idx => $g)
+                <div class="gs-card {{ $idx === 0 ? 'is-active' : '' }}"
+                     data-index="{{ $idx }}"
+                     data-src="{{ $g->image_path }}"
+                     data-caption="{{ $g->caption }}"
+                     data-desc="{{ $g->description ?? '' }}"
+                     role="group"
+                     aria-roledescription="slide"
+                     aria-label="{{ $idx + 1 }} dari {{ $galeriItems->count() }}: {{ $g->caption }}">
+                  <div class="gs-card-inner">
+                    <img src="{{ $g->image_path }}"
+                         alt="{{ $g->caption }}"
+                         loading="{{ $idx < 2 ? 'eager' : 'lazy' }}"
+                         draggable="false">
+                    <div class="gs-card-overlay">
+                      <span class="gs-card-zoom-badge"><i class="bi bi-zoom-in me-1"></i>Perbesar</span>
+                    </div>
+                  </div>
+                </div>
+                @endforeach
+              </div>
+            </div>
+          </div>
+        </div>
+      @endif
     </div>
 
     <!-- TAB: Tentang -->
-    <div class="profil-tab-pane active" id="tab-tentang">
+    <div class="profil-tab-pane" id="tab-tentang">
       <div class="row g-4">
         <div class="col-lg-7">
           <div class="desa-info-card">
@@ -210,38 +286,6 @@
             </div>
           </div>
         </div>
-      </div>
-    </div>
-
-    <!-- TAB: Galeri -->
-    <div class="profil-tab-pane" id="tab-galeri">
-      <div class="desa-info-card mb-4">
-        <h4>Galeri Kegiatan Desa Pelemwatu</h4>
-        <p class="mb-0">Dokumentasi kegiatan masyarakat dan aktivitas yang berlangsung di Desa Pelemwatu.</p>
-      </div>
-      <div class="galeri-card-grid" id="galeriGrid">
-        @php
-          $galeriItems = \App\Models\Galeri::orderBy('sort_order', 'asc')->orderBy('id', 'asc')->get();
-        @endphp
-        @forelse($galeriItems as $g)
-        <div class="galeri-card"
-             data-src="{{ $g->image_path }}"
-             data-caption="{{ $g->caption }}"
-             data-desc="{{ $g->description ?? '' }}">
-          <div class="galeri-card-img">
-            <img src="{{ $g->image_path }}" alt="{{ $g->caption }}" loading="lazy">
-            <div class="galeri-card-zoom"><i class="bi bi-zoom-in"></i></div>
-          </div>
-          <div class="galeri-card-info">
-            <h6 class="galeri-card-title">{{ $g->caption }}</h6>
-            <p class="galeri-card-desc">{{ $g->description }}</p>
-          </div>
-        </div>
-        @empty
-        <div class="col-12 py-5 text-center text-muted" style="grid-column: 1 / -1;">
-          <i class="bi bi-images me-2"></i>Belum ada foto kegiatan.
-        </div>
-        @endforelse
       </div>
     </div>
 
@@ -749,9 +793,13 @@
     document.getElementById('lbNext').style.display = lbItems.length > 1 ? '' : 'none';
   }
 
+  window.openLightbox = openLightbox;
+  window.closeLightbox = closeLightbox;
+  window.shiftLightbox = shiftLightbox;
+
   /* Bind galeri items */
   function bindGaleri() {
-    var items = Array.from(document.querySelectorAll('#galeriGrid .galeri-card'));
+    var items = Array.from(document.querySelectorAll('.gs-card, #galeriGrid .galeri-card'));
     var data  = items.map(function(el) {
       return {
         src:     el.dataset.src,
@@ -759,15 +807,7 @@
         desc:    el.dataset.desc || ''
       };
     });
-    items.forEach(function(el, i) {
-      var imgWrap = el.querySelector('.galeri-card-img');
-      if (imgWrap && !imgWrap.__boundLb) {
-        imgWrap.__boundLb = true;
-        imgWrap.addEventListener('click', function() {
-          openLightbox(data, i);
-        });
-      }
-    });
+    return data;
   }
   bindGaleri();
 
@@ -777,32 +817,9 @@
       .then(function(r){ return r.json(); })
       .then(function(res){
         if (!res || !Array.isArray(res.data)) return;
-        var grid = document.getElementById('galeriGrid');
-        if (!grid) return;
-        if (res.data.length === 0) {
-          grid.innerHTML = '<div class="col-12 py-5 text-center text-muted" style="grid-column: 1 / -1;"><i class="bi bi-images me-2"></i>Belum ada foto kegiatan.</div>';
-          return;
+        if (typeof window.updateGaleriSlider === 'function') {
+          window.updateGaleriSlider(res.data);
         }
-        grid.innerHTML = '';
-        res.data.forEach(function(g){
-          var safeSrc = window.sanitizeSrc ? window.sanitizeSrc(g.image_path) : g.image_path;
-          var card = document.createElement('div');
-          card.className = 'galeri-card';
-          card.dataset.src = safeSrc;
-          card.dataset.caption = g.caption || '';
-          card.dataset.desc = g.description || '';
-          card.innerHTML =
-            '<div class="galeri-card-img">' +
-              '<img src="' + safeSrc + '" alt="' + escapeHtml(g.caption || '') + '" loading="lazy">' +
-              '<div class="galeri-card-zoom"><i class="bi bi-zoom-in"></i></div>' +
-            '</div>' +
-            '<div class="galeri-card-info">' +
-              '<h6 class="galeri-card-title">' + escapeHtml(g.caption || '') + '</h6>' +
-              '<p class="galeri-card-desc">' + escapeHtml(g.description || '') + '</p>' +
-            '</div>';
-          grid.appendChild(card);
-        });
-        bindGaleri();
       })
       .catch(function(){});
   }
@@ -813,7 +830,7 @@
   /* Keyboard nav */
   document.addEventListener('keydown', function(e) {
     var lb = document.getElementById('lightbox');
-    if (lb.style.display === 'none') return;
+    if (!lb || lb.style.display === 'none') return;
     if (e.key === 'Escape')     closeLightbox();
     if (e.key === 'ArrowLeft')  shiftLightbox(-1);
     if (e.key === 'ArrowRight') shiftLightbox(1);
@@ -822,5 +839,6 @@
 <script src="assets/js/utils.js"></script>
 <script src="assets/js/warga-auth.js"></script>
 <script src="assets/js/site-logo.js"></script>
+<script src="assets/js/galeri-slider.js"></script>
 </body>
 </html>
