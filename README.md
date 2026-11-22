@@ -225,9 +225,36 @@ php artisan backup:run
 ```
 
 - Arsip `.zip` disimpan di `storage/app/backups/backup-YYYY-MM-DD-His.zip`.
-- Berisi salinan database SQLite (`database/database.sqlite`) atau dump SQL, serta seluruh berkas di folder `public/uploads`.
+- Berisi salinan database SQLite (`database/database.sqlite`) atau dump SQL (`database/dump.sql` jika menggunakan MySQL/MariaDB), serta seluruh berkas di folder `public/uploads`.
 - **Rotasi Otomatis**: Sistem secara otomatis hanya menyimpan 7 arsip cadangan terakhir dan menghapus arsip yang lebih lama.
 - Cadangan dijadwalkan berjalan otomatis setiap hari via Laravel Scheduler (`routes/console.php`).
+
+### Konfigurasi mysqldump untuk MySQL/MariaDB
+
+Jika menggunakan driver `mysql` atau `mariadb`, pastikan binary `mysqldump` terpasang di sistem dan tentukan path-nya pada `.env`:
+
+```env
+# Contoh di Windows XAMPP
+BACKUP_MYSQLDUMP_PATH="C:\xampp\mysql\bin\mysqldump.exe"
+
+# Contoh di Linux / Server Produksi (jika sudah di PATH atau direktori bin)
+BACKUP_MYSQLDUMP_PATH="/usr/bin/mysqldump"
+```
+
+Password dikirim secara aman melalui environment variable `MYSQL_PWD` (tidak tampil di argumen proses baris perintah).
+
+### Cara Memulihkan Data (Restore)
+
+1. Ekstrak file arsip `.zip` yang diinginkan dari `storage/app/backups/`.
+2. **Restore Database**:
+   - **MySQL / MariaDB**:
+     ```bash
+     mysql -u nama_user -p nama_database < database/dump.sql
+     ```
+   - **SQLite**:
+     Salin berkas `database/database.sqlite` ke path database proyek Anda.
+3. **Restore Berkas Unggahan**:
+   Salin isi folder `uploads/` hasil ekstrak ke dalam direktori `public/uploads/`.
 
 ---
 

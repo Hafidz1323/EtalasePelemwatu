@@ -2,10 +2,12 @@
 
 namespace App\Console\Commands;
 
+use App\Services\MysqlDumpRunner;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
+use Throwable;
 use ZipArchive;
 
 class RunBackup extends Command
@@ -27,7 +29,7 @@ class RunBackup extends Command
     /**
      * Execute the console command.
      */
-    public function handle(): int
+    public function handle(MysqlDumpRunner $dumper): int
     {
         $backupDir = storage_path('app/backups');
         if (! File::isDirectory($backupDir)) {
@@ -46,18 +48,98 @@ class RunBackup extends Command
         }
 
         // 1. Cadangkan Database
-        $defaultConn = config('database.default');
+        $defaultConn = (string) config('database.default');
+
         if ($defaultConn === 'sqlite') {
             $sqlitePath = config('database.connections.sqlite.database');
             if ($sqlitePath && $sqlitePath !== ':memory:' && File::exists($sqlitePath)) {
                 $zip->addFile($sqlitePath, 'database/database.sqlite');
-            } else {
-                // Cadangan virtual untuk :memory: saat testing
+            } elseif (app()->runningUnitTests()) {
+                // Cadangan virtual untuk :memory: hanya saat unit test
                 $zip->addFromString('database/database.sqlite', '-- SQLite in-memory snapshot created at '.$timestamp);
+            } else {
+                $zip->close();
+                if (File::exists($zipFilePath)) {
+                    File::delete($zipFilePath);
+                }
+                $this->error("File database SQLite tidak ditemukan pada path: {$sqlitePath}");
+
+                return self::FAILURE;
+            }
+        } elseif ($defaultConn === 'mysql' || $defaultConn === 'mariadb') {
+            $dbConfig = config("database.connections.{$defaultConn}", []);
+            $host = (string) ($dbConfig['host'] ?? '127.0.0.1');
+            $port = (string) ($dbConfig['port'] ?? '3306');
+            $database = (string) ($dbConfig['database'] ?? '');
+            $username = (string) ($dbConfig['username'] ?? 'root');
+            $password = (string) ($dbConfig['password'] ?? '');
+
+            if ($database === '') {
+                $zip->close();
+                if (File::exists($zipFilePath)) {
+                    File::delete($zipFilePath);
+                }
+                $this->error('Nama database MySQL belum dikonfigurasi.');
+
+                return self::FAILURE;
+            }
+
+            $mysqldumpPath = (string) config('backup.mysqldump_path', env('BACKUP_MYSQLDUMP_PATH', 'mysqldump'));
+
+            // Argumen array (bukan string shell)
+            $command = [
+                $mysqldumpPath,
+                '--host='.$host,
+                '--port='.$port,
+                '--user='.$username,
+                '--single-transaction',
+                '--routines',
+                '--no-tablespaces',
+                $database,
+            ];
+
+            // Kirim password lewat environment variable MYSQL_PWD
+            $env = [];
+            if ($password !== '') {
+                $env['MYSQL_PWD'] = $password;
+            }
+
+            try {
+                $process = $dumper->run($command, $env);
+
+                if (! $process->isSuccessful()) {
+                    $zip->close();
+                    if (File::exists($zipFilePath)) {
+                        File::delete($zipFilePath);
+                    }
+                    $err = trim($process->getErrorOutput());
+                    $this->error('Gagal melakukan dump database MySQL: '.($err ?: 'Proses mysqldump tidak berhasil.'));
+                    $this->line('Petunjuk: Pastikan binary mysqldump terpasang dan path telah disetel di BACKUP_MYSQLDUMP_PATH (misal pada XAMPP Windows: C:\xampp\mysql\bin\mysqldump.exe).');
+
+                    return self::FAILURE;
+                }
+
+                $dumpOutput = $process->getOutput();
+                $zip->addFromString('database/dump.sql', $dumpOutput);
+            } catch (Throwable $e) {
+                $zip->close();
+                if (File::exists($zipFilePath)) {
+                    File::delete($zipFilePath);
+                }
+                $this->error('Gagal menjalankan mysqldump: '.$e->getMessage());
+                $this->line('Petunjuk: Pastikan binary mysqldump terpasang dan path telah disetel di BACKUP_MYSQLDUMP_PATH (misal pada XAMPP Windows: C:\xampp\mysql\bin\mysqldump.exe).');
+
+                return self::FAILURE;
             }
         } else {
-            // Placeholder / snapshot koneksi lain (misal MySQL)
-            $zip->addFromString('database/dump.sql', "-- Database backup for {$defaultConn} at ".$timestamp);
+            // Driver tidak didukung (pgsql, sqlsrv, dll.)
+            $zip->close();
+            if (File::exists($zipFilePath)) {
+                File::delete($zipFilePath);
+            }
+            $this->error("Driver database '{$defaultConn}' belum didukung untuk backup otomatis.");
+
+            return self::FAILURE;
         }
 
         // 2. Cadangkan folder public/uploads
