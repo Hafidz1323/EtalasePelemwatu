@@ -14,6 +14,7 @@ class UploadController extends Controller
     public function upload(Request $request)
     {
         $request->validate([
+<<<<<<< HEAD
             'image' => [
                 'required',
                 'file',
@@ -101,6 +102,25 @@ class UploadController extends Controller
             'status'  => 'success',
             'message' => 'Gambar berhasil diunggah dan dioptimalkan.',
             'path'    => '/uploads/' . $safeName,
+=======
+            'image' => ['required', 'file', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+        ], [
+            'image.required' => 'Pilih file gambar terlebih dahulu.',
+            'image.image' => 'File harus berupa gambar.',
+            'image.mimes' => 'Format gambar harus JPG, PNG, atau WEBP.',
+            'image.max' => 'Ukuran gambar maksimal 2 MB.',
+        ]);
+
+        $file = $request->file('image');
+        // extension() ditebak dari ISI file, bukan dari nama yang dikirim pengguna.
+        $filename = 'image-'.Str::lower(Str::random(24)).'.'.$file->extension();
+        $file->move(public_path('uploads'), $filename);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'File uploaded',
+            'path' => '/uploads/'.$filename,
+>>>>>>> 99bae7f599c1565d45f22896e47f8da1e83dd8c2
         ]);
     }
 }

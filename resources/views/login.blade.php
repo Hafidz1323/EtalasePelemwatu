@@ -3,9 +3,32 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<<<<<<< HEAD
   <title>Masuk & Daftar — EtalasePelemwatu</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+=======
+  <title>Login Admin — EtalasePelemwatu</title>
+  <meta name="description" content="Halaman login administrator portal potensi lokal Desa Pelemwatu.">
+  <link rel="canonical" href="{{ url()->current() }}">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="{{ url()->current() }}">
+  <meta property="og:title" content="Login Admin — EtalasePelemwatu">
+  <meta property="og:description" content="Halaman login administrator portal potensi lokal Desa Pelemwatu.">
+  <meta property="og:image" content="{{ asset('assets/img/foto-kantor-desa.jpg') }}">
+  <meta property="og:locale" content="id_ID">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="{{ url()->current() }}">
+  <meta name="twitter:title" content="Login Admin — EtalasePelemwatu">
+  <meta name="twitter:description" content="Halaman login administrator portal potensi lokal Desa Pelemwatu.">
+  <meta name="twitter:image" content="{{ asset('assets/img/foto-kantor-desa.jpg') }}">
+
+  @vite(['resources/css/app.css', 'resources/js/app.js'])
+>>>>>>> 99bae7f599c1565d45f22896e47f8da1e83dd8c2
   <link rel="stylesheet" href="assets/css/style.css">
   <style>
     body.login-page {
@@ -100,10 +123,26 @@
 </head>
 <body class="login-page">
 
+<<<<<<< HEAD
   <div class="login-container">
     <div class="text-center mb-4">
       <h3 class="fw-bold text-white mb-1">EtalasePelemwatu</h3>
       <p class="text-white-50" style="font-size:0.9rem;">Portal Layanan & Promosi Potensi Desa Pelemwatu</p>
+=======
+  <div class="login-decor-circle decor-1"></div>
+  <div class="login-decor-circle decor-2"></div>
+  <div class="login-decor-circle decor-3"></div>
+
+  <div class="login-card-container">
+    <!-- Header Brand -->
+    <div class="login-brand-header">
+      <div class="logo-badge" style="overflow:hidden;position:relative;">
+        <img data-site-logo src="/assets/img/logo-desa.png" alt="Logo Desa" style="width:100%;height:100%;object-fit:contain;display:none;" onload="this.style.display='block';var fb=this.parentNode.querySelector('.logo-fallback');if(fb)fb.style.display='none';">
+        <span class="logo-fallback">EP</span>
+      </div>
+      <h1>EtalasePelemwatu</h1>
+      <p>Panel Akses Khusus Administrator Desa</p>
+>>>>>>> 99bae7f599c1565d45f22896e47f8da1e83dd8c2
     </div>
 
     <div class="login-card">
@@ -207,9 +246,16 @@
       </form>
     </div>
 
+<<<<<<< HEAD
     <div class="text-center mt-3">
       <a href="/" class="text-white-50 text-decoration-none" style="font-size:0.9rem;">
         <i class="bi bi-arrow-left"></i> Kembali ke Beranda
+=======
+    <!-- Footer link -->
+    <div class="login-footer-links">
+      <a href="/">
+        <i class="bi bi-arrow-left"></i> Kembali ke Website EtalasePelemwatu
+>>>>>>> 99bae7f599c1565d45f22896e47f8da1e83dd8c2
       </a>
     </div>
   </div>
@@ -236,12 +282,31 @@
       }
     }
 
+<<<<<<< HEAD
     function showAlert(msg, type = 'danger') {
       const box = document.getElementById('authAlert');
       box.className = 'auth-alert alert alert-' + type;
       document.getElementById('authAlertText').textContent = msg;
       box.style.display = 'block';
     }
+=======
+      // Periksa apakah sudah ada sesi aktif
+      const existingSession = localStorage.getItem('ep_admin_session') || sessionStorage.getItem('ep_admin_session');
+      if (existingSession) {
+        try {
+          const parsed = JSON.parse(existingSession);
+          if (parsed && parsed.isLoggedIn) {
+            showAlert('Sesi aktif terdeteksi. Mengarahkan ke panel admin...', 'info');
+            setTimeout(function () {
+              window.location.href = '/admin';
+            }, 800);
+          }
+        } catch (e) {
+          localStorage.removeItem('ep_admin_session');
+          sessionStorage.removeItem('ep_admin_session');
+        }
+      }
+>>>>>>> 99bae7f599c1565d45f22896e47f8da1e83dd8c2
 
     function hideAlert() {
       document.getElementById('authAlert').style.display = 'none';
@@ -269,15 +334,98 @@
         });
         const data = await res.json();
 
+<<<<<<< HEAD
         if (res.ok && data.status === 'success') {
           const u = data.data.user;
           localStorage.setItem('authToken', data.data.token);
           localStorage.setItem('userData', JSON.stringify(u));
+=======
+        if (!email) {
+          showAlert('Harap masukkan alamat email atau username Anda.', 'error');
+          emailInput.focus();
+          return;
+        }
+
+        if (!password) {
+          showAlert('Harap masukkan kata sandi akun.', 'error');
+          passwordInput.focus();
+          return;
+        }
+
+        // Tampilkan loading
+        btnSubmit.disabled = true;
+        btnSubmitText.textContent = 'Memverifikasi...';
+        btnSubmit.querySelector('i').className = 'spinner-border spinner-border-sm';
+
+        try {
+          let loginSuccess = false;
+          let userData = null;
+          let authToken = null;
+
+          // 1. Coba hubungi backend API
+          try {
+            const API_BASE = (window.location.protocol === 'file:' || window.location.port === '5500') ? 'http://localhost:8000/api' : (window.location.port === '3000' ? 'http://localhost:3000/api' : '/api');
+            const response = await fetch(API_BASE + '/login', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ email, password })
+            });
+
+            const result = await response.json();
+
+            if (response.ok && result.status === 'success') {
+              loginSuccess = true;
+              userData = result.data.user;
+              authToken = result.data.token;
+            } else if ([400, 401, 422, 429].includes(response.status)) {
+              const msg = response.status === 429
+                ? 'Terlalu banyak percobaan login. Tunggu sekitar 1 menit lalu coba lagi.'
+                : (result.message || 'Email atau password salah.');
+              showAlert(msg, 'error');
+              resetButton();
+              return;
+            }
+          } catch (netErr) {
+            console.warn('Backend server tidak dapat dihubungi:', netErr.message);
+          }
+
+          // Tidak ada login lokal/offline: sesi hanya sah jika server menerbitkan token.
+          if (!loginSuccess) {
+            showAlert('Server tidak dapat dihubungi. Coba lagi beberapa saat.', 'error');
+            resetButton();
+            return;
+          }
+
+          if (loginSuccess && userData) {
+            const sessionPayload = {
+              isLoggedIn: true,
+              token: authToken,
+              user: userData,
+              loginAt: new Date().toISOString()
+            };
+>>>>>>> 99bae7f599c1565d45f22896e47f8da1e83dd8c2
 
           if (u.role === 'admin') {
             localStorage.setItem('adminLoggedIn', 'true');
+<<<<<<< HEAD
             localStorage.setItem('adminUser', JSON.stringify(u));
             window.location.href = '/admin';
+=======
+            localStorage.setItem('adminUser', JSON.stringify(userData));
+
+            if (rememberCheckbox.checked) {
+              localStorage.setItem('ep_admin_session', JSON.stringify(sessionPayload));
+            } else {
+              sessionStorage.setItem('ep_admin_session', JSON.stringify(sessionPayload));
+            }
+
+            showAlert('Login berhasil! Mengalihkan ke Panel Admin...', 'success');
+            setTimeout(function () {
+              window.location.href = '/admin';
+            }, 750);
+>>>>>>> 99bae7f599c1565d45f22896e47f8da1e83dd8c2
           } else {
             localStorage.setItem('wargaLoggedIn', 'true');
             showAlert('Login berhasil! Mengalihkan...', 'success');
@@ -334,5 +482,7 @@
       }
     });
   </script>
+  <script src="assets/js/utils.js"></script>
+  <script src="assets/js/site-logo.js"></script>
 </body>
 </html>

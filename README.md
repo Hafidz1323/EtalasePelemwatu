@@ -1,58 +1,402 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# EtalasePelemwatu
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Aplikasi web untuk menampilkan dan mengelola potensi desa (usaha, jasa, hunian, barang) berbasis Laravel 13. Warga dapat mendaftarkan potensi secara mandiri; admin desa memverifikasi dan mempublikasikannya melalui panel administrasi.
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Daftar Isi
+- [Fitur Utama](#fitur-utama)
+- [Tangkapan Layar](#tangkapan-layar)
+- [Kebutuhan Sistem](#kebutuhan-sistem)
+- [Instalasi & Menjalankan](#instalasi--menjalankan)
+- [Struktur Proyek](#struktur-proyek)
+- [Daftar Endpoint API Utama](#daftar-endpoint-api-utama)
+- [Pengelolaan Profil & Kontak Desa](#pengelolaan-profil--kontak-desa)
+- [Pemulihan Akun Admin](#pemulihan-akun-admin)
+- [Cadangan Data (Backup)](#cadangan-data-backup)
+- [Panduan Deploy (Produksi)](#panduan-deploy-produksi)
+- [Keamanan Server Web (Nginx)](#keamanan-server-web-nginx)
+- [Menjalankan Test](#menjalankan-test)
+- [Lisensi](#lisensi)
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+---
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Fitur Utama
 
-## Learning Laravel
+- **Katalog Potensi Publik**: Menampilkan potensi lokal dengan pencarian teks, filter kategori, slider, dan detail modal interaktif.
+- **Pendaftaran Mandiri & Autentikasi Warga**: Warga desa dapat mendaftar akun, mengelola profil, melihat status verifikasi, mengedit data, serta mengajukan penghapusan potensi.
+- **Panel Administrator Lengkap**:
+  - Verifikasi dan persetujuan potensi baru.
+  - Pengelolaan permohonan hapus dari warga.
+  - CRUD Galeri Kegiatan Desa (foto, judul, deskripsi, urutan).
+  - Pengaturan Profil Desa (alamat, jam operasional, WhatsApp, telepon, email, jumlah KK) yang tersinkronisasi otomatis ke website publik.
+  - Penggantian logo portal desa dinamis.
+  - Keamanan akun dan ganti kata sandi.
+- **Optimasi Gambar Otomatis**: Setiap gambar yang diunggah di-resize maksimal 1600px dan dikonversi ke WebP kualitas 80 (menggunakan GD) dengan nama acak aman.
+- **Aset Terpadu (Self-Hosted)**: Bootstrap 5.3.3 dan Bootstrap Icons 1.11.3 dibundel lokal menggunakan npm dan Vite (bebas ketergantungan CDN eksternal).
+- **SEO & Peta Situs**: Meta deskripsi, tag Open Graph, Twitter Cards, `robots.txt`, dan rute `/sitemap.xml` dinamis.
+- **Keamanan Ketat**: Proteksi XSS (sanitasi atribut URL dan teks), pembatasan rate limit login warga dan admin, .htaccess proteksi folder uploads, serta token Sanctum yang di-prune secara terjadwal.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+---
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## Tangkapan Layar
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+Simpan tangkapan layar antarmuka aplikasi pada folder `docs/screenshots/`:
+- `docs/screenshots/homepage.png` — Tampilan Beranda & Katalog
+- `docs/screenshots/daftar-potensi.png` — Formulir Pendaftaran Potensi
+- `docs/screenshots/admin-dashboard.png` — Dashboard Administrator
+- `docs/screenshots/profil-warga.png` — Halaman Profil & Potensi Warga
 
-## Agentic Development
+---
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+## Kebutuhan Sistem
+
+| Komponen | Versi Minimum | Keterangan |
+|----------|--------------|------------|
+| PHP | 8.3 | Ekstensi: `pdo_sqlite`, `gd`, `zip`, `mbstring`, `fileinfo` |
+| Composer | 2.x | Manajer dependensi PHP |
+| Node.js & npm | 20.x / 10.x | Untuk build aset Vite (Bootstrap & Icons) |
+| Database | SQLite 3.x / MySQL 8.x | SQLite bawaan untuk kemudahan deployment |
+
+---
+
+## Instalasi & Menjalankan
+
+### 1. Salin Repositori & Install Dependensi
 
 ```bash
-composer require laravel/boost --dev
+# Clone repositori
+git clone <url-repo> EtalasePelemwatu
+cd EtalasePelemwatu
 
-php artisan boost:install
+# Install dependensi PHP
+composer install
+
+# Install dependensi Node.js & build aset
+npm install
+npm run build
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+### 2. Konfigurasi Environment
 
-## Contributing
+File `.env.example` telah dikonfigurasi dengan pengaturan pengembangan bawaan (`APP_DEBUG=true`, `DB_CONNECTION=sqlite`).
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+```bash
+cp .env.example .env
+php artisan key:generate
+```
 
-## Code of Conduct
+Buka `.env` dan sesuaikan akun admin awal:
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+```env
+APP_URL=http://localhost:8000
+ADMIN_NAME="Administrator Desa"
+ADMIN_EMAIL=admin@pelemwatu.desa.id
+ADMIN_PASSWORD=kata-sandi-aman
+```
 
-## Security Vulnerabilities
+> **Catatan:** `ADMIN_PASSWORD` di `.env` wajib diisi sebelum menjalankan `db:seed`.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### 3. Migrasi & Seeder Database
 
-## License
+```bash
+php artisan migrate
+php artisan db:seed
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+### 4. Menjalankan Server Lokal
+
+```bash
+php artisan serve
+```
+
+Buka <http://localhost:8000> di browser:
+- **Katalog Publik**: `/`
+- **Pendaftaran Potensi**: `/daftar-potensi`
+- **Panel Admin**: `/admin`
+- **Login Admin**: `/login`
+- **Portal Warga**: `/register` (Masuk / Daftar Akun) dan `/profil-warga`
+
+---
+
+## Struktur Proyek
+
+```
+EtalasePelemwatu/
+├── app/
+│   ├── Console/Commands/        # Command CLI: RunBackup, AdminResetPassword
+│   ├── Http/Controllers/        # Web & Sitemap Controller
+│   │   └── API/                 # API Controllers (Auth, Potensi, Galeri, ProfilDesa, dll.)
+│   ├── Models/                  # Eloquent Models (User, Potensi, Galeri, Setting, dll.)
+│   └── Services/                # Service Layer (ImageOptimizer)
+├── database/
+│   ├── migrations/              # Skema database
+│   └── seeders/                 # DatabaseSeeder & data awal
+├── public/
+│   ├── assets/                  # CSS, JS, dan Gambar statis bawaan
+│   │   └── js/                  # utils.js, site-logo.js, auth.js, dll.
+│   ├── uploads/                 # File media dinamis (.htaccess dilindungi)
+│   └── robots.txt               # Aturan perayap mesin pencari
+├── resources/
+│   ├── css/ & js/               # Sumber daya Vite (Bootstrap, Icons, App)
+│   └── views/                   # Template Blade (index, admin, login, register, dll.)
+├── routes/
+│   ├── api.php                  # Endpoint REST API publik, warga, dan admin
+│   ├── console.php              # Penjadwalan task (prune token, backup harian)
+│   └── web.php                  # Halaman web dan redirect 301 legacy URL
+└── tests/                       # Rangkaian automated test PHPUnit Feature
+```
+
+---
+
+## Daftar Endpoint API Utama
+
+### Rute Publik
+- `GET /api/potensi` — Daftar potensi yang telah disetujui admin.
+- `GET /api/potensi/{id}` — Detail potensi terverifikasi.
+- `POST /api/potensi` — Pendaftaran potensi baru oleh pengunjung/warga (`pending`).
+- `GET /api/categories` — Daftar kategori potensi.
+- `GET /api/galeri` — Foto kegiatan galeri desa (diurutkan berdasarkan `sort_order`).
+- `GET /api/stats/public` — Statistik ringkas publik (jumlah UMKM berstatus aktif).
+- `GET /api/settings/logo` — URL logo situs resmi desa terkini.
+- `GET /sitemap.xml` — Peta situs XML dinamis.
+
+### Rute Autentikasi
+- `POST /api/login` — Autentikasi admin (rate limit: 5x/menit per email+IP).
+- `POST /api/warga/register` — Registrasi akun warga desa.
+- `POST /api/warga/login` — Login akun warga (rate limit: 5x/menit per nomor HP+IP).
+- `GET /api/auth/verify` & `POST /api/auth/logout` — Verifikasi dan pencabutan token.
+
+### Rute Khusus Warga (`auth:sanctum`, `role:warga`)
+- `GET /api/warga/profile` & `POST /api/warga/profile` — Data dan pembaruan profil warga.
+- `PUT /api/warga/password` — Ganti password akun warga.
+- `GET /api/warga/potensi` — Daftar potensi yang didaftarkan oleh akun bersangkutan.
+- `POST /api/warga/potensi/{id}` — Pembaruan informasi potensi milik sendiri.
+- `POST /api/warga/potensi/{id}/request-deletion` — Pengajuan permohonan hapus potensi ke admin.
+
+### Rute Administrator (`auth:sanctum`, `role:admin`)
+- `POST /api/potensi/{id}/review` — Menyetujui atau menolak pendaftaran potensi.
+- `GET /api/admin/deletion-requests` — Daftar permohonan penghapusan potensi.
+- `POST /api/admin/deletion-requests/{id}/approve` — Menyetujui penghapusan permanen.
+- `GET /api/admin/profil-desa` & `PUT /api/admin/profil-desa` — Membaca dan memperbarui info kontak desa.
+- `POST /api/galeri` & `DELETE /api/galeri/{id}` — Tambah dan hapus dokumentasi galeri.
+- `POST /api/settings/logo` — Unggah logo resmi portal desa.
+
+---
+
+## Pengelolaan Profil & Kontak Desa
+
+Administrator desa dapat memperbarui informasi kontak desa langsung dari Panel Admin tanpa menyentuh kode program:
+1. Buka **Panel Admin** (`/admin`) dan masuk ke bagian **Profil Desa**.
+2. Perbarui field:
+   - Alamat Lengkap & Kode Pos
+   - Nomor Telepon Kantor
+   - Nomor WhatsApp Resmi Desa (otomatis dinormalisasi ke format `628xxxxxxxxxx`)
+   - Email Resmi & Nama Kepala Desa
+   - Jam Operasional Kantor
+   - Akun Instagram Desa (contoh: `@official_pelemwatu`)
+   - Estimasi Jumlah Kepala Keluarga (KK)
+3. Klik **Simpan Perubahan**.
+4. Seluruh pembaruan langsung tercermin secara instan di kartu lokasi beranda, bagian kontak, footer, dan formulir pendaftaran.
+
+---
+
+## Pemulihan Akun Admin
+
+Jika administrator lupa kata sandi dan tidak dapat masuk ke Panel Admin, gunakan artisan command pemulihan:
+
+```bash
+php artisan admin:reset-password admin@pelemwatu.desa.id
+```
+
+Command ini akan:
+1. Menghasilkan kata sandi acak baru sepanjang 16 karakter yang kuat.
+2. Menampilkan kata sandi baru sekali di terminal.
+3. Mencabut seluruh token Sanctum aktif akun tersebut demi keamanan.
+
+---
+
+## Cadangan Data (Backup)
+
+Aplikasi dilengkapi command pencadangan otomatis untuk membackup basis data dan file unggahan:
+
+```bash
+php artisan backup:run
+```
+
+- Arsip `.zip` disimpan di `storage/app/backups/backup-YYYY-MM-DD-His.zip`.
+- Berisi salinan database SQLite (`database/database.sqlite`) atau dump SQL (`database/dump.sql` jika menggunakan MySQL/MariaDB), serta seluruh berkas di folder `public/uploads`.
+- **Rotasi Otomatis**: Sistem secara otomatis hanya menyimpan 7 arsip cadangan terakhir dan menghapus arsip yang lebih lama.
+- Cadangan dijadwalkan berjalan otomatis setiap hari via Laravel Scheduler (`routes/console.php`).
+
+> **Penting**: Berkas arsip cadangan tersimpan di penyimpanan lokal server yang sama (`storage/app/backups/`). Untuk mengantisipasi kegagalan server fisik atau kerusakan disk, salin berkas arsip secara berkala ke lokasi penyimpanan luar (offsite/cloud storage) dan lakukan simulasi pemulihan (uji restore) minimal sekali untuk memastikan keutuhan data cadangan.
+
+### Konfigurasi mysqldump untuk MySQL/MariaDB
+
+Jika menggunakan driver `mysql` atau `mariadb`, pastikan binary `mysqldump` terpasang di sistem dan tentukan path-nya pada `.env`:
+
+```env
+# Contoh di Windows XAMPP
+BACKUP_MYSQLDUMP_PATH="C:\xampp\mysql\bin\mysqldump.exe"
+
+# Contoh di Linux / Server Produksi (jika sudah di PATH atau direktori bin)
+BACKUP_MYSQLDUMP_PATH="/usr/bin/mysqldump"
+```
+
+Password dikirim secara aman melalui environment variable `MYSQL_PWD` (tidak tampil di argumen proses baris perintah).
+
+### Cara Memulihkan Data (Restore)
+
+1. Ekstrak file arsip `.zip` yang diinginkan dari `storage/app/backups/`.
+2. **Restore Database**:
+   - **MySQL / MariaDB**:
+     ```bash
+     mysql -u nama_user -p nama_database < database/dump.sql
+     ```
+   - **SQLite**:
+     Salin berkas `database/database.sqlite` ke path database proyek Anda.
+3. **Restore Berkas Unggahan**:
+   Salin isi folder `uploads/` hasil ekstrak ke dalam direktori `public/uploads/`.
+
+---
+
+## Panduan Deploy (Produksi)
+
+### Syarat Server
+Sebelum instalasi, pastikan lingkungan server hosting memenuhi checklist berikut:
+- [ ] **PHP >= 8.3**
+- [ ] **Ekstensi PHP wajib**: `gd`, `zip`, `mbstring`, `intl`, dan driver database (`pdo_sqlite` atau `pdo_mysql`)
+- [ ] **Node.js 20.19+ atau 22.12+** (syarat Vite 8) & NPM (untuk proses build aset Vite)
+- [ ] **Koneksi HTTPS aktif** (sertifikat SSL/TLS valid)
+- [ ] **Web Server** (Nginx/Apache) dengan Document Root mengarah langsung ke folder `public/`
+
+### 1. Konfigurasi Wajib Produksi di `.env`
+
+Pastikan variabel berikut disesuaikan dari nilai bawaan pengembangan:
+
+```env
+APP_NAME=EtalasePelemwatu
+APP_ENV=production
+APP_DEBUG=false
+APP_URL=https://etalase.pelemwatu.id
+
+# Koneksi Database Produksi (Bisa tetap SQLite atau MySQL)
+DB_CONNECTION=sqlite
+
+# Kunci Sesi & Keamanan
+APP_KEY=base64:...
+
+# Akun Administrator Awal (Diisi SEBELUM menjalankan seeder)
+ADMIN_NAME="Administrator Desa"
+# Ganti dengan email yang benar-benar Anda kuasai (dipakai untuk login admin)
+ADMIN_EMAIL=admin@pelemwatu.desa.id
+ADMIN_PASSWORD=ISI_PASSWORD_ACAK_MINIMAL_16_KARAKTER
+
+# Token Sanctum Kedaluwarsa (Menit)
+SANCTUM_EXPIRATION=480
+
+# Reverse Proxy:
+# Atur TRUSTED_PROXIES=* HANYA jika server benar-benar berada di balik reverse proxy tepercaya (misalnya Cloudflare atau load balancer Nginx).
+# Jika server langsung melayani pengunjung tanpa reverse proxy, KOSONGKAN variabel ini (TRUSTED_PROXIES=)
+# agar IP asli pengunjung tidak dapat dipalsukan dan pembatasan laju login (rate limiting) tidak dilewati.
+TRUSTED_PROXIES=
+```
+
+> **Penting (Document Root & Keamanan .env)**: Document root web server (Nginx/Apache) **wajib** mengarah ke folder `public/`. Jangan pernah menaruh seluruh folder proyek langsung di dalam folder root publik web (seperti `public_html`). Uji melalui browser bahwa URL `https://etalase.pelemwatu.id/.env` mengembalikan respons **403 Forbidden** atau **404 Not Found**, bukan mengunduh atau menampilkan isi berkas.
+
+### 2. Perintah Build & Optimasi Produksi
+
+```bash
+composer install --optimize-autoloader --no-dev
+npm ci
+npm run build
+
+php artisan migrate --force
+php artisan db:seed --force
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+```
+
+> **Catatan Build Aset Vite**:
+> Folder `public/build` diabaikan oleh git (`.gitignore`). Menjalankan `npm ci && npm run build` di server **wajib** dilakukan (atau lakukan build di lingkungan lokal kemudian unggah folder `public/build` ke server). Tanpa langkah ini, seluruh halaman web akan gagal dimuat dengan galat *"Vite manifest not found"*.
+
+> **Catatan Inisialisasi Database Seeder (`db:seed --force`)**:
+> - Pastikan Anda telah mengisi `ADMIN_PASSWORD` yang kuat dan menyesuaikan `ADMIN_EMAIL` di file `.env` **sebelum** menjalankan perintah seeder.
+> - Seeder bersifat idempoten: jika akun admin dengan email tersebut sudah terdaftar di database, seeder **tidak akan menimpa** data nama atau password yang sudah ada.
+> - Segera ganti kata sandi administrator melalui menu profil admin setelah berhasil masuk untuk pertama kali.
+
+### 3. Izin Akses Folder (File Permissions)
+
+```bash
+chmod -R 775 storage bootstrap/cache public/uploads
+chown -R www-data:www-data storage bootstrap/cache public/uploads
+```
+
+### 4. Konfigurasi Penjadwal Tugas (Cron Job Scheduler)
+
+Jalankan perintah penjadwal Laravel setiap menit menggunakan crontab server Linux (`crontab -e -u www-data`):
+
+```bash
+* * * * * cd /path/ke/proyek && php artisan schedule:run >> /dev/null 2>&1
+```
+
+> **Penting**: Penjadwal tugas (Laravel Scheduler) bertanggung jawab menjalankan proses otomatis krusial secara berkala:
+> 1. **Pencadangan Data Harian (Backup)**: Menjalankan `php artisan backup:run` setiap hari dan melakukan rotasi 7 cadangan terakhir.
+> 2. **Pembersihan Token Sanctum**: Menghapus token autentikasi yang sudah kedaluwarsa dari tabel `personal_access_tokens` agar database tetap bersih dan optimal.
+
+---
+
+## Keamanan Server Web (Nginx)
+
+Untuk mencegah eksekusi skrip PHP yang diunggah ke folder publik, tambahkan konfigurasi blok berikut di konfigurasi virtual host Nginx Anda:
+
+```nginx
+server {
+    server_name etalase.pelemwatu.id;
+    root /var/www/EtalasePelemwatu/public;
+
+    index index.php index.html;
+
+    # Blokir eksekusi skrip berbahaya di folder uploads
+    location ~* ^/uploads/.*\.php$ {
+        deny all;
+        return 404;
+    }
+
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    location ~ \.php$ {
+        include snippets/fastcgi-php.conf;
+        fastcgi_pass unix:/var/run/php/php8.3-fpm.sock;
+    }
+
+    location ~ /\.ht {
+        deny all;
+    }
+}
+```
+
+---
+
+## Menjalankan Test
+
+Jalankan pengujian otomatis untuk memvalidasi seluruh fungsionalitas:
+
+```bash
+php artisan test
+```
+
+Pemeriksaan gaya penulisan kode (PHP CS):
+
+```bash
+vendor/bin/pint --test
+```
+
+---
+
+## Lisensi
+
+Proprietary — Pemerintah Desa Pelemwatu. Seluruh hak cipta dilindungi undang-undang. Teks lengkap ada di berkas [LICENSE](LICENSE).

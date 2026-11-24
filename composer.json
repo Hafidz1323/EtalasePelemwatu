@@ -1,10 +1,10 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "laravel/laravel",
+    "name": "pelemwatu/etalase-pelemwatu",
     "type": "project",
-    "description": "The skeleton application for the Laravel framework.",
-    "keywords": ["laravel", "framework"],
-    "license": "MIT",
+    "description": "Aplikasi web etalase potensi desa Pelemwatu berbasis Laravel.",
+    "keywords": ["laravel", "desa", "potensi"],
+    "license": "proprietary",
     "require": {
         "php": "^8.3",
         "laravel/framework": "^13.17",

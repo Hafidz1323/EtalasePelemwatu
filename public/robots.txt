@@ -1,2 +1,7 @@
 User-agent: *
-Disallow:
+Disallow: /admin
+Disallow: /api/
+Disallow: /profil-warga
+Allow: /
+
+Sitemap: https://etalasepelemwatu.id/sitemap.xml

@@ -30,7 +30,28 @@ class UserFactory extends Factory
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
+            'role' => 'warga',
         ];
+    }
+
+    /**
+     * Set role user sebagai admin.
+     */
+    public function admin(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => 'admin',
+        ]);
+    }
+
+    /**
+     * Set role user sebagai warga.
+     */
+    public function warga(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => 'warga',
+        ]);
     }
 
     /**

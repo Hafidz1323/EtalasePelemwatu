@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Middleware\EnsureRole;
+use App\Http\Middleware\SecurityHeaders;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -13,6 +15,7 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+<<<<<<< HEAD
         // Daftarkan alias middleware untuk digunakan di route
         $middleware->alias([
             'admin.page' => \App\Http\Middleware\AdminPageMiddleware::class,
@@ -22,6 +25,22 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             \App\Http\Middleware\SecurityHeadersMiddleware::class,
         ]);
+=======
+        $middleware->append(SecurityHeaders::class);
+
+        $middleware->alias([
+            'role' => EnsureRole::class,
+        ]);
+
+        // Percayai proxy tertentu berdasarkan env TRUSTED_PROXIES.
+        // Isi dengan IP proxy (koma-pisah) atau '*' untuk semua, kosongkan jika tidak ada proxy.
+        $trustedProxies = env('TRUSTED_PROXIES', '');
+        if (! empty($trustedProxies)) {
+            $middleware->trustProxies(
+                at: $trustedProxies === '*' ? '*' : array_map('trim', explode(',', $trustedProxies))
+            );
+        }
+>>>>>>> 99bae7f599c1565d45f22896e47f8da1e83dd8c2
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

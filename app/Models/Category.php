@@ -21,4 +21,3 @@ class Category extends Model
         return $this->hasMany(Potensi::class, 'category_id');
     }
 }
-

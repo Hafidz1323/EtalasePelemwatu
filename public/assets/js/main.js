@@ -113,7 +113,7 @@ function initProfilTabs() {
 // ── Katalog Filter ────────────────────────────────────────────
 function initKatalogFilter() {
   const filterBtns = $$('.filter-btn');
-  const cards = $$('.potensi-card');
+  const getCards = () => $$('.potensi-card');
   const searchInput = document.getElementById('katalogSearch');
   const clearBtn = document.getElementById('katalogSearchClear');
   const resultInfo = document.getElementById('katalogSearchResultInfo');
@@ -136,9 +136,9 @@ function initKatalogFilter() {
     let visibleCount = 0;
     const query = searchQuery.trim().toLowerCase();
 
-    cards.forEach(card => {
+    getCards().forEach(card => {
       const category = card.dataset.category || '';
-      const title = card.querySelector('h5')?.textContent.toLowerCase() || '';
+      const title = (card.querySelector('.potensi-name-tag') || card.querySelector('h5'))?.textContent.toLowerCase() || '';
       const desc = card.querySelector('p')?.textContent.toLowerCase() || '';
       const badge = card.querySelector('.potensi-badge')?.textContent.toLowerCase() || '';
 
@@ -196,6 +196,17 @@ function initKatalogFilter() {
       }
     }
   }
+
+  // Tombol kata kunci cepat (Dimsum, Laundry, ...)
+  $$('.quick-tag-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      searchQuery = btn.dataset.keyword || '';
+      if (searchInput) searchInput.value = searchQuery;
+      applyFilters();
+    });
+  });
+
+  window.applyKatalogFilters = applyFilters;
 
   // Category buttons
   filterBtns.forEach(btn => {
@@ -323,27 +334,92 @@ const katalogData = {
 };
 
 function initDetailModal() {
-  $$('.btn-detail').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const id = btn.dataset.id;
-      const data = katalogData[id];
-      if (!data) return;
+  // Delegasi: berlaku juga untuk kartu yang dibuat dinamis dari API.
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest('.btn-detail');
+    if (!btn) return;
+    const id = btn.dataset.id;
+    const data = katalogData[id] || (window.__katalogDinamis || {})[id];
+    if (!data) return;
 
-      const modal = document.getElementById('detailModal');
-      if (!modal) return;
-      modal.querySelector('.modal-title').textContent = data.nama;
-      modal.querySelector('#detail-img').style.background = data.bg;
-      modal.querySelector('#detail-emoji').textContent = data.emoji;
-      modal.querySelector('#detail-nama').textContent = data.nama;
-      modal.querySelector('#detail-kategori').textContent = data.kategori;
-      modal.querySelector('#detail-deskripsi').textContent = data.deskripsi;
-      modal.querySelector('#detail-lokasi').textContent = data.lokasi;
-      modal.querySelector('#detail-status').textContent = data.status;
+    const modal = document.getElementById('detailModal');
+    if (!modal) return;
+    modal.querySelector('.modal-title').textContent = data.nama;
+    modal.querySelector('#detail-img').style.background = data.bg;
+    modal.querySelector('#detail-emoji').textContent = data.emoji;
+    modal.querySelector('#detail-nama').textContent = data.nama;
+    modal.querySelector('#detail-kategori').textContent = data.kategori;
+    modal.querySelector('#detail-deskripsi').textContent = data.deskripsi;
+    modal.querySelector('#detail-lokasi').textContent = data.lokasi;
+    modal.querySelector('#detail-status').textContent = data.status;
 
-      const bsModal = new bootstrap.Modal(modal);
-      bsModal.show();
-    });
+    bootstrap.Modal.getOrCreateInstance(modal).show();
   });
+}
+
+// ── Katalog dinamis dari API ──────────────────────────────────
+const KATEGORI_TAMPIL = {
+  usaha:   { img: 'assets/img/foto-warung-desa.jpg',    emoji: '🍽️', bg: '#fff0e8' },
+  jasa:    { img: 'assets/img/foto-daftar-potensi.jpg', emoji: '🧺', bg: '#e8f4ff' },
+  hunian:  { img: 'assets/img/foto-daftar-potensi.jpg', emoji: '🏠', bg: '#eaf7ee' },
+  barang:  { img: 'assets/img/foto-daftar-potensi.jpg', emoji: '🛍️', bg: '#fff8e1' },
+  lainnya: { img: 'assets/img/foto-daftar-potensi.jpg', emoji: '📍', bg: '#f1f3f5' },
+};
+
+function slugKategori(cat) {
+  const n = ((cat && cat.name) || '').toLowerCase();
+  if (n.startsWith('usaha')) return 'usaha';
+  if (n.startsWith('jasa')) return 'jasa';
+  if (n.startsWith('hunian')) return 'hunian';
+  if (n.startsWith('barang')) return 'barang';
+  return 'lainnya';
+}
+
+function buatKartuPotensi(p) {
+  const slug = slugKategori(p.category);
+  const tampil = KATEGORI_TAMPIL[slug];
+  const key = 'api-' + p.id;
+  const desc = p.description || '';
+
+  window.__katalogDinamis[key] = {
+    nama: p.name,
+    kategori: (p.category && p.category.name) || 'Lainnya',
+    emoji: tampil.emoji,
+    bg: tampil.bg,
+    deskripsi: desc || '-',
+    lokasi: p.location || p.address || 'Desa Pelemwatu, Kec. Menganti, Kab. Gresik',
+    status: 'Terverifikasi',
+  };
+
+  const mk = (tag, cls, text) => {
+    const n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (text != null) n.textContent = text;   // textContent: aman dari XSS
+    return n;
+  };
+
+  const card = mk('div', 'potensi-card');
+  card.dataset.category = slug;
+  card.dataset.dinamis = '1';
+
+  const imgWrap = mk('div', 'potensi-card-img');
+  const img = document.createElement('img');
+  img.src = tampil.img;
+  img.alt = p.name;
+  img.loading = 'lazy';
+  imgWrap.appendChild(img);
+
+  const body = mk('div', 'potensi-card-body');
+  body.appendChild(mk('span', 'potensi-name-tag', p.name));
+  body.appendChild(mk('p', '', desc.length > 160 ? desc.slice(0, 157).trimEnd() + '…' : desc));
+  const btn = mk('button', 'btn-detail', 'Lihat Detail →');
+  btn.type = 'button';
+  btn.dataset.id = key;
+  body.appendChild(btn);
+
+  card.appendChild(imgWrap);
+  card.appendChild(body);
+  return card;
 }
 
 // ── Smooth Scroll for Anchor Links ───────────────────────────

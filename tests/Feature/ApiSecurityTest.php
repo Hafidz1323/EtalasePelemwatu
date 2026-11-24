@@ -1,0 +1,566 @@
+<?php
+
+namespace Tests\Feature;
+
+use App\Models\Category;
+use App\Models\Potensi;
+use App\Models\User;
+use Database\Seeders\DatabaseSeeder;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
+use Laravel\Sanctum\Sanctum;
+use Tests\TestCase;
+
+class ApiSecurityTest extends TestCase
+{
+    use RefreshDatabase;
+
+    private function admin(): User
+    {
+        return User::factory()->admin()->create(['email' => 'admin@test.id', 'password' => 'Rahasia123']);
+    }
+
+    private function potensi(string $status = 'aktif', array $extra = []): Potensi
+    {
+        return Potensi::create(array_merge([
+            'name' => 'Usaha Uji', 'owner_name' => 'Budi Santoso', 'whatsapp' => '081234567890',
+            'address' => 'Jl. Melati No. 12', 'description' => 'Deskripsi usaha untuk pengujian.',
+            'status' => $status,
+        ], $extra));
+    }
+
+    private function payload(array $o = []): array
+    {
+        return array_merge([
+            'name' => 'Warung Baru', 'owner_name' => 'Siti Aminah', 'whatsapp' => '081298765432',
+            'address' => 'Jl. Raya Pelemwatu 45', 'description' => 'Warung makan rumahan dengan menu harian.',
+        ], $o);
+    }
+
+    // ---------- Proteksi rute ----------
+
+    public function test_rute_tulis_ditolak_tanpa_token(): void
+    {
+        $p = $this->potensi();
+        $c = Category::create(['name' => 'Jasa']);
+
+        $this->putJson("/api/potensi/{$p->id}", ['name' => 'Diretas'])->assertStatus(401);
+        $this->deleteJson("/api/potensi/{$p->id}")->assertStatus(401);
+        $this->postJson('/api/categories', ['name' => 'X'])->assertStatus(401);
+        $this->putJson("/api/categories/{$c->id}", ['name' => 'X'])->assertStatus(401);
+        $this->deleteJson("/api/categories/{$c->id}")->assertStatus(401);
+        $this->postJson("/api/potensi/{$p->id}/review", ['status' => 'approved'])->assertStatus(401);
+        $this->postJson('/api/upload', [])->assertStatus(401);
+        $this->getJson('/api/stats')->assertStatus(401);
+
+        $this->assertSame('Usaha Uji', $p->fresh()->name);
+        $this->assertNotNull(Category::find($c->id));
+    }
+
+    public function test_endpoint_messages_telah_dihapus(): void
+    {
+        $this->getJson('/api/messages')->assertNotFound();
+        $this->postJson('/api/messages', ['name' => 'A', 'email' => 'a@b.id', 'message' => 'Halo'])->assertNotFound();
+    }
+
+    public function test_rute_publik_tetap_bisa_diakses(): void
+    {
+        $this->getJson('/api/status')->assertOk();
+        $this->getJson('/api/categories')->assertOk();
+        $this->getJson('/api/potensi')->assertOk();
+        $this->getJson('/api/settings/logo')->assertOk();
+    }
+
+    // ---------- Login ----------
+
+    public function test_login_hardcoded_admin_tidak_berlaku(): void
+    {
+        $this->postJson('/api/login', ['email' => 'admin@pelemwatu.desa.id', 'password' => 'admin123'])
+            ->assertStatus(401);
+    }
+
+    public function test_login_user_db_berhasil_dan_salah_password_gagal(): void
+    {
+        $this->admin();
+        $this->postJson('/api/login', ['email' => 'ADMIN@test.id', 'password' => 'Rahasia123'])
+            ->assertOk()->assertJsonStructure(['data' => ['token', 'user']])
+            ->assertJsonMissing(['password']);
+        $this->postJson('/api/login', ['email' => 'admin@test.id', 'password' => 'salah'])->assertStatus(401);
+    }
+
+    public function test_login_tanpa_input_tidak_500(): void
+    {
+        $this->postJson('/api/login', [])->assertStatus(422);
+        $this->postJson('/api/login', ['email' => ['x'], 'password' => 'y'])->assertStatus(422);
+    }
+
+    public function test_login_dibatasi_throttle(): void
+    {
+        $last = null;
+        for ($i = 0; $i < 12; $i++) {
+            $last = $this->postJson('/api/login', ['email' => 'x@y.id', 'password' => 'salah'])->status();
+        }
+        $this->assertSame(429, $last);
+    }
+
+    // ---------- Verify & logout ----------
+
+    public function test_verify_menolak_token_palsu(): void
+    {
+        $this->getJson('/api/auth/verify', ['Authorization' => 'Bearer palsu'])->assertStatus(401);
+        $this->getJson('/api/auth/verify')->assertStatus(401);
+    }
+
+    public function test_verify_menerima_token_asli(): void
+    {
+        $token = $this->admin()->createToken('t')->plainTextToken;
+        $this->getJson('/api/auth/verify', ['Authorization' => "Bearer $token"])->assertOk();
+    }
+
+    public function test_logout_hanya_cabut_token_saat_ini(): void
+    {
+        $u = $this->admin();
+        $t1 = $u->createToken('a')->plainTextToken;
+        $u->createToken('b');
+        $this->postJson('/api/auth/logout', [], ['Authorization' => "Bearer $t1"])->assertOk();
+        $this->assertSame(1, $u->tokens()->count());
+    }
+
+    public function test_logout_tanpa_token_ditolak(): void
+    {
+        $this->postJson('/api/auth/logout')->assertStatus(401);
+    }
+
+    public function test_logout_sesi_transient_tidak_500(): void
+    {
+        Sanctum::actingAs($this->admin());
+        $this->postJson('/api/auth/logout')->assertOk();
+    }
+
+    // ---------- Validasi / mass assignment ----------
+
+    public function test_kategori_validasi_dan_mass_assignment(): void
+    {
+        Sanctum::actingAs($this->admin());
+        $this->postJson('/api/categories', [])->assertStatus(422);
+        $this->postJson('/api/categories', ['name' => str_repeat('a', 300)])->assertStatus(422);
+        $r = $this->postJson('/api/categories', ['name' => 'Baru', 'id' => 999, 'created_at' => '2000-01-01'])->assertStatus(201);
+        $this->assertNotSame(999, $r->json('data.id'));
+        $c = Category::find($r->json('data.id'));
+        $this->assertNotSame('2000', $c->created_at->format('Y'));
+        $this->putJson("/api/categories/{$c->id}", ['name' => ''])->assertStatus(422);
+        $this->putJson("/api/categories/{$c->id}", ['name' => 'Ubah'])->assertOk();
+    }
+
+    public function test_update_potensi_divalidasi_dan_tidak_bisa_set_kolom_terlarang(): void
+    {
+        $admin = $this->admin();
+        Sanctum::actingAs($admin);
+        $p = $this->potensi();
+
+        $this->putJson("/api/potensi/{$p->id}", ['status' => 'hacked'])->assertStatus(422);
+        $this->putJson("/api/potensi/{$p->id}", ['whatsapp' => 'abc'])->assertStatus(422);
+        $this->putJson("/api/potensi/{$p->id}", ['category_id' => 9999])->assertStatus(422);
+        $this->putJson("/api/potensi/{$p->id}", ['name' => 'Nama Baru', 'reviewed_by' => 999, 'id' => 500])->assertOk();
+
+        $p = $p->fresh();
+        $this->assertSame('Nama Baru', $p->name);
+        $this->assertNotSame(999, $p->reviewed_by);
+        $this->assertSame(1, Potensi::count());
+    }
+
+    public function test_update_potensi_menerima_payload_form_admin(): void
+    {
+        Sanctum::actingAs($this->admin());
+        $cat = Category::create(['name' => 'Jasa']);
+        $p = $this->potensi();
+        $this->putJson("/api/potensi/{$p->id}", [
+            'name' => 'Edit', 'owner_name' => 'Budi', 'category_id' => $cat->id, 'whatsapp' => '081234567890',
+            'email' => null, 'address' => 'Jl. Melati No. 12', 'description' => 'Deskripsi cukup panjang sekali.',
+            'location' => null, 'jenis' => null, 'jam_operasional' => null, 'status' => 'approved',
+        ])->assertOk();
+    }
+
+    // ---------- Upload ----------
+
+    public function test_upload_menolak_file_berbahaya(): void
+    {
+        Sanctum::actingAs($this->admin());
+        $this->postJson('/api/upload', ['image' => UploadedFile::fake()->create('shell.php', 10, 'application/x-php')])->assertStatus(422);
+        $this->postJson('/api/upload', ['image' => UploadedFile::fake()->create('a.html', 10, 'text/html')])->assertStatus(422);
+        $this->postJson('/api/upload', ['image' => UploadedFile::fake()->image('besar.jpg')->size(5000)])->assertStatus(422);
+        $this->postJson('/api/upload', [])->assertStatus(422);
+    }
+
+    public function test_upload_gambar_sah_dan_ekstensi_dari_isi_file(): void
+    {
+        Sanctum::actingAs($this->admin());
+        // PNG sungguhan dengan nama .php -> ekstensi harus mengikuti isi file
+        $file = UploadedFile::fake()->image('evil.php', 20, 20);
+        $res = $this->postJson('/api/upload', ['image' => $file]);
+        if ($res->status() === 200) {
+            $this->assertStringNotContainsString('.php', $res->json('path'));
+            @unlink(public_path($res->json('path')));
+        } else {
+            $res->assertStatus(422);
+        }
+        $ok = $this->postJson('/api/upload', ['image' => UploadedFile::fake()->image('foto.png', 20, 20)])->assertOk();
+        $this->assertMatchesRegularExpression('#^/uploads/[A-Za-z0-9_\-]+\.png$#', $ok->json('path'));
+        @unlink(public_path($ok->json('path')));
+    }
+
+    // ---------- Status & publikasi ----------
+
+    public function test_pendaftaran_publik_default_pending(): void
+    {
+        $r = $this->postJson('/api/potensi', $this->payload(['status' => 'aktif']))->assertStatus(201);
+        // Respons hanya mengembalikan id (data pribadi tidak dikembalikan);
+        // verifikasi status 'pending' langsung dari DB.
+        $this->assertNotNull($r->json('data.id'));
+        $this->assertSame('pending', Potensi::first()->status);
+    }
+
+    public function test_daftar_publik_hanya_yang_disetujui(): void
+    {
+        // Status 'aktif' dihapus — kini hanya 'approved' yang tampil ke publik
+        $this->potensi('aktif', ['name' => 'Aktif Satu']);
+        $this->potensi('approved', ['name' => 'Disetujui']);
+        $this->potensi('pending', ['name' => 'Pending Satu']);
+        $this->potensi('rejected', ['name' => 'Ditolak Satu']);
+
+        $names = collect($this->getJson('/api/potensi')->assertOk()->json('data'))->pluck('name')->all();
+        // Setelah normalisasi: hanya 'approved' yang tampil (bukan 'aktif')
+        $this->assertEqualsCanonicalizing(['Disetujui'], $names);
+
+        // guest tidak bisa memaksa filter status
+        $names = collect($this->getJson('/api/potensi?status=pending')->json('data'))->pluck('name')->all();
+        $this->assertNotContains('Pending Satu', $names);
+    }
+
+    public function test_detail_publik_tidak_menampilkan_yang_belum_disetujui(): void
+    {
+        $p = $this->potensi('pending');
+        $a = $this->potensi('approved'); // 'aktif' dihapus — gunakan 'approved'
+        $this->getJson("/api/potensi/{$p->id}")->assertStatus(404);
+        $this->getJson("/api/potensi/{$a->id}")->assertOk();
+    }
+
+    public function test_admin_melihat_semua_status_dan_bisa_filter(): void
+    {
+        $this->potensi('aktif');
+        $this->potensi('pending');
+        $this->potensi('rejected');
+        $token = $this->admin()->createToken('t')->plainTextToken;
+        $h = ['Authorization' => "Bearer $token"];
+
+        $this->assertCount(3, $this->getJson('/api/potensi', $h)->json('data'));
+        $this->assertCount(1, $this->getJson('/api/potensi?status=pending', $h)->json('data'));
+        $this->getJson('/api/potensi/'.Potensi::where('status', 'pending')->value('id'), $h)->assertOk();
+    }
+
+    // ---------- Review & stats ----------
+
+    public function test_review_mengisi_reviewed_by_dan_validasi(): void
+    {
+        $admin = $this->admin();
+        Sanctum::actingAs($admin);
+        $p = $this->potensi('pending');
+
+        $this->postJson("/api/potensi/{$p->id}/review", ['status' => 'bogus'])->assertStatus(422);
+        $this->postJson("/api/potensi/{$p->id}/review", ['status' => 'rejected'])->assertStatus(422); // alasan wajib
+        $this->postJson("/api/potensi/{$p->id}/review", ['status' => 'rejected', 'reason' => 'Data tidak lengkap'])->assertOk();
+        $p = $p->fresh();
+        $this->assertSame('rejected', $p->status);
+        $this->assertSame($admin->id, $p->reviewed_by);
+        $this->assertNotNull($p->reviewed_at);
+
+        $this->postJson("/api/potensi/{$p->id}/review", ['status' => 'approved'])->assertOk();
+        $p = $p->fresh();
+        $this->assertNull($p->rejection_reason);
+        $this->postJson('/api/potensi/99999/review', ['status' => 'approved'])->assertStatus(404);
+    }
+
+    public function test_stats_pending_dihitung_benar(): void
+    {
+        Sanctum::actingAs($this->admin());
+        $this->potensi('aktif');
+        $this->potensi('approved');
+        $this->potensi('pending');
+        $this->potensi('pending');
+        $this->potensi('rejected');
+
+        $d = $this->getJson('/api/stats')->assertOk()->json('data');
+        $this->assertSame(5, $d['totalPotensi']);
+        $this->assertSame(2, $d['pendingReviews']);
+    }
+
+    // ---------- Throttle pendaftaran ----------
+
+    public function test_pendaftaran_dibatasi_throttle(): void
+    {
+        $s = null;
+        for ($i = 0; $i < 15; $i++) {
+            $s = $this->postJson('/api/potensi', $this->payload())->status();
+        }
+        $this->assertSame(429, $s);
+    }
+
+    // ---------- Profil / password ----------
+
+    public function test_profil_dan_password_butuh_login(): void
+    {
+        $this->getJson('/api/admin/profile')->assertStatus(401);
+        $this->putJson('/api/admin/password', [])->assertStatus(401);
+        Sanctum::actingAs($this->admin());
+        $this->getJson('/api/admin/profile')->assertOk()->assertJsonPath('data.email', 'admin@test.id');
+    }
+
+    public function test_ganti_password_alur_lengkap(): void
+    {
+        $u = $this->admin();
+        Sanctum::actingAs($u);
+        $this->putJson('/api/admin/password', ['current_password' => 'salah', 'password' => 'Baru12345', 'password_confirmation' => 'Baru12345'])->assertStatus(422);
+        $this->putJson('/api/admin/password', ['current_password' => 'Rahasia123', 'password' => 'lemah', 'password_confirmation' => 'lemah'])->assertStatus(422);
+        $this->putJson('/api/admin/password', ['current_password' => 'Rahasia123', 'password' => 'Baru12345', 'password_confirmation' => 'Baru12345'])->assertOk();
+        $this->assertTrue(\Hash::check('Baru12345', $u->fresh()->password));
+    }
+
+    public function test_seeder_tidak_memakai_password_bawaan(): void
+    {
+        config(['admin.email' => 'seed@test.id', 'admin.password' => 'SeedPass123']);
+        $this->seed();
+        $u = User::where('email', 'seed@test.id')->first();
+        $this->assertNotNull($u);
+        $this->assertTrue(\Hash::check('SeedPass123', $u->password));
+        $this->assertFalse(\Hash::check('admin123', $u->password));
+        $this->assertNull(User::where('email', 'admin@pelemwatu.desa.id')->first());
+    }
+
+    public function test_seed_dua_kali_tidak_mereset_password_yang_sudah_diubah(): void
+    {
+        // Seed pertama: buat akun admin
+        config(['admin.email' => 'seed2@test.id', 'admin.password' => 'PasswordAwal1']);
+        $this->seed();
+
+        $u = User::where('email', 'seed2@test.id')->first();
+        $this->assertNotNull($u);
+        $this->assertTrue(\Hash::check('PasswordAwal1', $u->password));
+
+        // Simulasi admin mengubah passwordnya sendiri
+        $u->password = \Hash::make('PasswordBaru99');
+        $u->save();
+
+        // Seed kedua: password di config berbeda (atau kosong)
+        config(['admin.password' => 'PasswordLain2']);
+        $this->seed();
+
+        // Password harus TETAP PasswordBaru99, bukan ditimpa config
+        $u = $u->fresh();
+        $this->assertTrue(
+            \Hash::check('PasswordBaru99', $u->password),
+            'Seed kedua tidak boleh menimpa password yang sudah diubah admin'
+        );
+        $this->assertFalse(\Hash::check('PasswordLain2', $u->password));
+        // Pastikan hanya 1 user (tidak duplikat)
+        $this->assertSame(1, User::where('email', 'seed2@test.id')->count());
+    }
+
+    public function test_seed_di_production_tidak_mengisi_tabel_potensi(): void
+    {
+        // Override env ke 'production' — app()->environment() harus mengembalikan 'production'
+        $this->app->instance('env', 'production');
+        $this->assertSame('production', app()->environment());
+
+        config(['admin.email' => 'prod@test.id', 'admin.password' => 'ProdPass123']);
+
+        // Jalankan seeder secara langsung (tanpa artisan command runner)
+        // agar tidak memunculkan dialog interaktif dari Mockery
+        $seeder = new DatabaseSeeder;
+        $seeder->run();
+
+        // Tabel potensi harus tetap kosong di production
+        $this->assertSame(
+            0,
+            DB::table('potensi')->count(),
+            'Seeder tidak boleh mengisi tabel potensi di environment production'
+        );
+
+        // Kategori tetap ter-seed (data master)
+        $this->assertGreaterThan(0, DB::table('categories')->count());
+    }
+
+    // ---------- Field sensitif di endpoint publik ----------
+
+    private function potensiPayload(array $override = []): array
+    {
+        return array_merge([
+            'name' => 'Usaha Test Privasi',
+            'owner_name' => 'Budi Santoso',
+            'whatsapp' => '081234567890',
+            'address' => 'Jl. Melati No. 12 Pelemwatu',
+            'description' => 'Deskripsi usaha cukup panjang untuk pengujian privasi data warga.',
+            'status' => 'approved',
+        ], $override);
+    }
+
+    public function test_tamu_tidak_melihat_field_sensitif_pada_daftar_potensi(): void
+    {
+        $p = Potensi::create($this->potensiPayload());
+
+        $response = $this->getJson('/api/potensi')->assertOk();
+        $data = collect($response->json('data'));
+
+        $this->assertNotEmpty($data, 'Harus ada data potensi yang dikembalikan');
+
+        $item = $data->firstWhere('id', $p->id);
+        $this->assertNotNull($item, 'Potensi yang baru dibuat harus ada di response');
+
+        // Field yang HARUS ada di respons publik
+        $this->assertArrayHasKey('id', $item);
+        $this->assertArrayHasKey('name', $item);
+        $this->assertArrayHasKey('description', $item);
+
+        // Field sensitif yang TIDAK BOLEH ada
+        $this->assertArrayNotHasKey('owner_name', $item, 'owner_name tidak boleh bocor ke publik');
+        $this->assertArrayNotHasKey('email', $item, 'email tidak boleh bocor ke publik');
+        $this->assertArrayNotHasKey('address', $item, 'address tidak boleh bocor ke publik');
+        $this->assertArrayNotHasKey('reviewed_by', $item, 'reviewed_by tidak boleh bocor ke publik');
+        $this->assertArrayNotHasKey('reviewed_at', $item, 'reviewed_at tidak boleh bocor ke publik');
+        $this->assertArrayNotHasKey('rejection_reason', $item, 'rejection_reason tidak boleh bocor ke publik');
+        $this->assertArrayNotHasKey('status', $item, 'status tidak boleh bocor ke publik');
+    }
+
+    public function test_tamu_tidak_melihat_field_sensitif_pada_detail_potensi(): void
+    {
+        $p = Potensi::create($this->potensiPayload());
+
+        $response = $this->getJson("/api/potensi/{$p->id}")->assertOk();
+        $item = $response->json('data');
+
+        $this->assertNotNull($item);
+        $this->assertSame($p->id, $item['id']);
+
+        $this->assertArrayNotHasKey('owner_name', $item, 'owner_name tidak boleh bocor ke publik');
+        $this->assertArrayNotHasKey('email', $item, 'email tidak boleh bocor ke publik');
+        $this->assertArrayNotHasKey('address', $item, 'address tidak boleh bocor ke publik');
+        $this->assertArrayNotHasKey('reviewed_by', $item, 'reviewed_by tidak boleh bocor ke publik');
+        $this->assertArrayNotHasKey('reviewed_at', $item, 'reviewed_at tidak boleh bocor ke publik');
+        $this->assertArrayNotHasKey('rejection_reason', $item, 'rejection_reason tidak boleh bocor ke publik');
+        $this->assertArrayNotHasKey('status', $item, 'status tidak boleh bocor ke publik');
+    }
+
+    public function test_admin_melihat_semua_field_termasuk_sensitif(): void
+    {
+        Sanctum::actingAs($this->admin());
+        $p = Potensi::create($this->potensiPayload());
+
+        // Index
+        $response = $this->getJson('/api/potensi')->assertOk();
+        $item = collect($response->json('data'))->firstWhere('id', $p->id);
+        $this->assertNotNull($item);
+        $this->assertArrayHasKey('owner_name', $item);
+        $this->assertArrayHasKey('email', $item);
+        $this->assertArrayHasKey('address', $item);
+        $this->assertArrayHasKey('reviewed_by', $item);
+        $this->assertArrayHasKey('rejection_reason', $item);
+        $this->assertArrayHasKey('status', $item);
+
+        // Detail
+        $detail = $this->getJson("/api/potensi/{$p->id}")->assertOk()->json('data');
+        $this->assertArrayHasKey('owner_name', $detail);
+        $this->assertArrayHasKey('address', $detail);
+        $this->assertArrayHasKey('status', $detail);
+        $this->assertArrayHasKey('reviewed_by', $detail);
+    }
+
+    public function test_pendaftaran_publik_hanya_mengembalikan_id(): void
+    {
+        $response = $this->postJson('/api/potensi', $this->potensiPayload())->assertStatus(201);
+
+        $data = $response->json('data');
+
+        // Harus ada id
+        $this->assertArrayHasKey('id', $data);
+        $this->assertNotNull($data['id']);
+
+        // Tidak boleh ada field pribadi
+        $this->assertArrayNotHasKey('owner_name', $data, 'owner_name tidak boleh ada di respons store()');
+        $this->assertArrayNotHasKey('whatsapp', $data, 'whatsapp tidak boleh ada di respons store()');
+        $this->assertArrayNotHasKey('address', $data, 'address tidak boleh ada di respons store()');
+        $this->assertArrayNotHasKey('email', $data, 'email tidak boleh ada di respons store()');
+    }
+
+    // ---------- Autentikasi lanjutan ----------
+
+    public function test_token_kadaluwarsa_ditolak_401(): void
+    {
+        // Aktifkan expiration 1 menit agar mudah disimulasikan
+        config(['sanctum.expiration' => 1]);
+
+        $user = $this->admin();
+        $token = $user->createToken('expired-test');
+
+        // Mundurkan created_at token lebih dari 1 menit agar dianggap kadaluwarsa
+        \DB::table('personal_access_tokens')
+            ->where('id', $token->accessToken->id)
+            ->update(['created_at' => now()->subMinutes(2)]);
+
+        $this->getJson('/api/auth/verify', [
+            'Authorization' => 'Bearer '.$token->plainTextToken,
+        ])->assertStatus(401);
+    }
+
+    public function test_ganti_password_mencabut_token_lain(): void
+    {
+        $u = $this->admin();
+        $tok1 = $u->createToken('sesi-1');
+        $tok2 = $u->createToken('sesi-2');
+        $token1 = $tok1->plainTextToken;
+        $t1Id = $tok1->accessToken->id;
+        $t2Id = $tok2->accessToken->id;
+
+        $this->assertSame(2, $u->tokens()->count(), 'Harus ada 2 token sebelum ganti password');
+
+        // Ganti password menggunakan token1
+        $this->putJson('/api/admin/password', [
+            'current_password' => 'Rahasia123',
+            'password' => 'BaruBanget99',
+            'password_confirmation' => 'BaruBanget99',
+        ], ['Authorization' => "Bearer $token1"])->assertOk();
+
+        // Verifikasi langsung dari DB: token2 harus sudah dihapus, token1 harus masih ada
+        $this->assertNull(
+            \DB::table('personal_access_tokens')->where('id', $t2Id)->first(),
+            'token sesi-2 harus dihapus setelah ganti password'
+        );
+        $this->assertNotNull(
+            \DB::table('personal_access_tokens')->where('id', $t1Id)->first(),
+            'token sesi-1 (sesi aktif) harus tetap ada'
+        );
+        $this->assertSame(1, (int) \DB::table('personal_access_tokens')->where('tokenable_id', $u->id)->count());
+    }
+
+    public function test_throttle_login_berbeda_untuk_email_berbeda_dari_ip_sama(): void
+    {
+        // Habiskan throttle untuk email1 (5 percobaan)
+        for ($i = 0; $i < 5; $i++) {
+            $this->postJson('/api/login', [
+                'email' => 'emailsatu@test.id',
+                'password' => 'salah',
+            ]);
+        }
+
+        // Percobaan ke-6 dengan email1 harus kena throttle (429)
+        $this->postJson('/api/login', [
+            'email' => 'emailsatu@test.id',
+            'password' => 'salah',
+        ])->assertStatus(429);
+
+        // email2 dari IP yang sama TIDAK kena throttle (kunci berbeda karena email berbeda)
+        $this->postJson('/api/login', [
+            'email' => 'emaildua@test.id',
+            'password' => 'salah',
+        ])->assertStatus(401); // 401 bukan 429
+    }
+}

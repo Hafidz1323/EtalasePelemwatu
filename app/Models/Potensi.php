@@ -9,6 +9,9 @@ class Potensi extends Model
 {
     use HasFactory;
 
+    /** Status yang tampil di halaman publik. */
+    public const STATUS_PUBLIK = ['approved'];
+
     protected $table = 'potensi';
 
     protected $fillable = [
@@ -17,17 +20,22 @@ class Potensi extends Model
         'name',
         'owner_name',
         'whatsapp',
+        'email',
         'address',
         'description',
         'location',
+        'jenis',
+        'jam_operasional',
         'status',
         'latitude',
         'longitude',
         'reviewed_by',
         'reviewed_at',
         'rejection_reason',
+        'deletion_requested_at',
     ];
 
+<<<<<<< HEAD
     protected $casts = [
         'latitude' => 'float',
         'longitude' => 'float',
@@ -35,6 +43,9 @@ class Potensi extends Model
     ];
 
     public function user()
+=======
+    public function owner()
+>>>>>>> 99bae7f599c1565d45f22896e47f8da1e83dd8c2
     {
         return $this->belongsTo(User::class, 'user_id');
     }
@@ -53,6 +64,7 @@ class Potensi extends Model
     {
         return $this->hasMany(PotensiImage::class, 'potensi_id');
     }
+<<<<<<< HEAD
 
     /**
      * Helper scope untuk potensi yang disetujui tampil di publik
@@ -61,4 +73,6 @@ class Potensi extends Model
     {
         return $query->whereIn('status', ['approved', 'aktif']);
     }
+=======
+>>>>>>> 99bae7f599c1565d45f22896e47f8da1e83dd8c2
 }
