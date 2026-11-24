@@ -393,3 +393,135 @@ document.addEventListener('DOMContentLoaded', () => {
   initMapPlaceholder();
 });
 
+
+
+
+// ── Load Katalog Dinamis dari API dengan Pagination & Loading State ──────────────────
+let currentKatalogPage = 1;
+const KATALOG_PER_PAGE = 6;
+
+async function loadKatalogFromApi(page = 1) {
+  currentKatalogPage = page;
+  const grid = document.querySelector(".katalog-grid");
+  const statPotensi = document.querySelector(".hero-stat-strip .hero-stat-item:last-child .hero-stat-value");
+  if (!grid) return;
+
+  // 1. Tampilkan Skeleton Loading State
+  grid.innerHTML = `
+    <div class="col-12 text-center py-5 my-3" id="katalogLoadingState">
+      <div class="spinner-border text-primary" role="status" style="width:3rem;height:3rem;color:#f2630f !important;">
+        <span class="visually-hidden">Memuat data potensi desa...</span>
+      </div>
+      <p class="mt-3 text-muted fw-semibold" style="font-size:0.95rem;">Sedang memuat data potensi lokal Desa Pelemwatu...</p>
+    </div>
+  `;
+
+  try {
+    const res = await fetch(`/api/potensi?page=${page}&per_page=${KATALOG_PER_PAGE}`);
+    const json = await res.json();
+
+    if (res.ok && json.status === "success") {
+      const items = json.data || [];
+      const pagination = json.pagination || null;
+
+      if (pagination && statPotensi) {
+        statPotensi.textContent = pagination.total + "+";
+      }
+
+      if (items.length === 0) {
+        grid.innerHTML = `
+          <div class="col-12 text-center py-5" id="katalogEmptyState">
+            <div class="empty-icon text-muted mb-3" style="font-size:3rem;"><i class="bi bi-inbox"></i></div>
+            <h5 class="fw-bold">Belum Ada Potensi Terdaftar</h5>
+            <p class="text-muted small">Saat ini belum ada potensi yang disetujui untuk ditampilkan di katalog.</p>
+          </div>
+        `;
+        renderPaginationControls(null);
+        return;
+      }
+
+      // 2. Render Cards
+      let html = "";
+      items.forEach(item => {
+        const catMap = { 1: "usaha", 2: "jasa", 3: "hunian", 4: "barang" };
+        const catSlug = catMap[item.category_id] || "usaha";
+        const catName = item.category ? item.category.name : "Usaha & Produk";
+        const foto = (item.images && item.images.length > 0) ? item.images[0].image_path : "assets/img/foto-warung-desa.jpg";
+        const waLink = item.whatsapp ? `https://wa.me/${item.whatsapp}` : "#";
+
+        html += `
+          <div class="potensi-card" data-category="${catSlug}">
+            <div class="potensi-card-img position-relative">
+              <img src="${foto}" alt="Foto ${item.name}" loading="lazy" style="height:190px;object-fit:cover;width:100%;border-top-left-radius:12px;border-top-right-radius:12px;">
+              <span class="potensi-badge badge-${catSlug}">${catName}</span>
+            </div>
+            <div class="potensi-card-body p-3">
+              <h5 class="fw-bold mb-1 text-truncate" title="${item.name}">${item.name}</h5>
+              <p class="text-muted small mb-2"><i class="bi bi-person me-1"></i>${item.owner_name} &bull; <i class="bi bi-geo-alt"></i> ${item.location || "Pelemwatu"}</p>
+              <p class="potensi-desc small text-secondary" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:38px;">${item.description || "Potensi lokal masyarakat Desa Pelemwatu."}</p>
+              <div class="d-flex justify-content-between align-items-center mt-3 pt-2 border-top">
+                <a href="${waLink}" target="_blank" rel="noopener" class="btn btn-sm btn-outline-success d-flex align-items-center gap-1" aria-label="Hubungi pemilik ${item.name} via WhatsApp"><i class="bi bi-whatsapp"></i> Hubungi</a>
+                <span class="badge bg-light text-dark border d-flex align-items-center gap-1"><i class="bi bi-patch-check-fill text-primary"></i> Terverifikasi</span>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+
+      // Tambahkan empty state filter
+      html += `
+        <div id="katalogEmptyState" class="katalog-empty-state col-12 text-center py-5" style="display:none;">
+          <div class="empty-icon text-muted mb-2" style="font-size:2.5rem;"><i class="bi bi-search"></i></div>
+          <h5 class="fw-bold">Potensi Tidak Ditemukan</h5>
+          <p id="emptyStateMsg" class="text-muted small">Tidak ada potensi lokal yang cocok dengan kata kunci pencarian Anda.</p>
+          <button type="button" class="btn btn-sm btn-outline-primary" id="btnResetEmptyState">
+            Tampilkan Semua Potensi
+          </button>
+        </div>
+      `;
+
+      grid.innerHTML = html;
+
+      // 3. Render Pagination
+      renderPaginationControls(pagination);
+
+      // Re-init filter
+      initKatalogFilter();
+    }
+  } catch (err) {
+    grid.innerHTML = `
+      <div class="col-12 text-center py-5">
+        <p class="text-danger fw-semibold"><i class="bi bi-exclamation-triangle me-1"></i> Gagal memuat data potensi. Silakan segarkan halaman.</p>
+      </div>
+    `;
+  }
+}
+
+function renderPaginationControls(pagination) {
+  let navContainer = document.getElementById("katalogPaginationNav");
+  if (!navContainer) {
+    const katalogSection = document.getElementById("katalog");
+    if (!katalogSection) return;
+    navContainer = document.createElement("div");
+    navContainer.id = "katalogPaginationNav";
+    navContainer.className = "d-flex justify-content-center align-items-center gap-2 mt-4 flex-wrap";
+    const container = katalogSection.querySelector(".container") || katalogSection;
+    container.appendChild(navContainer);
+  }
+
+  if (!pagination || pagination.last_page <= 1) {
+    navContainer.innerHTML = "";
+    return;
+  }
+
+  let btns = "";
+  btns += `<button class="btn btn-sm btn-outline-secondary ${pagination.current_page <= 1 ? "disabled" : ""}" onclick="loadKatalogFromApi(${pagination.current_page - 1})" aria-label="Halaman Sebelumnya"><i class="bi bi-chevron-left"></i></button>`;
+
+  for (let i = 1; i <= pagination.last_page; i++) {
+    btns += `<button class="btn btn-sm ${i === pagination.current_page ? "btn-primary" : "btn-outline-secondary"}" style="${i === pagination.current_page ? "background:#f2630f;border-color:#f2630f;" : ""}" onclick="loadKatalogFromApi(${i})" aria-label="Ke halaman ${i}">${i}</button>`;
+  }
+
+  btns += `<button class="btn btn-sm btn-outline-secondary ${pagination.current_page >= pagination.last_page ? "disabled" : ""}" onclick="loadKatalogFromApi(${pagination.current_page + 1})" aria-label="Halaman Berikutnya"><i class="bi bi-chevron-right"></i></button>`;
+
+  navContainer.innerHTML = btns;
+}

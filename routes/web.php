@@ -10,12 +10,10 @@ Route::get('/index.html', function () {
     return view('index');
 });
 
-Route::get('/admin.html', function () {
-    return view('admin');
-});
-
-Route::get('/admin', function () {
-    return view('admin');
+// Halaman admin dilindungi AdminPageMiddleware (server-side token check)
+Route::middleware(\App\Http\Middleware\AdminPageMiddleware::class)->group(function () {
+    Route::get('/admin.html', fn() => view('admin'));
+    Route::get('/admin', fn() => view('admin'));
 });
 
 Route::get('/daftar-potensi.html', function () {
@@ -32,4 +30,8 @@ Route::get('/login.html', function () {
 
 Route::get('/login', function () {
     return view('login');
+});
+
+Route::get('/register', function () {
+    return view('login'); // Menuju tab daftar di halaman login/register
 });

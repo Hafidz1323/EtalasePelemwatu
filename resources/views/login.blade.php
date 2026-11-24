@@ -3,8 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login Admin — EtalasePelemwatu</title>
-  <meta name="description" content="Halaman login administrator portal potensi lokal Desa Pelemwatu.">
+  <title>Masuk & Daftar â€” EtalasePelemwatu</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   <link rel="stylesheet" href="assets/css/style.css">
@@ -17,140 +16,59 @@
       justify-content: center;
       align-items: center;
       padding: 1.5rem;
-      position: relative;
-      overflow-x: hidden;
     }
-    .login-decor-circle {
-      position: absolute;
-      border-radius: 50%;
-      pointer-events: none;
-      filter: blur(80px);
-      opacity: 0.25;
-    }
-    .decor-1 {
-      width: 380px;
-      height: 380px;
-      background: var(--clr-orange);
-      top: -100px;
-      right: -80px;
-    }
-    .decor-2 {
-      width: 320px;
-      height: 320px;
-      background: var(--clr-yellow);
-      bottom: -60px;
-      left: -80px;
-    }
-    .decor-3 {
-      width: 260px;
-      height: 260px;
-      background: var(--clr-green);
-      top: 40%;
-      left: 10%;
-      opacity: 0.15;
-    }
-    .login-card-container {
-      width: 100%;
-      max-width: 460px;
-      position: relative;
-      z-index: 2;
-    }
-    .login-brand-header {
-      text-align: center;
-      margin-bottom: 1.75rem;
-    }
-    .login-brand-header .logo-badge {
-      width: 58px;
-      height: 58px;
-      border-radius: 16px;
-      background: linear-gradient(135deg, var(--clr-orange), #ff7b2b);
-      color: #fff;
-      font-weight: 800;
-      font-size: 1.5rem;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 10px 25px rgba(242, 99, 15, 0.4);
-      margin-bottom: 0.75rem;
-    }
-    .login-brand-header h1 {
-      font-size: 1.5rem;
-      color: #ffffff;
-      font-weight: 700;
-      margin-bottom: 0.2rem;
-    }
-    .login-brand-header p {
-      color: rgba(255, 255, 255, 0.7);
-      font-size: 0.9rem;
-      margin-bottom: 0;
-    }
-    .login-box {
+    .login-container { width: 100%; max-width: 480px; }
+    .login-card {
       background: #ffffff;
-      border-radius: var(--radius-lg);
-      padding: 2.25rem 2rem;
+      border-radius: 16px;
       box-shadow: 0 20px 45px rgba(0, 0, 0, 0.28);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 2.25rem 2rem;
     }
-    .login-header-title {
+    .auth-nav-tabs {
       display: flex;
-      align-items: center;
-      gap: 0.65rem;
-      margin-bottom: 0.5rem;
-    }
-    .login-header-title i {
-      font-size: 1.4rem;
-      color: var(--clr-orange);
-    }
-    .login-header-title h4 {
-      margin-bottom: 0;
-      font-size: 1.25rem;
-      color: var(--clr-blue);
-      font-weight: 700;
-    }
-    .login-header-desc {
-      font-size: 0.85rem;
-      color: var(--clr-text-light);
+      gap: 0.5rem;
+      background: #f1f5f9;
+      padding: 0.35rem;
+      border-radius: 12px;
       margin-bottom: 1.5rem;
     }
-    .input-group-custom {
-      position: relative;
-      margin-bottom: 1.2rem;
+    .auth-tab-btn {
+      flex: 1;
+      border: none;
+      background: transparent;
+      padding: 0.6rem 0.5rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #64748b;
+      border-radius: 8px;
     }
+    .auth-tab-btn.active {
+      background: #ffffff;
+      color: #094A74;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .input-group-custom { margin-bottom: 1rem; }
     .input-group-custom .form-label {
       font-size: 0.82rem;
       font-weight: 600;
-      color: var(--clr-blue);
+      color: #094A74;
       margin-bottom: 0.35rem;
       display: block;
     }
-    .input-icon-wrap {
-      position: relative;
-    }
+    .input-icon-wrap { position: relative; }
     .input-icon-wrap i.prefix-icon {
       position: absolute;
       left: 1rem;
       top: 50%;
       transform: translateY(-50%);
-      color: var(--clr-text-light);
-      font-size: 1rem;
-      pointer-events: none;
-      transition: color 0.2s ease;
+      color: #94a3b8;
     }
     .input-icon-wrap input {
       padding-left: 2.75rem;
       padding-right: 2.75rem;
-      height: 48px;
-      font-size: 0.92rem;
-      border: 1.5px solid var(--clr-border);
-      border-radius: var(--radius);
-      transition: all 0.2s ease;
-    }
-    .input-icon-wrap input:focus {
-      border-color: var(--clr-orange);
-      box-shadow: 0 0 0 3.5px rgba(242, 99, 15, 0.15);
-    }
-    .input-icon-wrap input:focus + i.prefix-icon {
-      color: var(--clr-orange);
+      height: 46px;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 10px;
     }
     .btn-toggle-password {
       position: absolute;
@@ -159,367 +77,262 @@
       transform: translateY(-50%);
       background: none;
       border: none;
-      color: var(--clr-text-light);
-      padding: 0.35rem 0.5rem;
+      color: #94a3b8;
       cursor: pointer;
-      font-size: 1rem;
     }
-    .btn-toggle-password:hover {
-      color: var(--clr-blue);
-    }
-
-    .btn-submit-login {
-      background: var(--clr-orange);
+    .btn-submit-auth {
+      background: #f2630f;
       color: #fff;
       border: none;
-      border-radius: var(--radius);
+      border-radius: 10px;
       height: 48px;
-      font-weight: 700;
-      font-size: 0.95rem;
+      font-weight: 600;
+      width: 100%;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 0.5rem;
-      width: 100%;
-      transition: all 0.25s ease;
-      box-shadow: 0 4px 14px rgba(242, 99, 15, 0.35);
-      cursor: pointer;
+      margin-top: 1rem;
     }
-    .btn-submit-login:hover {
-      background: var(--clr-orange-dark);
-      transform: translateY(-1px);
-      box-shadow: 0 6px 18px rgba(242, 99, 15, 0.45);
-      color: #fff;
-    }
-    .btn-submit-login:disabled {
-      opacity: 0.7;
-      cursor: not-allowed;
-      transform: none;
-    }
-    .login-footer-links {
-      text-align: center;
-      margin-top: 1.5rem;
-    }
-    .login-footer-links a {
-      color: rgba(255, 255, 255, 0.85);
-      font-size: 0.88rem;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.35rem;
-      text-decoration: none;
-      transition: color 0.2s ease;
-    }
-    .login-footer-links a:hover {
-      color: var(--clr-yellow);
-    }
-    .auth-alert {
-      display: none;
-      padding: 0.75rem 1rem;
-      border-radius: var(--radius);
-      font-size: 0.85rem;
-      margin-bottom: 1.25rem;
-      align-items: center;
-      gap: 0.6rem;
-    }
-    .auth-alert.show {
-      display: flex;
-    }
-    .auth-alert.error {
-      background: rgba(220, 53, 69, 0.1);
-      border: 1px solid rgba(220, 53, 69, 0.3);
-      color: #b02a37;
-    }
-    .auth-alert.success {
-      background: rgba(40, 167, 69, 0.12);
-      border: 1px solid rgba(40, 167, 69, 0.3);
-      color: #1e7e34;
-    }
-    .auth-alert.info {
-      background: rgba(13, 110, 253, 0.1);
-      border: 1px solid rgba(13, 110, 253, 0.25);
-      color: #0b5ed7;
-    }
+    .btn-submit-auth:hover { background: #d95305; color: #fff; }
+    .auth-alert { display: none; border-radius: 10px; padding: 0.75rem 1rem; font-size: 0.88rem; margin-bottom: 1.25rem; }
   </style>
 </head>
 <body class="login-page">
 
-  <div class="login-decor-circle decor-1"></div>
-  <div class="login-decor-circle decor-2"></div>
-  <div class="login-decor-circle decor-3"></div>
-
-  <div class="login-card-container">
-    <!-- Header Brand -->
-    <div class="login-brand-header">
-      <div class="logo-badge">EP</div>
-      <h1>EtalasePelemwatu</h1>
-      <p>Panel Akses Khusus Administrator Desa</p>
+  <div class="login-container">
+    <div class="text-center mb-4">
+      <h3 class="fw-bold text-white mb-1">EtalasePelemwatu</h3>
+      <p class="text-white-50" style="font-size:0.9rem;">Portal Layanan & Promosi Potensi Desa Pelemwatu</p>
     </div>
 
-    <!-- Login Box -->
-    <div class="login-box">
-      <div class="login-header-title">
-        <i class="bi bi-shield-lock-fill"></i>
-        <h4>Login Admin</h4>
-      </div>
-      <p class="login-header-desc">
-        Silakan masukkan identitas akun Anda untuk mengelola data etalase dan verifikasi potensi.
-      </p>
-
-      <!-- Alert Notifikasi -->
-      <div id="authAlert" class="auth-alert">
-        <i id="authAlertIcon" class="bi bi-exclamation-triangle-fill flex-shrink-0"></i>
-        <span id="authAlertText">Pesan pemberitahuan</span>
+    <div class="login-card">
+      <div class="auth-nav-tabs">
+        <button type="button" class="auth-tab-btn active" id="tabBtnLogin" onclick="switchTab('login')">
+          <i class="bi bi-box-arrow-in-right"></i> Masuk (Login)
+        </button>
+        <button type="button" class="auth-tab-btn" id="tabBtnRegister" onclick="switchTab('register')">
+          <i class="bi bi-person-plus"></i> Daftar Warga
+        </button>
       </div>
 
+      <div id="authAlert" class="auth-alert alert">
+        <span id="authAlertText"></span>
+      </div>
 
-      <!-- Form Login -->
-      <form id="adminLoginForm" novalidate>
+      <!-- FORM LOGIN -->
+      <form id="loginForm">
         <div class="input-group-custom">
-          <label class="form-label" for="loginEmail">Email / Username <span class="text-danger">*</span></label>
+          <label class="form-label" for="loginEmail">Email / Username</label>
           <div class="input-icon-wrap">
-            <input
-              type="text"
-              id="loginEmail"
-              class="form-control"
-              placeholder="admin@pelemwatu.desa.id"
-              autocomplete="username"
-              required
-            >
+            <input type="text" id="loginEmail" class="form-control" placeholder="admin@pelemwatu.desa.id atau email Anda" required>
             <i class="bi bi-envelope prefix-icon"></i>
           </div>
         </div>
 
         <div class="input-group-custom">
-          <div class="d-flex justify-content-between align-items-center mb-1">
-            <label class="form-label mb-0" for="loginPassword">Kata Sandi <span class="text-danger">*</span></label>
-            <a href="javascript:void(0)" id="btnHelpPass" class="text-muted" style="font-size:0.75rem;text-decoration:none;">
-              Bantuan sandi?
-            </a>
-          </div>
+          <label class="form-label" for="loginPassword">Kata Sandi</label>
           <div class="input-icon-wrap">
-            <input
-              type="password"
-              id="loginPassword"
-              class="form-control"
-              placeholder="Masukkan password admin"
-              autocomplete="current-password"
-              required
-            >
+            <input type="password" id="loginPassword" class="form-control" placeholder="Masukkan kata sandi" required>
             <i class="bi bi-lock prefix-icon"></i>
-            <button type="button" class="btn-toggle-password" id="btnTogglePassword" title="Lihat/Sembunyikan sandi">
-              <i class="bi bi-eye" id="togglePasswordIcon"></i>
+            <button type="button" class="btn-toggle-password" onclick="togglePass('loginPassword', 'eyeIconLogin')">
+              <i class="bi bi-eye" id="eyeIconLogin"></i>
             </button>
           </div>
         </div>
 
-        <div class="d-flex justify-content-between align-items-center mb-4">
-          <div class="form-check" style="font-size:0.85rem;">
-            <input class="form-check-input" type="checkbox" id="rememberMe">
-            <label class="form-check-label text-muted" for="rememberMe">
-              Ingat saya di perangkat ini
-            </label>
+        <button type="submit" class="btn-submit-auth" id="btnLoginSubmit">
+          <i class="bi bi-box-arrow-in-right"></i> Masuk Sekarang
+        </button>
+      </form>
+
+      <!-- FORM REGISTER WARGA -->
+      <form id="registerForm" style="display:none;">
+        <div class="input-group-custom">
+          <label class="form-label">Nama Lengkap Sesuai KTP <span class="text-danger">*</span></label>
+          <div class="input-icon-wrap">
+            <input type="text" id="regName" class="form-control" placeholder="Contoh: Ahmad Fauzi" required>
+            <i class="bi bi-person prefix-icon"></i>
           </div>
         </div>
 
-        <button type="submit" class="btn-submit-login" id="btnSubmitLogin">
-          <i class="bi bi-box-arrow-in-right"></i>
-          <span id="btnSubmitText">Masuk ke Panel Admin</span>
+        <div class="input-group-custom">
+          <label class="form-label">Alamat Email <span class="text-danger">*</span></label>
+          <div class="input-icon-wrap">
+            <input type="email" id="regEmail" class="form-control" placeholder="contoh@gmail.com" required>
+            <i class="bi bi-envelope prefix-icon"></i>
+          </div>
+        </div>
+
+        <div class="input-group-custom">
+          <label class="form-label">Nomor WhatsApp Aktif</label>
+          <div class="input-icon-wrap">
+            <input type="text" id="regPhone" class="form-control" placeholder="081234567890">
+            <i class="bi bi-whatsapp prefix-icon"></i>
+          </div>
+        </div>
+
+        <div class="input-group-custom">
+          <label class="form-label">Alamat / RT RW Dusun</label>
+          <div class="input-icon-wrap">
+            <input type="text" id="regAddress" class="form-control" placeholder="Dusun Pelemwatu RT 02 RW 01">
+            <i class="bi bi-geo-alt prefix-icon"></i>
+          </div>
+        </div>
+
+        <div class="row g-2">
+          <div class="col-sm-6">
+            <div class="input-group-custom">
+              <label class="form-label">Kata Sandi (Min. 6) <span class="text-danger">*</span></label>
+              <div class="input-icon-wrap">
+                <input type="password" id="regPassword" class="form-control" placeholder="******" required>
+                <i class="bi bi-lock prefix-icon"></i>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="input-group-custom">
+              <label class="form-label">Konfirmasi Sandi <span class="text-danger">*</span></label>
+              <div class="input-icon-wrap">
+                <input type="password" id="regPasswordConfirmation" class="form-control" placeholder="******" required>
+                <i class="bi bi-shield-check prefix-icon"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <button type="submit" class="btn-submit-auth" id="btnRegisterSubmit">
+          <i class="bi bi-person-plus"></i> Daftarkan Akun Warga
         </button>
       </form>
     </div>
 
-    <!-- Footer link -->
-    <div class="login-footer-links">
-      <a href="index.html">
-        <i class="bi bi-arrow-left"></i> Kembali ke Website EtalasePelemwatu
+    <div class="text-center mt-3">
+      <a href="/" class="text-white-50 text-decoration-none" style="font-size:0.9rem;">
+        <i class="bi bi-arrow-left"></i> Kembali ke Beranda
       </a>
     </div>
   </div>
 
   <script>
-    (function () {
-      'use strict';
+    function switchTab(tab) {
+      const isLogin = tab === 'login';
+      document.getElementById('tabBtnLogin').classList.toggle('active', isLogin);
+      document.getElementById('tabBtnRegister').classList.toggle('active', !isLogin);
+      document.getElementById('loginForm').style.display = isLogin ? 'block' : 'none';
+      document.getElementById('registerForm').style.display = isLogin ? 'none' : 'block';
+      hideAlert();
+    }
 
-      const form = document.getElementById('adminLoginForm');
-      const emailInput = document.getElementById('loginEmail');
-      const passwordInput = document.getElementById('loginPassword');
-      const rememberCheckbox = document.getElementById('rememberMe');
-      const btnSubmit = document.getElementById('btnSubmitLogin');
-      const btnSubmitText = document.getElementById('btnSubmitText');
-      const alertBox = document.getElementById('authAlert');
-      const alertIcon = document.getElementById('authAlertIcon');
-      const alertText = document.getElementById('authAlertText');
-      const btnTogglePassword = document.getElementById('btnTogglePassword');
-      const togglePasswordIcon = document.getElementById('togglePasswordIcon');
-      const btnHelpPass = document.getElementById('btnHelpPass');
-
-      // Cek parameter URL (misalnya jika baru saja logout atau diarahkan karena belum login)
-      const urlParams = new URLSearchParams(window.location.search);
-      if (urlParams.get('logout') === 'true') {
-        showAlert('Anda telah berhasil keluar (logout) dari panel admin.', 'success');
-      } else if (urlParams.get('unauthorized') === 'true') {
-        showAlert('Akses ditolak. Anda harus login terlebih dahulu untuk mengakses Panel Admin.', 'error');
+    function togglePass(inputId, iconId) {
+      const inp = document.getElementById(inputId);
+      const ico = document.getElementById(iconId);
+      if (inp.type === 'password') {
+        inp.type = 'text';
+        ico.classList.replace('bi-eye', 'bi-eye-slash');
+      } else {
+        inp.type = 'password';
+        ico.classList.replace('bi-eye-slash', 'bi-eye');
       }
+    }
 
-      // Periksa apakah sudah ada sesi aktif
-      const existingSession = localStorage.getItem('ep_admin_session') || sessionStorage.getItem('ep_admin_session');
-      if (existingSession) {
-        try {
-          const parsed = JSON.parse(existingSession);
-          if (parsed && parsed.isLoggedIn) {
-            showAlert('Sesi aktif terdeteksi. Mengarahkan ke panel admin...', 'info');
-            setTimeout(function () {
-              window.location.href = 'admin.html';
-            }, 800);
-          }
-        } catch (e) {
-          localStorage.removeItem('ep_admin_session');
-          sessionStorage.removeItem('ep_admin_session');
-        }
-      }
+    function showAlert(msg, type = 'danger') {
+      const box = document.getElementById('authAlert');
+      box.className = 'auth-alert alert alert-' + type;
+      document.getElementById('authAlertText').textContent = msg;
+      box.style.display = 'block';
+    }
 
-      // Bantuan Sandi
-      btnHelpPass.addEventListener('click', function () {
-        showAlert('Silakan hubungi administrator utama desa untuk pemulihan akun.', 'info');
-      });
+    function hideAlert() {
+      document.getElementById('authAlert').style.display = 'none';
+    }
 
-      // Toggle Password Visibility
-      btnTogglePassword.addEventListener('click', function () {
-        if (passwordInput.type === 'password') {
-          passwordInput.type = 'text';
-          togglePasswordIcon.className = 'bi bi-eye-slash';
-        } else {
-          passwordInput.type = 'password';
-          togglePasswordIcon.className = 'bi bi-eye';
-        }
-      });
+    if (window.location.hash === '#register' || window.location.pathname.includes('/register')) {
+      switchTab('register');
+    }
 
-      // Helper untuk menampilkan alert
-      function showAlert(msg, type) {
-        alertBox.className = 'auth-alert show ' + type;
-        alertText.textContent = msg;
-        if (type === 'error') {
-          alertIcon.className = 'bi bi-exclamation-octagon-fill flex-shrink-0';
-        } else if (type === 'success') {
-          alertIcon.className = 'bi bi-check-circle-fill flex-shrink-0';
-        } else {
-          alertIcon.className = 'bi bi-info-circle-fill flex-shrink-0';
-        }
-      }
+    document.getElementById('loginForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const email = document.getElementById('loginEmail').value.trim();
+      const password = document.getElementById('loginPassword').value;
+      const btn = document.getElementById('btnLoginSubmit');
 
-      // Handler Submit Form
-      form.addEventListener('submit', async function (e) {
-        e.preventDefault();
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Memproses...';
+      hideAlert();
 
-        const email = emailInput.value.trim();
-        const password = passwordInput.value;
+      try {
+        const res = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+        const data = await res.json();
 
-        if (!email) {
-          showAlert('Harap masukkan alamat email atau username Anda.', 'error');
-          emailInput.focus();
-          return;
-        }
+        if (res.ok && data.status === 'success') {
+          const u = data.data.user;
+          localStorage.setItem('authToken', data.data.token);
+          localStorage.setItem('userData', JSON.stringify(u));
 
-        if (!password) {
-          showAlert('Harap masukkan kata sandi akun.', 'error');
-          passwordInput.focus();
-          return;
-        }
-
-        // Tampilkan loading
-        btnSubmit.disabled = true;
-        btnSubmitText.textContent = 'Memverifikasi...';
-        btnSubmit.querySelector('i').className = 'spinner-border spinner-border-sm';
-
-        try {
-          let loginSuccess = false;
-          let userData = null;
-          let authToken = null;
-
-          // 1. Coba hubungi backend API
-          try {
-            const response = await fetch('/api/auth/login', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json'
-              },
-              body: JSON.stringify({ email, password })
-            });
-
-            const result = await response.json();
-
-            if (response.ok && result.status === 'success') {
-              loginSuccess = true;
-              userData = result.data.user;
-              authToken = result.data.token;
-            } else if (response.status === 401 || response.status === 400) {
-              showAlert(result.message || 'Email atau password salah.', 'error');
-              resetButton();
-              return;
-            }
-          } catch (netErr) {
-            console.warn('Backend server tidak dapat dihubungi, menggunakan verifikasi lokal:', netErr.message);
-          }
-
-          // 2. Fallback verifikasi lokal jika server offline
-          if (!loginSuccess) {
-            const isDefaultEmail =
-              email.toLowerCase() === 'admin@pelemwatu.desa.id' ||
-              email.toLowerCase() === 'admin';
-            const isDefaultPass = password === 'admin123';
-
-            if (isDefaultEmail && isDefaultPass) {
-              loginSuccess = true;
-              userData = {
-                id: 1,
-                name: 'Administrator Desa',
-                email: 'admin@pelemwatu.desa.id',
-                role: 'Admin Desa'
-              };
-              authToken = 'ep-local-session-' + Date.now();
-            }
-          }
-
-          if (loginSuccess && userData) {
-            const sessionPayload = {
-              isLoggedIn: true,
-              token: authToken,
-              user: userData,
-              loginAt: new Date().toISOString()
-            };
-
+          if (u.role === 'admin') {
             localStorage.setItem('adminLoggedIn', 'true');
-            localStorage.setItem('adminUser', JSON.stringify(userData));
-
-            if (rememberCheckbox.checked) {
-              localStorage.setItem('ep_admin_session', JSON.stringify(sessionPayload));
-            } else {
-              sessionStorage.setItem('ep_admin_session', JSON.stringify(sessionPayload));
-            }
-
-            showAlert('Login berhasil! Mengalihkan ke Panel Admin...', 'success');
-            setTimeout(function () {
-              window.location.href = 'admin.html';
-            }, 750);
+            localStorage.setItem('adminUser', JSON.stringify(u));
+            window.location.href = '/admin';
           } else {
-            showAlert('Email atau kata sandi tidak cocok. Silakan periksa kembali.', 'error');
-            resetButton();
+            localStorage.setItem('wargaLoggedIn', 'true');
+            showAlert('Login berhasil! Mengalihkan...', 'success');
+            setTimeout(() => { window.location.href = '/daftar-potensi'; }, 800);
           }
-
-        } catch (err) {
-          console.error('Error saat login:', err);
-          showAlert('Terjadi kesalahan saat memproses login. Coba lagi.', 'error');
-          resetButton();
+        } else {
+          showAlert(data.message || 'Login gagal, periksa email dan kata sandi Anda.', 'danger');
         }
-      });
-
-      function resetButton() {
-        btnSubmit.disabled = false;
-        btnSubmitText.textContent = 'Masuk ke Panel Admin';
-        btnSubmit.querySelector('i').className = 'bi bi-box-arrow-in-right';
+      } catch (err) {
+        showAlert('Terjadi kesalahan koneksi server.', 'danger');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-box-arrow-in-right"></i> Masuk Sekarang';
       }
-    })();
+    });
+
+    document.getElementById('registerForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const name = document.getElementById('regName').value.trim();
+      const email = document.getElementById('regEmail').value.trim();
+      const phone = document.getElementById('regPhone').value.trim();
+      const address = document.getElementById('regAddress').value.trim();
+      const password = document.getElementById('regPassword').value;
+      const password_confirmation = document.getElementById('regPasswordConfirmation').value;
+      const btn = document.getElementById('btnRegisterSubmit');
+
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Mendaftarkan...';
+      hideAlert();
+
+      try {
+        const res = await fetch('/api/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email, phone, address, password, password_confirmation })
+        });
+        const data = await res.json();
+
+        if (res.ok && data.status === 'success') {
+          localStorage.setItem('authToken', data.data.token);
+          localStorage.setItem('userData', JSON.stringify(data.data.user));
+          localStorage.setItem('wargaLoggedIn', 'true');
+
+          showAlert('Pendaftaran warga berhasil! Mengalihkan...', 'success');
+          setTimeout(() => { window.location.href = '/daftar-potensi'; }, 1000);
+        } else {
+          showAlert(data.message || 'Pendaftaran gagal, periksa isian data Anda.', 'danger');
+        }
+      } catch (err) {
+        showAlert('Gagal menghubungi server.', 'danger');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-person-plus"></i> Daftarkan Akun Warga';
+      }
+    });
   </script>
 </body>
 </html>
-
