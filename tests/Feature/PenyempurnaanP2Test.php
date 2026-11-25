@@ -2,10 +2,10 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
 use App\Models\Category;
 use App\Models\Potensi;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 class PenyempurnaanP2Test extends TestCase
 {
@@ -30,9 +30,9 @@ class PenyempurnaanP2Test extends TestCase
         for ($i = 1; $i <= 15; $i++) {
             Potensi::create([
                 'category_id' => 1,
-                'name'        => "Usaha Warga {$i}",
-                'owner_name'  => "Pemilik {$i}",
-                'status'      => 'approved',
+                'name' => "Usaha Warga {$i}",
+                'owner_name' => "Pemilik {$i}",
+                'status' => 'approved',
             ]);
         }
 
