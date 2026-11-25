@@ -28,7 +28,7 @@ class AppServiceProvider extends ServiceProvider
     {
         // View composer untuk profil desa di halaman publik
         View::composer(['index', 'daftar-potensi'], function ($view) {
-            $desa = Cache::remember('profil_desa_settings', 600, function () {
+            $desa = Cache::remember('profil_desa_settings_v2', 600, function () {
                 $keys = array_keys(ProfilDesaController::DEFAULTS);
                 $settings = Setting::whereIn('key', $keys)->pluck('value', 'key');
 
@@ -49,6 +49,26 @@ class AppServiceProvider extends ServiceProvider
 
                 return $data;
             });
+
+            // Proteksi fallback jika cache berisi data parsial/format lama tanpa key baru
+            if (! is_array($desa)) {
+                $desa = [];
+            }
+            foreach (ProfilDesaController::DEFAULTS as $key => $default) {
+                $shortKey = str_replace('desa_', '', $key);
+                if (! isset($desa[$shortKey]) || $desa[$shortKey] === null || $desa[$shortKey] === '') {
+                    $desa[$shortKey] = $default;
+                }
+            }
+            if (! isset($desa['whatsapp_display'])) {
+                $rawWa = $desa['whatsapp'] ?? '';
+                $displayWa = preg_replace('/^62/', '0', $rawWa);
+                if (strlen($displayWa) >= 10) {
+                    $desa['whatsapp_display'] = substr($displayWa, 0, 4).'-'.substr($displayWa, 4, 4).'-'.substr($displayWa, 8);
+                } else {
+                    $desa['whatsapp_display'] = $displayWa;
+                }
+            }
 
             $view->with('desa', $desa);
         });

@@ -792,6 +792,35 @@
                 <label class="form-label fw-semibold" style="color:var(--clr-blue);">Jumlah KK</label>
                 <input type="number" class="form-control" id="admDesaJmlKK" name="desa_jumlah_kk" min="0" placeholder="Contoh: 850">
               </div>
+              <div class="col-12 mt-4 pt-3 border-top">
+                <h6 class="fw-bold" style="color:var(--clr-blue);"><i class="bi bi-layout-text-window-reverse me-2" style="color:var(--clr-orange);"></i>Teks Halaman Utama (Beranda)</h6>
+                <p class="text-muted small mb-3">Sesuaikan teks judul, deskripsi, dan pengenalan yang tampil di halaman depan website.</p>
+              </div>
+              <div class="col-12">
+                <label class="form-label fw-semibold" style="color:var(--clr-blue);">Judul Hero Beranda</label>
+                <textarea class="form-control" id="admDesaHeroJudul" name="desa_hero_judul" rows="2" placeholder="Contoh: Selamat Datang di&#10;Desa Pelemwatu"></textarea>
+                <div class="form-text small">Maksimal 150 karakter. Tekan Enter untuk membuat baris baru.</div>
+              </div>
+              <div class="col-12">
+                <label class="form-label fw-semibold" style="color:var(--clr-blue);">Deskripsi Hero Beranda</label>
+                <textarea class="form-control" id="admDesaHeroDeskripsi" name="desa_hero_deskripsi" rows="3" placeholder="Deskripsi singkat yang tampil di bawah judul hero"></textarea>
+                <div class="form-text small">Maksimal 500 karakter.</div>
+              </div>
+              <div class="col-12">
+                <label class="form-label fw-semibold" style="color:var(--clr-blue);">Tentang Etalase — Paragraf 1</label>
+                <textarea class="form-control" id="admDesaTentangP1" name="desa_tentang_p1" rows="3" placeholder="Teks lanjutan setelah kata 'EtalasePelemwatu'"></textarea>
+                <div class="form-text small">Maksimal 1000 karakter. Kata depan 'EtalasePelemwatu' tetap dicetak tebal secara otomatis.</div>
+              </div>
+              <div class="col-12">
+                <label class="form-label fw-semibold" style="color:var(--clr-blue);">Tentang Etalase — Paragraf 2</label>
+                <textarea class="form-control" id="admDesaTentangP2" name="desa_tentang_p2" rows="3" placeholder="Paragraf kedua penjelasan mengenai etalase"></textarea>
+                <div class="form-text small">Maksimal 1000 karakter.</div>
+              </div>
+              <div class="col-12">
+                <label class="form-label fw-semibold" style="color:var(--clr-blue);">Deskripsi Footer</label>
+                <textarea class="form-control" id="admDesaFooterDeskripsi" name="desa_footer_deskripsi" rows="2" placeholder="Deskripsi ringkas pada footer website"></textarea>
+                <div class="form-text small">Maksimal 500 karakter.</div>
+              </div>
               <div class="col-12 mt-2">
                 <button type="button" class="btn-primary-custom" id="saveProfileBtn">
                   <i class="bi bi-save me-1"></i> Simpan Perubahan
@@ -3295,6 +3324,11 @@ document.querySelectorAll('.btn-go-verifikasi').forEach(function(b){
     var elWa = document.getElementById('admDesaWa');
     var elIg = document.getElementById('admDesaIg');
     var elJmlKK = document.getElementById('admDesaJmlKK');
+    var elHeroJudul = document.getElementById('admDesaHeroJudul');
+    var elHeroDeskripsi = document.getElementById('admDesaHeroDeskripsi');
+    var elTentangP1 = document.getElementById('admDesaTentangP1');
+    var elTentangP2 = document.getElementById('admDesaTentangP2');
+    var elFooterDeskripsi = document.getElementById('admDesaFooterDeskripsi');
 
     if (elAlamat) elAlamat.value = data.desa_alamat || '';
     if (elKodePos) elKodePos.value = data.desa_kode_pos || '';
@@ -3305,6 +3339,11 @@ document.querySelectorAll('.btn-go-verifikasi').forEach(function(b){
     if (elWa) elWa.value = data.desa_whatsapp || '';
     if (elIg) elIg.value = data.desa_instagram || '';
     if (elJmlKK) elJmlKK.value = (data.desa_jumlah_kk !== undefined && data.desa_jumlah_kk !== null) ? data.desa_jumlah_kk : '';
+    if (elHeroJudul) elHeroJudul.value = data.desa_hero_judul || '';
+    if (elHeroDeskripsi) elHeroDeskripsi.value = data.desa_hero_deskripsi || '';
+    if (elTentangP1) elTentangP1.value = data.desa_tentang_p1 || '';
+    if (elTentangP2) elTentangP2.value = data.desa_tentang_p2 || '';
+    if (elFooterDeskripsi) elFooterDeskripsi.value = data.desa_footer_deskripsi || '';
   }
 
   function loadProfilDesa() {
@@ -3341,7 +3380,12 @@ document.querySelectorAll('.btn-go-verifikasi').forEach(function(b){
         desa_whatsapp: (document.getElementById('admDesaWa') ? document.getElementById('admDesaWa').value : '').trim(),
         desa_instagram: (document.getElementById('admDesaIg') ? document.getElementById('admDesaIg').value : '').trim(),
         desa_kepala: (document.getElementById('admDesaKepala') ? document.getElementById('admDesaKepala').value : '').trim(),
-        desa_jumlah_kk: (document.getElementById('admDesaJmlKK') ? document.getElementById('admDesaJmlKK').value : '').trim()
+        desa_jumlah_kk: (document.getElementById('admDesaJmlKK') ? document.getElementById('admDesaJmlKK').value : '').trim(),
+        desa_hero_judul: (document.getElementById('admDesaHeroJudul') ? document.getElementById('admDesaHeroJudul').value : '').trim(),
+        desa_hero_deskripsi: (document.getElementById('admDesaHeroDeskripsi') ? document.getElementById('admDesaHeroDeskripsi').value : '').trim(),
+        desa_tentang_p1: (document.getElementById('admDesaTentangP1') ? document.getElementById('admDesaTentangP1').value : '').trim(),
+        desa_tentang_p2: (document.getElementById('admDesaTentangP2') ? document.getElementById('admDesaTentangP2').value : '').trim(),
+        desa_footer_deskripsi: (document.getElementById('admDesaFooterDeskripsi') ? document.getElementById('admDesaFooterDeskripsi').value : '').trim()
       };
 
       btnSimpan.disabled = true;

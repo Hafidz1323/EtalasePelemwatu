@@ -141,7 +141,7 @@ class ProfilDesaTest extends TestCase
         ])->assertStatus(200);
 
         // Pastikan cache segar
-        Cache::forget('profil_desa_settings');
+        Cache::forget('profil_desa_settings_v2');
 
         // Cek Homepage
         $homeRes = $this->get('/');
@@ -229,7 +229,7 @@ class ProfilDesaTest extends TestCase
         $this->assertEquals(ProfilDesaController::DEFAULTS['desa_whatsapp'], $res->json('data.desa_whatsapp'));
 
         // 3. Homepage menampilkan default
-        Cache::forget('profil_desa_settings');
+        Cache::forget('profil_desa_settings_v2');
         $homeRes = $this->get('/');
         $homeRes->assertStatus(200);
         $homeRes->assertSee(ProfilDesaController::DEFAULTS['desa_alamat']);
@@ -332,7 +332,7 @@ class ProfilDesaTest extends TestCase
     {
         // Masukkan data dengan tag HTML langsung di DB untuk simulasi escape Blade {{ }}
         Setting::set('desa_kepala', '<script>alert("xss")</script>');
-        Cache::forget('profil_desa_settings');
+        Cache::forget('profil_desa_settings_v2');
 
         $res = $this->get('/')->assertOk();
 
@@ -340,5 +340,158 @@ class ProfilDesaTest extends TestCase
         $res->assertDontSee('<script>alert("xss")</script>', false);
         // Harus ter-escape secara aman
         $res->assertSee('&lt;script&gt;alert(&quot;xss&quot;)&lt;/script&gt;', false);
+    }
+
+    public function test_teks_beranda_default_tampil_di_halaman_depan(): void
+    {
+        $res = $this->get('/')->assertOk();
+
+        // Hero Judul (nl2br & escape)
+        $res->assertSee("Selamat Datang di<br />\nDesa Pelemwatu", false);
+        // Hero Deskripsi
+        $res->assertSee(ProfilDesaController::DEFAULTS['desa_hero_deskripsi']);
+        // Tentang Paragraf 1 & 2
+        $res->assertSee(ProfilDesaController::DEFAULTS['desa_tentang_p1']);
+        $res->assertSee(ProfilDesaController::DEFAULTS['desa_tentang_p2']);
+        // Footer Deskripsi
+        $res->assertSee(ProfilDesaController::DEFAULTS['desa_footer_deskripsi']);
+    }
+
+    public function test_admin_dapat_memperbarui_teks_beranda_dan_tampil_di_halaman_depan(): void
+    {
+        Sanctum::actingAs($this->makeAdmin());
+
+        $payload = [
+            'desa_hero_judul' => "Katalog Usaha Desa\nPelemwatu Mandiri",
+            'desa_hero_deskripsi' => 'Jelajahi beragam produk dan jasa unggulan karya masyarakat Pelemwatu.',
+            'desa_footer_deskripsi' => 'Media promosi digital UMKM Desa Pelemwatu, Menganti, Gresik.',
+            'desa_tentang_p1' => 'menyediakan wadah interaktif untuk memajukan perekonomian warga desa kami secara inklusif.',
+            'desa_tentang_p2' => 'Temukan produk lokal pilihan dari usaha kuliner, kerajinan, dan berbagai penyedia jasa terpercaya.',
+        ];
+
+        $res = $this->putJson('/api/admin/profil-desa', $payload);
+        $res->assertOk()
+            ->assertJson([
+                'status' => 'success',
+                'data' => $payload,
+            ]);
+
+        $home = $this->get('/')->assertOk();
+        $home->assertSee("Katalog Usaha Desa<br />\nPelemwatu Mandiri", false);
+        $home->assertSee('Jelajahi beragam produk dan jasa unggulan karya masyarakat Pelemwatu.');
+        $home->assertSee('Media promosi digital UMKM Desa Pelemwatu, Menganti, Gresik.');
+        $home->assertSee('menyediakan wadah interaktif untuk memajukan perekonomian warga desa kami secara inklusif.');
+        $home->assertSee('Temukan produk lokal pilihan dari usaha kuliner, kerajinan, dan berbagai penyedia jasa terpercaya.');
+    }
+
+    public function test_judul_hero_dengan_baris_baru_dan_simbol_di_escape_dengan_aman(): void
+    {
+        Sanctum::actingAs($this->makeAdmin());
+
+        $this->putJson('/api/admin/profil-desa', [
+            'desa_hero_judul' => "Warung & Usaha\nPelemwatu Jaya",
+        ])->assertOk();
+
+        $home = $this->get('/')->assertOk();
+        // & harus di-escape menjadi &amp;, baris baru menjadi <br />
+        $home->assertSee("Warung &amp; Usaha<br />\nPelemwatu Jaya", false);
+    }
+
+    public function test_teks_beranda_dengan_tag_html_ditolak_422(): void
+    {
+        Sanctum::actingAs($this->makeAdmin());
+
+        // Coba masukkan tag script pada judul hero
+        $res1 = $this->putJson('/api/admin/profil-desa', [
+            'desa_hero_judul' => '<script>alert("xss")</script>',
+        ]);
+        $res1->assertStatus(422)
+            ->assertJson([
+                'status' => 'error',
+                'message' => 'Input tidak boleh mengandung tag HTML.',
+                'errors' => [
+                    'desa_hero_judul' => ['Input tidak boleh mengandung tag HTML.'],
+                ],
+            ]);
+
+        // Coba masukkan tag b pada tentang_p1
+        $res2 = $this->putJson('/api/admin/profil-desa', [
+            'desa_tentang_p1' => 'Teks dengan <b>bold</b> tidak boleh.',
+        ]);
+        $res2->assertStatus(422)
+            ->assertJson([
+                'status' => 'error',
+                'message' => 'Input tidak boleh mengandung tag HTML.',
+                'errors' => [
+                    'desa_tentang_p1' => ['Input tidak boleh mengandung tag HTML.'],
+                ],
+            ]);
+    }
+
+    public function test_mengosongkan_teks_beranda_mengembalikan_ke_default(): void
+    {
+        Sanctum::actingAs($this->makeAdmin());
+
+        // Set teks kustom dulu
+        $this->putJson('/api/admin/profil-desa', [
+            'desa_hero_judul' => 'Judul Kustom',
+            'desa_hero_deskripsi' => 'Deskripsi Kustom',
+        ])->assertOk();
+
+        $home1 = $this->get('/')->assertOk();
+        $home1->assertSee('Judul Kustom');
+
+        // Kosongkan kembali
+        $this->putJson('/api/admin/profil-desa', [
+            'desa_hero_judul' => '',
+            'desa_hero_deskripsi' => '',
+        ])->assertOk();
+
+        $home2 = $this->get('/')->assertOk();
+        $home2->assertDontSee('Judul Kustom');
+        $home2->assertSee("Selamat Datang di<br />\nDesa Pelemwatu", false);
+        $home2->assertSee(ProfilDesaController::DEFAULTS['desa_hero_deskripsi']);
+    }
+
+    public function test_cache_profil_desa_di_homepage_ter_invalidation_saat_admin_update(): void
+    {
+        Sanctum::actingAs($this->makeAdmin());
+
+        // 1. Panggil GET / untuk memanaskan cache profil_desa_settings_v2
+        $resInitial = $this->get('/')->assertOk();
+        $resInitial->assertSee("Selamat Datang di<br />\nDesa Pelemwatu", false);
+        $this->assertTrue(Cache::has('profil_desa_settings_v2'), 'Cache profil_desa_settings_v2 harus terisi setelah akses homepage');
+
+        // 2. Admin memperbarui teks beranda via API
+        $this->putJson('/api/admin/profil-desa', [
+            'desa_hero_judul' => "Judul Baru Langsung\nTanpa Nunggu Cache",
+        ])->assertOk();
+
+        // 3. Panggil GET / langsung setelahnya: nilai baru HARUS langsung muncul
+        $resUpdated = $this->get('/')->assertOk();
+        $resUpdated->assertSee("Judul Baru Langsung<br />\nTanpa Nunggu Cache", false);
+        $resUpdated->assertDontSee("Selamat Datang di<br />\nDesa Pelemwatu", false);
+    }
+
+    public function test_homepage_tidak_error_jika_cache_berisi_format_lama_tanpa_key_baru(): void
+    {
+        // Simulasi cache lama yang hanya berisi field profil sebelum penambahan teks beranda
+        Cache::put('profil_desa_settings_v2', [
+            'alamat' => 'Jl. Arsip Lama No. 99, Pelemwatu',
+            'telepon' => '031-7991111',
+            'whatsapp' => '6281234567890',
+            // Tanpa key 'hero_judul', 'hero_deskripsi', 'tentang_p1', 'tentang_p2', 'footer_deskripsi'
+        ], 600);
+
+        $res = $this->get('/')->assertOk();
+
+        // Data alamat dari cache lama tetap dirender
+        $res->assertSee('Jl. Arsip Lama No. 99, Pelemwatu');
+        // Key baru yang tidak ada di cache lama otomatis menggunakan DEFAULTS tanpa error Undefined array key
+        $res->assertSee("Selamat Datang di<br />\nDesa Pelemwatu", false);
+        $res->assertSee(ProfilDesaController::DEFAULTS['desa_hero_deskripsi']);
+        $res->assertSee(ProfilDesaController::DEFAULTS['desa_tentang_p1']);
+        $res->assertSee(ProfilDesaController::DEFAULTS['desa_tentang_p2']);
+        $res->assertSee(ProfilDesaController::DEFAULTS['desa_footer_deskripsi']);
     }
 }

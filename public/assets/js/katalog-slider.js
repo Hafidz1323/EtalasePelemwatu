@@ -134,6 +134,9 @@
     track.style.transform = 'translateX(0)';
     track.innerHTML = '';
     currentIdx = 0;
+    if (btnPrev) btnPrev.style.display = '';
+    if (btnNext) btnNext.style.display = '';
+
     if (!filtered.length) {
       if (emptyState) emptyState.style.display = 'flex';
       if (viewport)   viewport.style.display   = 'none';
@@ -149,16 +152,40 @@
     goTo(0);
   }
 
+  /* ── Tampilkan Error State ── */
+  function showErrorState(err) {
+    console.error('Data potensi gagal dimuat:', err);
+    if (emptyState) emptyState.style.display = 'none';
+    if (viewport)   viewport.style.display   = '';
+    if (btnPrev)    btnPrev.style.display    = 'none';
+    if (btnNext)    btnNext.style.display    = 'none';
+
+    track.style.transform = 'translateX(0)';
+    track.innerHTML =
+      '<div class="ks-empty ks-error">' +
+        '<i class="bi bi-exclamation-triangle" style="font-size:2rem;color:#ef4444;"></i>' +
+        '<p>Data potensi gagal dimuat.</p>' +
+        '<button type="button" class="ks-retry-btn" id="ksRetryBtn">Coba lagi</button>' +
+      '</div>';
+
+    var retryBtn = document.getElementById('ksRetryBtn');
+    if (retryBtn) {
+      retryBtn.addEventListener('click', function () {
+        fetchAll();
+      });
+    }
+  }
+
   /* ── Terapkan filter kategori + search ── */
   function applyFilter() {
     var q   = searchInput ? searchInput.value.trim().toLowerCase() : '';
     var cat = activeCat.toLowerCase();
 
     filtered = allItems.filter(function (item) {
-      // Filter kategori: cocokkan category.name atau jenis (case-insensitive)
+      // Filter kategori: cocokkan category.name persis (case-insensitive)
       if (cat) {
-        var itemCat = ((item.category && item.category.name) || item.jenis || '').toLowerCase();
-        if (itemCat.indexOf(cat) === -1) return false;
+        var itemCat = (item.category && item.category.name) ? item.category.name.trim().toLowerCase() : '';
+        if (itemCat !== cat) return false;
       }
       // Search: nama, deskripsi, jenis, lokasi
       if (q) {
@@ -182,7 +209,13 @@
 
   /* ── Fetch dari API ── */
   function fetchAll() {
+    if (emptyState) emptyState.style.display = 'none';
+    if (viewport)   viewport.style.display   = '';
+    if (btnPrev)    btnPrev.style.display    = '';
+    if (btnNext)    btnNext.style.display    = '';
+
     // Tampilkan skeleton
+    track.style.transform = 'translateX(0)';
     track.innerHTML =
       '<div class="ks-skeleton"></div>' +
       '<div class="ks-skeleton"></div>' +
@@ -204,19 +237,8 @@
         filtered = allItems.slice();
         renderCards();
       })
-      .catch(function () {
-        // Fallback: pakai data statis jika API tidak bisa dijangkau
-        allItems = [
-          { name: 'Omah Dimsum',                 jenis: 'Kuliner', description: 'Usaha kuliner yang menyajikan berbagai jenis dimsum pilihan dengan cita rasa khas.',                             location: 'Desa Pelemwatu', category: { name: 'Usaha'   } },
-          { name: 'Warung Prasmanan Selarasnasi', jenis: 'Kuliner', description: 'Warung makan prasmanan pilihan masyarakat dengan menu masakan rumahan yang beragam.',                           location: 'Desa Pelemwatu', category: { name: 'Usaha'   } },
-          { name: 'Ratu Frozen Food',             jenis: 'Produk',  description: 'Penjualan produk frozen food berkualitas untuk kebutuhan rumah tangga.',                                        location: 'Desa Pelemwatu', category: { name: 'Usaha'   } },
-          { name: 'Moni Laundry 24 Jam',          jenis: 'Jasa',    description: 'Layanan jasa laundry yang beroperasi 24 jam untuk memenuhi kebutuhan warga.',                                  location: 'Desa Pelemwatu', category: { name: 'Jasa'    } },
-          { name: 'One Laundry Koin',             jenis: 'Jasa',    description: 'Layanan laundry mandiri berbasis koin yang praktis dan terjangkau.',                                           location: 'Desa Pelemwatu', category: { name: 'Jasa'    } },
-          { name: 'My Kost',                      jenis: 'Hunian',  description: 'Hunian kost nyaman dan terjangkau di lingkungan Desa Pelemwatu.',                                              location: 'Desa Pelemwatu', category: { name: 'Hunian'  } },
-          { name: 'RAMA Kost',                    jenis: 'Hunian',  description: 'Pilihan hunian kost dengan fasilitas lengkap di lingkungan desa.',                                             location: 'Desa Pelemwatu', category: { name: 'Hunian'  } },
-        ];
-        filtered = allItems.slice();
-        renderCards();
+      .catch(function (err) {
+        showErrorState(err);
       });
   }
 
@@ -296,16 +318,64 @@
     });
   }
 
-  // Filter tag buttons
-  var tagBtns = document.querySelectorAll('.ks-tag');
-  tagBtns.forEach(function (btn) {
-    btn.addEventListener('click', function () {
-      tagBtns.forEach(function (b) { b.classList.remove('active'); });
+  // Filter tag buttons (Event delegation)
+  var filterTags = document.getElementById('ksFilterTags');
+  if (filterTags) {
+    filterTags.addEventListener('click', function (e) {
+      var btn = e.target.closest('.ks-tag');
+      if (!btn || !filterTags.contains(btn)) return;
+      filterTags.querySelectorAll('.ks-tag').forEach(function (b) {
+        b.classList.remove('active');
+      });
       btn.classList.add('active');
       activeCat = btn.dataset.cat || '';
       applyFilter();
     });
-  });
+  }
+
+  /* ── Fetch Kategori Dinamis ── */
+  function fetchCategories() {
+    var tagsWrap = document.getElementById('ksFilterTags');
+    if (!tagsWrap) return;
+
+    fetch(API_BASE + '/categories')
+      .then(function (r) {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.json();
+      })
+      .then(function (res) {
+        var cats = res.data || [];
+        if (!Array.isArray(cats) || cats.length === 0) return;
+
+        // Ambil atau buat tombol "Semua"
+        var allBtn = tagsWrap.querySelector('.ks-tag[data-cat=""]');
+        tagsWrap.innerHTML = '';
+        if (allBtn) {
+          tagsWrap.appendChild(allBtn);
+        } else {
+          var defaultAll = document.createElement('button');
+          defaultAll.type = 'button';
+          defaultAll.className = 'ks-tag active';
+          defaultAll.dataset.cat = '';
+          defaultAll.textContent = 'Semua';
+          tagsWrap.appendChild(defaultAll);
+        }
+
+        cats.forEach(function (cat) {
+          if (!cat || !cat.name) return;
+          var btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'ks-tag' + (activeCat.toLowerCase() === cat.name.trim().toLowerCase() ? ' active' : '');
+          btn.dataset.cat = cat.name;
+          btn.textContent = cat.name; // Aman dari XSS
+          tagsWrap.appendChild(btn);
+        });
+      })
+      .catch(function (err) {
+        console.warn('Gagal memuat kategori dinamis:', err);
+        // Jika gagal, tombol "Semua" yang ada di HTML tetap berfungsi
+      });
+  }
 
   // Touch / drag
   var startX = 0, dragging = false;
@@ -323,6 +393,7 @@
     });
   }
 
-  /* ── Init ── */
+  /* ── Init (Paralel fetch potensi & kategori) ── */
   fetchAll();
+  fetchCategories();
 }());
