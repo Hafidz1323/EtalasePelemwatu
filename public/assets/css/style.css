@@ -1,4 +1,4 @@
-﻿@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900&display=swap');
 
 /* =============================================================
    EtalasePelemwatu � Global Stylesheet
@@ -3069,6 +3069,24 @@ body.form-page .form-page-header p {
   padding: 3rem 0;
   color: #9ca3af;
   font-size: .9rem;
+}
+.ks-empty.ks-error {
+  width: 100%;
+}
+.ks-retry-btn {
+  margin-top: .4rem;
+  padding: .4rem 1.25rem;
+  font-size: .85rem;
+  font-weight: 600;
+  border-radius: 50px;
+  background: var(--clr-orange, #F2630F);
+  color: #ffffff;
+  border: none;
+  cursor: pointer;
+  transition: opacity .2s;
+}
+.ks-retry-btn:hover {
+  opacity: .9;
 }
 
 /* ── Modal Detail ── */

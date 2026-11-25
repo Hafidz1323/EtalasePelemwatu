@@ -22,6 +22,11 @@ class ProfilDesaController extends Controller
         'desa_whatsapp' => '6282245730256',
         'desa_instagram' => 'official_pelemwatu',
         'desa_jumlah_kk' => '',
+        'desa_hero_judul' => "Selamat Datang di\nDesa Pelemwatu",
+        'desa_hero_deskripsi' => 'Desa Pelemwatu berada di Kecamatan Menganti, Kabupaten Gresik. Warganya menjalankan usaha kuliner, laundry, kost, dan masih banyak lagi. Semuanya dikumpulkan di satu etalase supaya mudah ditemukan.',
+        'desa_footer_deskripsi' => 'Platform digital untuk mengenal dan mempromosikan potensi lokal masyarakat Desa Pelemwatu, Kecamatan Menganti, Kabupaten Gresik, Jawa Timur.',
+        'desa_tentang_p1' => 'adalah katalog digital resmi Desa Pelemwatu, Kecamatan Menganti, Kabupaten Gresik. Kami hadir untuk menjadi jembatan antara potensi lokal warga dengan pasar yang lebih luas — dari kuliner rumahan, kerajinan tangan, hingga jasa dan hunian sewa.',
+        'desa_tentang_p2' => 'Setiap usaha yang terdaftar ditampilkan lengkap dengan foto, deskripsi, dan informasi kontak pemilik. Pengunjung dapat mencari dan menyaring berdasarkan kategori, sehingga potensi warga lebih mudah ditemukan oleh siapa saja.',
     ];
 
     /**
@@ -80,6 +85,11 @@ class ProfilDesaController extends Controller
             'desa_jam_operasional' => ['nullable', 'string', 'max:100'],
             'desa_instagram' => ['nullable', 'string', 'max:100'],
             'desa_jumlah_kk' => ['nullable', 'integer', 'min:0'],
+            'desa_hero_judul' => ['nullable', 'string', 'max:150'],
+            'desa_hero_deskripsi' => ['nullable', 'string', 'max:500'],
+            'desa_footer_deskripsi' => ['nullable', 'string', 'max:500'],
+            'desa_tentang_p1' => ['nullable', 'string', 'max:1000'],
+            'desa_tentang_p2' => ['nullable', 'string', 'max:1000'],
         ], [
             'desa_alamat.max' => 'Alamat maksimal 255 karakter.',
             'desa_kode_pos.regex' => 'Kode pos harus berupa 5 digit angka.',
@@ -94,6 +104,11 @@ class ProfilDesaController extends Controller
             'desa_instagram.max' => 'Akun Instagram maksimal 100 karakter.',
             'desa_jumlah_kk.integer' => 'Jumlah KK harus berupa angka bilangan bulat.',
             'desa_jumlah_kk.min' => 'Jumlah KK tidak boleh bernilai negatif.',
+            'desa_hero_judul.max' => 'Judul hero maksimal 150 karakter.',
+            'desa_hero_deskripsi.max' => 'Deskripsi hero maksimal 500 karakter.',
+            'desa_footer_deskripsi.max' => 'Deskripsi footer maksimal 500 karakter.',
+            'desa_tentang_p1.max' => 'Teks tentang etalase paragraf 1 maksimal 1000 karakter.',
+            'desa_tentang_p2.max' => 'Teks tentang etalase paragraf 2 maksimal 1000 karakter.',
         ]);
 
         // Normalisasi WhatsApp: ubah 08xx atau +628xx menjadi 628xx
@@ -145,6 +160,11 @@ class ProfilDesaController extends Controller
             'desa_whatsapp' => $normalizedWa,
             'desa_instagram' => $normalizedIg,
             'desa_jumlah_kk' => ($rawKk !== null && $rawKk !== '') ? (string) (int) $rawKk : null,
+            'desa_hero_judul' => $request->has('desa_hero_judul') ? trim($request->input('desa_hero_judul') ?? '') : null,
+            'desa_hero_deskripsi' => $request->has('desa_hero_deskripsi') ? trim($request->input('desa_hero_deskripsi') ?? '') : null,
+            'desa_footer_deskripsi' => $request->has('desa_footer_deskripsi') ? trim($request->input('desa_footer_deskripsi') ?? '') : null,
+            'desa_tentang_p1' => $request->has('desa_tentang_p1') ? trim($request->input('desa_tentang_p1') ?? '') : null,
+            'desa_tentang_p2' => $request->has('desa_tentang_p2') ? trim($request->input('desa_tentang_p2') ?? '') : null,
         ];
 
         foreach ($payload as $key => $val) {

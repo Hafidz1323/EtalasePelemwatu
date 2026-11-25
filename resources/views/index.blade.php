@@ -81,12 +81,8 @@
   <section id="hero-desa">
     <div class="container position-relative" style="z-index:2;">
       <div class="hero-content">
-        <h1>Selamat Datang di<br>Desa Pelemwatu</h1>
-        <p class="hero-desc">
-          Desa Pelemwatu berada di Kecamatan Menganti, Kabupaten Gresik.
-          Warganya menjalankan usaha kuliner, laundry, kost, dan masih banyak
-          lagi. Semuanya dikumpulkan di satu etalase supaya mudah ditemukan.
-        </p>
+        <h1>{!! nl2br(e($desa['hero_judul'])) !!}</h1>
+        <p class="hero-desc">{{ $desa['hero_deskripsi'] }}</p>
         <div class="hero-cta-wrap">
           <a href="#katalog" class="btn-hero-primary">Lihat Usaha Warga</a>
           <a href="#profil-desa" class="btn-hero-outline">Kenali Desanya</a>
@@ -308,15 +304,10 @@
         </div>
         <h2 class="tentang-v2-title">Siapa <strong>Kami?</strong></h2>
         <p class="tentang-v2-body">
-          <strong>EtalasePelemwatu</strong> adalah katalog digital resmi Desa Pelemwatu,
-          Kecamatan Menganti, Kabupaten Gresik. Kami hadir untuk menjadi jembatan antara
-          potensi lokal warga dengan pasar yang lebih luas — dari kuliner rumahan, kerajinan
-          tangan, hingga jasa dan hunian sewa.
+          <strong>EtalasePelemwatu</strong> {{ $desa['tentang_p1'] }}
         </p>
         <p class="tentang-v2-body">
-          Setiap usaha yang terdaftar ditampilkan lengkap dengan foto, deskripsi, dan
-          informasi kontak pemilik. Pengunjung dapat mencari dan menyaring berdasarkan
-          kategori, sehingga potensi warga lebih mudah ditemukan oleh siapa saja.
+          {{ $desa['tentang_p2'] }}
         </p>
         <a href="#katalog" class="tentang-v2-btn">Lihat Katalog Potensi</a>
       </div>
@@ -363,11 +354,7 @@
         </button>
       </div>
       <div class="ks-filter-tags" id="ksFilterTags">
-        <button class="ks-tag active" data-cat="">Semua</button>
-        <button class="ks-tag" data-cat="usaha">Usaha</button>
-        <button class="ks-tag" data-cat="jasa">Jasa</button>
-        <button class="ks-tag" data-cat="hunian">Hunian</button>
-        <button class="ks-tag" data-cat="barang">Barang</button>
+        <button type="button" class="ks-tag active" data-cat="">Semua</button>
       </div>
     </div>
 
@@ -499,8 +486,7 @@
           EtalasePelemwatu
         </div>
         <p class="footer-desc mt-2">
-          Platform digital untuk mengenal dan mempromosikan potensi lokal masyarakat
-          Desa Pelemwatu, Kecamatan Menganti, Kabupaten Gresik, Jawa Timur.
+          {{ $desa['footer_deskripsi'] }}
         </p>
         <p class="footer-desc mt-3" style="font-size:.78rem;">&copy; 2026 EtalasePelemwatu &mdash; Platform Digital Desa Pelemwatu</p>
       </div>
