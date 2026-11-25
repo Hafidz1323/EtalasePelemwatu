@@ -4,25 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>EtalasePelemwatu — Portal Potensi Lokal Desa Pelemwatu</title>
-<<<<<<< HEAD
-  <meta name="description" content="Portal digital resmi potensi lokal, UMKM, produk unggulan, jasa, dan hunian Desa Pelemwatu, Kecamatan Menganti, Kabupaten Gresik.">
-  <meta name="keywords" content="Desa Pelemwatu, Pelemwatu Menganti Gresik, UMKM Pelemwatu, potensi lokal desa, etalase pelemwatu, produk desa">
-  <meta name="author" content="Pemerintah Desa Pelemwatu">
-  <meta name="robots" content="index, follow">
-  
-  <!-- Open Graph / Facebook SEO -->
-  <meta property="og:type" content="website">
-  <meta property="og:url" content="{{ url()->current() }}">
-  <meta property="og:title" content="EtalasePelemwatu — Portal Potensi Lokal Desa Pelemwatu">
-  <meta property="og:description" content="Jelajahi berbagai usaha, kuliner, produk unggulan, dan jasa warga Desa Pelemwatu secara mudah dan cepat.">
-  <meta property="og:image" content="{{ asset('assets/img/foto-kantor-desa.jpg') }}">
-
-  <!-- Twitter Card SEO -->
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="EtalasePelemwatu — Portal Potensi Lokal Desa Pelemwatu">
-  <meta name="twitter:description" content="Portal digital potensi lokal Desa Pelemwatu, Menganti, Gresik.">
-  <meta name="twitter:image" content="{{ asset('assets/img/foto-kantor-desa.jpg') }}">
-=======
   <meta name="description" content="Portal digital potensi lokal Desa Pelemwatu, Kecamatan Menganti, Kabupaten Gresik, Jawa Timur.">
   <link rel="canonical" href="{{ url()->current() }}">
 
@@ -41,7 +22,6 @@
   <meta name="twitter:description" content="Portal digital potensi lokal Desa Pelemwatu, Kecamatan Menganti, Kabupaten Gresik, Jawa Timur.">
   <meta name="twitter:image" content="{{ asset('assets/img/foto-kantor-desa.jpg') }}">
 
->>>>>>> 99bae7f599c1565d45f22896e47f8da1e83dd8c2
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   @vite(['resources/css/app.css', 'resources/js/app.js'])

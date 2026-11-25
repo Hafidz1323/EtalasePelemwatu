@@ -35,17 +35,7 @@ class Potensi extends Model
         'deletion_requested_at',
     ];
 
-<<<<<<< HEAD
-    protected $casts = [
-        'latitude' => 'float',
-        'longitude' => 'float',
-        'reviewed_at' => 'datetime',
-    ];
-
-    public function user()
-=======
     public function owner()
->>>>>>> 99bae7f599c1565d45f22896e47f8da1e83dd8c2
     {
         return $this->belongsTo(User::class, 'user_id');
     }
@@ -55,24 +45,8 @@ class Potensi extends Model
         return $this->belongsTo(Category::class, 'category_id');
     }
 
-    public function reviewer()
-    {
-        return $this->belongsTo(User::class, 'reviewed_by');
-    }
-
     public function images()
     {
         return $this->hasMany(PotensiImage::class, 'potensi_id');
     }
-<<<<<<< HEAD
-
-    /**
-     * Helper scope untuk potensi yang disetujui tampil di publik
-     */
-    public function scopeApproved($query)
-    {
-        return $query->whereIn('status', ['approved', 'aktif']);
-    }
-=======
->>>>>>> 99bae7f599c1565d45f22896e47f8da1e83dd8c2
 }

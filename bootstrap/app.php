@@ -15,17 +15,6 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-<<<<<<< HEAD
-        // Daftarkan alias middleware untuk digunakan di route
-        $middleware->alias([
-            'admin.page' => \App\Http\Middleware\AdminPageMiddleware::class,
-        ]);
-
-        // Security headers untuk semua respons web
-        $middleware->web(append: [
-            \App\Http\Middleware\SecurityHeadersMiddleware::class,
-        ]);
-=======
         $middleware->append(SecurityHeaders::class);
 
         $middleware->alias([
@@ -40,7 +29,6 @@ return Application::configure(basePath: dirname(__DIR__))
                 at: $trustedProxies === '*' ? '*' : array_map('trim', explode(',', $trustedProxies))
             );
         }
->>>>>>> 99bae7f599c1565d45f22896e47f8da1e83dd8c2
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

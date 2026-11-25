@@ -8,19 +8,6 @@ use Illuminate\Http\Request;
 
 class PotensiReviewController extends Controller
 {
-<<<<<<< HEAD
-    /**
-     * Admin Memverifikasi atau Menolak Potensi Warga
-     */
-    public function review(Request $request, $id)
-    {
-        $validated = $request->validate([
-            'status' => 'required|in:approved,rejected,pending,aktif',
-            'reason' => 'nullable|string|max:1000',
-        ], [
-            'status.required' => 'Status verifikasi harus dipilih.',
-            'status.in'       => 'Status harus berupa approved, rejected, pending, atau aktif.',
-=======
     /** POST /api/potensi/{id}/review — setujui / tolak pendaftaran */
     public function review(Request $request, $id)
     {
@@ -29,7 +16,6 @@ class PotensiReviewController extends Controller
             'reason' => 'required_if:status,rejected|nullable|string|max:1000',
         ], [
             'reason.required_if' => 'Alasan penolakan wajib diisi.',
->>>>>>> 99bae7f599c1565d45f22896e47f8da1e83dd8c2
         ]);
 
         $potensi = Potensi::find($id);
@@ -37,21 +23,6 @@ class PotensiReviewController extends Controller
             return response()->json(['status' => 'error', 'message' => 'Potensi tidak ditemukan'], 404);
         }
 
-<<<<<<< HEAD
-        $admin = $request->user();
-
-        $potensi->status = $validated['status'];
-        $potensi->reviewed_by = $admin ? $admin->id : null;
-        $potensi->reviewed_at = now();
-        $potensi->rejection_reason = ($validated['status'] === 'rejected') ? ($validated['reason'] ?? 'Tidak memenuhi kriteria desa') : null;
-        $potensi->save();
-
-        return response()->json([
-            'status'  => 'success',
-            'message' => 'Status potensi berhasil diperbarui menjadi ' . strtoupper($potensi->status),
-            'data'    => $potensi->fresh(['category', 'images', 'reviewer', 'user']),
-        ]);
-=======
         $potensi->status = $data['status'];
         $potensi->reviewed_by = $request->user()->id;
         $potensi->reviewed_at = now();
@@ -124,6 +95,5 @@ class PotensiReviewController extends Controller
         $potensi->save();
 
         return response()->json(['status' => 'success', 'message' => 'Permintaan penghapusan ditolak. Potensi tetap aktif.']);
->>>>>>> 99bae7f599c1565d45f22896e47f8da1e83dd8c2
     }
 }
