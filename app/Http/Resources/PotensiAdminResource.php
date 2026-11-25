@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Services\MediaStorage;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -38,7 +39,7 @@ class PotensiAdminResource extends JsonResource
             ]),
             'images' => $this->whenLoaded('images', fn () => $this->images->map(fn ($img) => [
                 'id' => $img->id,
-                'path' => $img->image_path,
+                'path' => MediaStorage::url($img->image_path),
             ])
             ),
         ];
