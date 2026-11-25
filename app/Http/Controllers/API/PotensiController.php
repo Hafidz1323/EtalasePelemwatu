@@ -56,15 +56,19 @@ class PotensiController extends Controller
             ? PotensiAdminResource::collection($paginator)
             : PotensiPublicResource::collection($paginator);
 
+        $paginationMeta = [
+            'current_page' => $paginator->currentPage(),
+            'last_page' => $paginator->lastPage(),
+            'total' => $paginator->total(),
+            'per_page' => $paginator->perPage(),
+            'has_more' => $paginator->hasMorePages(),
+        ];
+
         return response()->json([
             'status' => 'success',
             'data' => $resource,
-            'meta' => [
-                'current_page' => $paginator->currentPage(),
-                'last_page' => $paginator->lastPage(),
-                'total' => $paginator->total(),
-                'per_page' => $paginator->perPage(),
-            ],
+            'meta' => $paginationMeta,
+            'pagination' => $paginationMeta,
         ]);
     }
 
