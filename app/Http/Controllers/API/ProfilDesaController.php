@@ -175,7 +175,7 @@ class ProfilDesaController extends Controller
             }
         }
 
-        Cache::forget('profil_desa_settings');
+        Cache::forget('profil_desa_settings_v2');
 
         // Ambil data terbaru lengkap dengan fallback default
         $data = [];

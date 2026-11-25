@@ -141,7 +141,7 @@ class ProfilDesaTest extends TestCase
         ])->assertStatus(200);
 
         // Pastikan cache segar
-        Cache::forget('profil_desa_settings');
+        Cache::forget('profil_desa_settings_v2');
 
         // Cek Homepage
         $homeRes = $this->get('/');
@@ -229,7 +229,7 @@ class ProfilDesaTest extends TestCase
         $this->assertEquals(ProfilDesaController::DEFAULTS['desa_whatsapp'], $res->json('data.desa_whatsapp'));
 
         // 3. Homepage menampilkan default
-        Cache::forget('profil_desa_settings');
+        Cache::forget('profil_desa_settings_v2');
         $homeRes = $this->get('/');
         $homeRes->assertStatus(200);
         $homeRes->assertSee(ProfilDesaController::DEFAULTS['desa_alamat']);
@@ -332,7 +332,7 @@ class ProfilDesaTest extends TestCase
     {
         // Masukkan data dengan tag HTML langsung di DB untuk simulasi escape Blade {{ }}
         Setting::set('desa_kepala', '<script>alert("xss")</script>');
-        Cache::forget('profil_desa_settings');
+        Cache::forget('profil_desa_settings_v2');
 
         $res = $this->get('/')->assertOk();
 
@@ -457,10 +457,10 @@ class ProfilDesaTest extends TestCase
     {
         Sanctum::actingAs($this->makeAdmin());
 
-        // 1. Panggil GET / untuk memanaskan cache profil_desa_settings
+        // 1. Panggil GET / untuk memanaskan cache profil_desa_settings_v2
         $resInitial = $this->get('/')->assertOk();
         $resInitial->assertSee("Selamat Datang di<br />\nDesa Pelemwatu", false);
-        $this->assertTrue(Cache::has('profil_desa_settings'), 'Cache profil_desa_settings harus terisi setelah akses homepage');
+        $this->assertTrue(Cache::has('profil_desa_settings_v2'), 'Cache profil_desa_settings_v2 harus terisi setelah akses homepage');
 
         // 2. Admin memperbarui teks beranda via API
         $this->putJson('/api/admin/profil-desa', [
@@ -471,5 +471,27 @@ class ProfilDesaTest extends TestCase
         $resUpdated = $this->get('/')->assertOk();
         $resUpdated->assertSee("Judul Baru Langsung<br />\nTanpa Nunggu Cache", false);
         $resUpdated->assertDontSee("Selamat Datang di<br />\nDesa Pelemwatu", false);
+    }
+
+    public function test_homepage_tidak_error_jika_cache_berisi_format_lama_tanpa_key_baru(): void
+    {
+        // Simulasi cache lama yang hanya berisi field profil sebelum penambahan teks beranda
+        Cache::put('profil_desa_settings_v2', [
+            'alamat' => 'Jl. Arsip Lama No. 99, Pelemwatu',
+            'telepon' => '031-7991111',
+            'whatsapp' => '6281234567890',
+            // Tanpa key 'hero_judul', 'hero_deskripsi', 'tentang_p1', 'tentang_p2', 'footer_deskripsi'
+        ], 600);
+
+        $res = $this->get('/')->assertOk();
+
+        // Data alamat dari cache lama tetap dirender
+        $res->assertSee('Jl. Arsip Lama No. 99, Pelemwatu');
+        // Key baru yang tidak ada di cache lama otomatis menggunakan DEFAULTS tanpa error Undefined array key
+        $res->assertSee("Selamat Datang di<br />\nDesa Pelemwatu", false);
+        $res->assertSee(ProfilDesaController::DEFAULTS['desa_hero_deskripsi']);
+        $res->assertSee(ProfilDesaController::DEFAULTS['desa_tentang_p1']);
+        $res->assertSee(ProfilDesaController::DEFAULTS['desa_tentang_p2']);
+        $res->assertSee(ProfilDesaController::DEFAULTS['desa_footer_deskripsi']);
     }
 }

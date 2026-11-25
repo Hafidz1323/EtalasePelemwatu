@@ -241,7 +241,6 @@
         showErrorState(err);
       });
   }
-  }
 
   /* ── Modal detail ── */
   function openDetail(d) {
