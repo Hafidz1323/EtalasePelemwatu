@@ -8,6 +8,7 @@ use App\Http\Resources\PotensiPublicResource;
 use App\Models\Potensi;
 use App\Models\PotensiImage;
 use App\Services\ImageOptimizer;
+use App\Services\MediaStorage;
 use Illuminate\Http\Request;
 
 class PotensiController extends Controller
@@ -248,10 +249,7 @@ class PotensiController extends Controller
 
         // Hapus file gambar yang terdaftar di potensi_images sebelum hapus baris
         foreach ($potensi->images as $image) {
-            $filePath = public_path(ltrim($image->image_path, '/'));
-            if (file_exists($filePath)) {
-                @unlink($filePath);
-            }
+            MediaStorage::delete($image->image_path);
         }
 
         $potensi->delete();

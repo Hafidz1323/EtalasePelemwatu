@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Models\Galeri;
 use App\Services\ImageOptimizer;
+use App\Services\MediaStorage;
 use Illuminate\Http\Request;
 
 class GaleriController extends Controller
@@ -17,7 +18,18 @@ class GaleriController extends Controller
     {
         $galeri = Galeri::orderBy('sort_order', 'asc')
             ->orderBy('id', 'asc')
-            ->get();
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'id' => $item->id,
+                    'caption' => $item->caption,
+                    'description' => $item->description,
+                    'image_path' => MediaStorage::url($item->image_path),
+                    'sort_order' => $item->sort_order,
+                    'created_at' => $item->created_at,
+                    'updated_at' => $item->updated_at,
+                ];
+            });
 
         return response()->json([
             'status' => 'success',
@@ -64,10 +76,13 @@ class GaleriController extends Controller
             'sort_order' => $sortOrder,
         ]);
 
+        $returnData = $item->toArray();
+        $returnData['image_path'] = MediaStorage::url($item->image_path);
+
         return response()->json([
             'status' => 'success',
             'message' => 'Foto kegiatan berhasil ditambahkan.',
-            'data' => $item,
+            'data' => $returnData,
         ], 201);
     }
 
@@ -96,10 +111,13 @@ class GaleriController extends Controller
 
         $galeri->update($validated);
 
+        $returnData = $galeri->toArray();
+        $returnData['image_path'] = MediaStorage::url($galeri->image_path);
+
         return response()->json([
             'status' => 'success',
             'message' => 'Judul dan deskripsi kegiatan berhasil diperbarui.',
-            'data' => $galeri,
+            'data' => $returnData,
         ]);
     }
 
@@ -114,14 +132,8 @@ class GaleriController extends Controller
             return response()->json(['status' => 'error', 'message' => 'Data galeri tidak ditemukan.'], 404);
         }
 
-        // Hapus file fisik HANYA bila berada di dalam folder public/uploads
-        $rawPath = ltrim($galeri->image_path, '/\\');
-        if (str_starts_with($rawPath, 'uploads/')) {
-            $fullPath = public_path($rawPath);
-            if (file_exists($fullPath) && is_file($fullPath)) {
-                @unlink($fullPath);
-            }
-        }
+        // Hapus file fisik via MediaStorage (hanya jika berada di /uploads/)
+        MediaStorage::delete($galeri->image_path);
 
         $galeri->delete();
 

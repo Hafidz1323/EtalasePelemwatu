@@ -229,6 +229,10 @@ php artisan backup:run
 - **Rotasi Otomatis**: Sistem secara otomatis hanya menyimpan 7 arsip cadangan terakhir dan menghapus arsip yang lebih lama.
 - Cadangan dijadwalkan berjalan otomatis setiap hari via Laravel Scheduler (`routes/console.php`).
 
+> [!WARNING]
+> **Catatan Khusus Supabase Storage (`FILESYSTEM_DISK=supabase`)**:
+> Perintah `backup:run` hanya mencadangkan berkas lokal di folder `public/uploads`. Jika aplikasi dikonfigurasi menggunakan Supabase Storage, foto dan aset media tersimpan langsung di cloud Supabase dan **TIDAK** ikut terarsip ke dalam file ZIP `backup:run`. Cadangkan bucket Supabase Storage secara terpisah (misalnya via S3 bucket sync atau backup cloud).
+
 > **Penting**: Berkas arsip cadangan tersimpan di penyimpanan lokal server yang sama (`storage/app/backups/`). Untuk mengantisipasi kegagalan server fisik atau kerusakan disk, salin berkas arsip secara berkala ke lokasi penyimpanan luar (offsite/cloud storage) dan lakukan simulasi pemulihan (uji restore) minimal sekali untuk memastikan keutuhan data cadangan.
 
 ### Konfigurasi mysqldump untuk MySQL/MariaDB
@@ -300,11 +304,64 @@ SANCTUM_EXPIRATION=480
 # Jika server langsung melayani pengunjung tanpa reverse proxy, KOSONGKAN variabel ini (TRUSTED_PROXIES=)
 # agar IP asli pengunjung tidak dapat dipalsukan dan pembatasan laju login (rate limiting) tidak dilewati.
 TRUSTED_PROXIES=
+
+# Penyimpanan Media (Default: local)
+FILESYSTEM_DISK=local
+
+# Konfigurasi Supabase Storage (Hanya jika FILESYSTEM_DISK=supabase)
+SUPABASE_S3_KEY=placeholder-s3-access-key-id
+SUPABASE_S3_SECRET=placeholder-s3-secret-access-key
+SUPABASE_S3_REGION=ap-southeast-1
+SUPABASE_S3_BUCKET=placeholder-bucket-name
+SUPABASE_S3_ENDPOINT=https://your-project-id.storage.supabase.co/storage/v1/s3
+SUPABASE_PUBLIC_URL=https://your-project-id.supabase.co/storage/v1/object/public/placeholder-bucket-name
 ```
 
 > **Penting (Document Root & Keamanan .env)**: Document root web server (Nginx/Apache) **wajib** mengarah ke folder `public/`. Jangan pernah menaruh seluruh folder proyek langsung di dalam folder root publik web (seperti `public_html`). Uji melalui browser bahwa URL `https://etalase.pelemwatu.id/.env` mengembalikan respons **403 Forbidden** atau **404 Not Found**, bukan mengunduh atau menampilkan isi berkas.
 
-### 2. Perintah Build & Optimasi Produksi
+### 2. Konfigurasi Penyimpanan Foto (Lokal vs Supabase Storage)
+
+Secara default, aplikasi menyimpan foto di folder lokal `public/uploads/` (`FILESYSTEM_DISK=local`). Anda dapat memindahkan penyimpanan foto ke Supabase Storage (S3-compatible):
+
+1. **Buat Bucket di Supabase**:
+   - Masuk ke dashboard Supabase -> **Storage** -> **Create a new bucket**.
+   - Beri nama bucket (misal: `etalase-media`) dan **WAJIB aktifkan opsi "Public bucket"**.
+2. **Ambil Kredensial S3**:
+   - Masuk ke **Project Settings** -> **Storage** -> **S3 Connection**.
+   - Dapatkan Endpoint URL, Access Key ID, Secret Access Key, dan Region.
+3. **Isi Pengaturan di `.env`**:
+   ```env
+   FILESYSTEM_DISK=supabase
+   SUPABASE_S3_KEY=your_access_key_id
+   SUPABASE_S3_SECRET=your_secret_access_key
+   SUPABASE_S3_REGION=ap-southeast-1
+   SUPABASE_S3_BUCKET=etalase-media
+   SUPABASE_S3_ENDPOINT=https://<project-ref>.storage.supabase.co/storage/v1/s3
+   SUPABASE_PUBLIC_URL=https://<project-ref>.supabase.co/storage/v1/object/public/etalase-media
+   ```
+4. **Uji Koneksi & Izin**:
+   Jalankan command pengujian otomatis (mengunggah file kecil, memeriksa akses URL publik, lalu menghapusnya):
+   ```bash
+   php artisan media:test-supabase
+   ```
+   Pastikan menghasilkan keluaran `Hasil Uji Koneksi Supabase Storage: BERHASIL`.
+5. **Migrasi Foto Lama ke Supabase Storage**:
+   Untuk menyalin berkas yang sudah ada di `public/uploads/` ke bucket Supabase:
+   ```bash
+   # Jalankan simulasi terlebih dahulu
+   php artisan media:migrate-to-supabase --dry-run
+
+   # Eksekusi migrasi nyata (idempoten, tidak menghapus berkas lokal)
+   php artisan media:migrate-to-supabase
+   ```
+6. **Cara Rollback ke Mode Lokal**:
+   Jika ingin kembali menggunakan penyimpanan server lokal, cukup ubah kembali:
+   ```env
+   FILESYSTEM_DISK=local
+   ```
+   Karena berkas lokal di `public/uploads` tidak pernah dihapus otomatis saat migrasi dan path database tetap berformat `"/uploads/<namafile>"`, sistem akan langsung kembali bekerja secara lokal tanpa kehilangan data.
+
+### 3. Perintah Build & Optimasi Produksi
 
 ```bash
 composer install --optimize-autoloader --no-dev
@@ -326,14 +383,14 @@ php artisan view:cache
 > - Seeder bersifat idempoten: jika akun admin dengan email tersebut sudah terdaftar di database, seeder **tidak akan menimpa** data nama atau password yang sudah ada.
 > - Segera ganti kata sandi administrator melalui menu profil admin setelah berhasil masuk untuk pertama kali.
 
-### 3. Izin Akses Folder (File Permissions)
+### 4. Izin Akses Folder (File Permissions)
 
 ```bash
 chmod -R 775 storage bootstrap/cache public/uploads
 chown -R www-data:www-data storage bootstrap/cache public/uploads
 ```
 
-### 4. Konfigurasi Penjadwal Tugas (Cron Job Scheduler)
+### 5. Konfigurasi Penjadwal Tugas (Cron Job Scheduler)
 
 Jalankan perintah penjadwal Laravel setiap menit menggunakan crontab server Linux (`crontab -e -u www-data`):
 

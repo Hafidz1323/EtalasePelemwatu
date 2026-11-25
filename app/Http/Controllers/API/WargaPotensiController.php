@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Potensi;
 use App\Models\PotensiImage;
 use App\Services\ImageOptimizer;
+use App\Services\MediaStorage;
 use Illuminate\Http\Request;
 
 class WargaPotensiController extends Controller
@@ -115,15 +116,8 @@ class WargaPotensiController extends Controller
         $potensi->update($potensiData);
 
         if ($request->hasFile('images')) {
-            $uploadsDir = public_path('uploads');
-            if (! is_dir($uploadsDir)) {
-                mkdir($uploadsDir, 0755, true);
-            }
             foreach ($potensi->images as $img) {
-                $filePath = public_path(ltrim($img->image_path, '/'));
-                if (file_exists($filePath)) {
-                    @unlink($filePath);
-                }
+                MediaStorage::delete($img->image_path);
                 $img->delete();
             }
             foreach ($request->file('images') as $image) {
@@ -163,10 +157,7 @@ class WargaPotensiController extends Controller
         }
 
         foreach ($potensi->images as $img) {
-            $filePath = public_path(ltrim($img->image_path, '/'));
-            if (file_exists($filePath)) {
-                @unlink($filePath);
-            }
+            MediaStorage::delete($img->image_path);
         }
         $potensi->delete();
 
@@ -201,10 +192,7 @@ class WargaPotensiController extends Controller
         // Pending/rejected → langsung hapus tanpa perlu persetujuan admin
         if (in_array($potensi->status, ['pending', 'rejected'])) {
             foreach ($potensi->images as $img) {
-                $filePath = public_path(ltrim($img->image_path, '/'));
-                if (file_exists($filePath)) {
-                    @unlink($filePath);
-                }
+                MediaStorage::delete($img->image_path);
             }
             $potensi->delete();
 
@@ -263,10 +251,7 @@ class WargaPotensiController extends Controller
             return response()->json(['status' => 'error', 'message' => 'Foto tidak ditemukan.'], 404);
         }
 
-        $filePath = public_path(ltrim($image->image_path, '/'));
-        if (file_exists($filePath)) {
-            @unlink($filePath);
-        }
+        MediaStorage::delete($image->image_path);
         $image->delete();
 
         return response()->json(['status' => 'success', 'message' => 'Foto berhasil dihapus.']);

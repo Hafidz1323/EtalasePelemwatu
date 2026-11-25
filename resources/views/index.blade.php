@@ -173,14 +173,14 @@
                 @foreach($galeriItems as $idx => $g)
                 <div class="gs-card {{ $idx === 0 ? 'is-active' : '' }}"
                      data-index="{{ $idx }}"
-                     data-src="{{ $g->image_path }}"
+                     data-src="{{ \App\Services\MediaStorage::url($g->image_path) }}"
                      data-caption="{{ $g->caption }}"
                      data-desc="{{ $g->description ?? '' }}"
                      role="group"
                      aria-roledescription="slide"
                      aria-label="{{ $idx + 1 }} dari {{ $galeriItems->count() }}: {{ $g->caption }}">
                   <div class="gs-card-inner">
-                    <img src="{{ $g->image_path }}"
+                    <img src="{{ \App\Services\MediaStorage::url($g->image_path) }}"
                          alt="{{ $g->caption }}"
                          loading="{{ $idx < 2 ? 'eager' : 'lazy' }}"
                          draggable="false">

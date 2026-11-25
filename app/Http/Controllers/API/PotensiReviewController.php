@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use App\Models\Potensi;
+use App\Services\MediaStorage;
 use Illuminate\Http\Request;
 
 class PotensiReviewController extends Controller
@@ -51,7 +52,7 @@ class PotensiReviewController extends Controller
                     'status' => $p->status,
                     'category' => $p->category ? $p->category->name : null,
                     'deletion_requested_at' => $p->deletion_requested_at,
-                    'images' => $p->images->map(fn ($img) => ['id' => $img->id, 'path' => $img->image_path]),
+                    'images' => $p->images->map(fn ($img) => ['id' => $img->id, 'path' => MediaStorage::url($img->image_path)]),
                 ];
             });
 
@@ -70,10 +71,7 @@ class PotensiReviewController extends Controller
         }
 
         foreach ($potensi->images as $img) {
-            $filePath = public_path(ltrim($img->image_path, '/'));
-            if (file_exists($filePath)) {
-                @unlink($filePath);
-            }
+            MediaStorage::delete($img->image_path);
         }
         $potensi->delete();
 

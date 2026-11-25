@@ -12,16 +12,12 @@ class ImageOptimizer
      * - Resize sisi terpanjang maksimal 1600px (mempertahankan rasio aspek).
      * - Konversi ke format WebP kualitas 80 menggunakan GD bila didukung.
      * - Fallback: menyimpan format asli jika GD / WebP tidak tersedia atau gagal.
+     * - Penyimpanan fisik diserahkan ke MediaStorage (mendukung lokal dan Supabase).
      *
-     * @return string Nama file di dalam public/uploads
+     * @return string Nama file di dalam media storage
      */
     public static function processAndSave(UploadedFile $file, string $prefix = ''): string
     {
-        $destination = public_path('uploads');
-        if (! is_dir($destination)) {
-            mkdir($destination, 0755, true);
-        }
-
         $random = Str::lower(Str::random(24));
         $prefix = $prefix ? rtrim($prefix, '-').'-' : '';
 
@@ -85,13 +81,22 @@ class ImageOptimizer
                     );
 
                     $filename = $prefix.$random.'.webp';
-                    $targetPath = $destination.DIRECTORY_SEPARATOR.$filename;
+                    $tempPath = tempnam(sys_get_temp_dir(), 'opt_');
 
-                    if (@imagewebp($dstImage, $targetPath, 80)) {
+                    if ($tempPath && @imagewebp($dstImage, $tempPath, 80)) {
                         imagedestroy($srcImage);
                         imagedestroy($dstImage);
 
+                        $content = file_get_contents($tempPath);
+                        @unlink($tempPath);
+
+                        MediaStorage::put($content, $filename);
+
                         return $filename;
+                    }
+
+                    if ($tempPath && file_exists($tempPath)) {
+                        @unlink($tempPath);
                     }
 
                     imagedestroy($srcImage);
@@ -103,7 +108,8 @@ class ImageOptimizer
         // Fallback jika GD tidak tersedia atau gagal memproses
         $ext = $file->extension() ?: 'jpg';
         $filename = $prefix.$random.'.'.$ext;
-        $file->move($destination, $filename);
+        $content = file_get_contents($file->getRealPath());
+        MediaStorage::put($content, $filename);
 
         return $filename;
     }

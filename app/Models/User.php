@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Services\MediaStorage;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
@@ -29,5 +30,15 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function toArray(): array
+    {
+        $array = parent::toArray();
+        if (isset($array['avatar']) && $array['avatar']) {
+            $array['avatar'] = MediaStorage::url($array['avatar']);
+        }
+
+        return $array;
     }
 }

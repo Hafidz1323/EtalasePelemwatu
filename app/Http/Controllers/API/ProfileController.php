@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Services\MediaStorage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -24,7 +25,7 @@ class ProfileController extends Controller
             'data' => [
                 'name' => $user->name,
                 'email' => $user->email,
-                'avatar' => $user->avatar ? url($user->avatar) : null,
+                'avatar' => $user->avatar ? MediaStorage::url($user->avatar) : null,
             ],
         ]);
     }
@@ -46,21 +47,16 @@ class ProfileController extends Controller
         $user->email = $data['email'];
 
         if ($request->hasFile('avatar')) {
-            // Hapus avatar lama jika ada; validasi path berada di dalam public/uploads
+            // Hapus avatar lama jika ada
             if ($user->avatar) {
-                $oldPath = public_path(ltrim($user->avatar, '/'));
-                $uploadsDir = realpath(public_path('uploads'));
-                $realOld = file_exists($oldPath) ? realpath($oldPath) : null;
-                if ($realOld && $uploadsDir && str_starts_with($realOld, $uploadsDir.DIRECTORY_SEPARATOR)) {
-                    @unlink($realOld);
-                }
+                MediaStorage::delete($user->avatar);
             }
 
             // Gunakan ekstensi dari ISI file (bukan nama klien) + nama acak
             $file = $request->file('avatar');
             $filename = 'avatar-'.Str::lower(Str::random(24)).'.'.$file->extension();
-            $file->move(public_path('uploads'), $filename);
-            $user->avatar = '/uploads/'.$filename;
+            $newPath = MediaStorage::putFile($file, $filename);
+            $user->avatar = $newPath;
         }
 
         $user->save();
@@ -71,7 +67,7 @@ class ProfileController extends Controller
             'data' => [
                 'name' => $user->name,
                 'email' => $user->email,
-                'avatar' => $user->avatar ? url($user->avatar) : null,
+                'avatar' => $user->avatar ? MediaStorage::url($user->avatar) : null,
             ],
         ]);
     }
