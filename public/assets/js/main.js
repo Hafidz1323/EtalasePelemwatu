@@ -359,11 +359,11 @@ function initDetailModal() {
 
 // ── Katalog dinamis dari API ──────────────────────────────────
 const KATEGORI_TAMPIL = {
-  usaha:   { img: 'assets/img/foto-warung-desa.jpg',    emoji: '🍽️', bg: '#fff0e8' },
-  jasa:    { img: 'assets/img/foto-daftar-potensi.jpg', emoji: '🧺', bg: '#e8f4ff' },
-  hunian:  { img: 'assets/img/foto-daftar-potensi.jpg', emoji: '🏠', bg: '#eaf7ee' },
-  barang:  { img: 'assets/img/foto-daftar-potensi.jpg', emoji: '🛍️', bg: '#fff8e1' },
-  lainnya: { img: 'assets/img/foto-daftar-potensi.jpg', emoji: '📍', bg: '#f1f3f5' },
+  usaha:   { img: '', emoji: '🍽️', bg: '#fff0e8' },
+  jasa:    { img: '', emoji: '🧺', bg: '#e8f4ff' },
+  hunian:  { img: '', emoji: '🏠', bg: '#eaf7ee' },
+  barang:  { img: '', emoji: '🛍️', bg: '#fff8e1' },
+  lainnya: { img: '', emoji: '📍', bg: '#f1f3f5' },
 };
 
 function slugKategori(cat) {

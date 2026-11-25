@@ -82,13 +82,18 @@
       }
     }
 
-    var safeImg = (window.sanitizeSrc ? window.sanitizeSrc(imgSrc, 'assets/img/foto-warung-desa.jpg') : (imgSrc || 'assets/img/foto-warung-desa.jpg'));
+    var imgHtml = '';
+    if (imgSrc) {
+      var safeImg = window.sanitizeSrc ? window.sanitizeSrc(imgSrc, '') : imgSrc;
+      imgHtml = '<img src="' + safeImg + '" alt="' + esc(name) + '" loading="lazy" onerror="this.style.display=\'none\'">';
+    } else {
+      imgHtml = '<div class="ks-card-placeholder" style="width:100%;height:100%;min-height:220px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg, #1E3B2C 0%, #294e3b 100%);"><i class="bi bi-shop" style="font-size:2.5rem;color:rgba(255,255,255,.2);"></i></div>';
+    }
 
     var div = document.createElement('div');
     div.className = 'ks-card';
     div.innerHTML =
-      '<img src="' + safeImg + '" alt="' + esc(name) + '" loading="lazy" ' +
-      'onerror="this.onerror=null;this.src=\'assets/img/foto-warung-desa.jpg\'">' +
+      imgHtml +
       '<div class="ks-card-overlay">' +
         '<span class="ks-card-cat">' + esc(cat) + '</span>' +
         '<div class="ks-card-name">' + esc(name) + '</div>' +
